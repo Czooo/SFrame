@@ -1,0 +1,111 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- application theme. -->
+    <style name="Theme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/colorAppTheme</item>
+        <item name="colorPrimaryDark">@color/colorAppStatus</item>
+        <item name="colorAccent">@color/colorAppTheme</item>
+
+        <!-- ActionBar Style-->
+        <item name="actionBarStyle">@style/ActionBarStyle</item>
+        <!-- 隐藏原来的ActionBar, 使用自定义ToolBar-->
+        <item name="windowActionBar">false</item>
+        <!-- 隐藏ActionBar的标题-->
+        <item name="windowNoTitle">true</item>
+        <!-- Activity Animation-->
+        <item name="android:windowAnimationStyle">@style/ActivityAnimation</item>
+    </style>
+
+    <style name="AppTheme.AppCompat" parent="Theme">
+        <!-- Customize your theme here. -->
+    </style>
+
+    <!-- Animation Start-->
+    <style name="ActivityAnimation" parent="android:Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/slide_in_from_right</item>
+        <item name="android:activityOpenExitAnimation">@anim/slide_out_to_left</item>
+        <item name="android:activityCloseEnterAnimation">@anim/slide_in_from_left</item>
+        <item name="android:activityCloseExitAnimation">@anim/slide_out_to_right</item>
+    </style>
+
+    <style name="PopupWindowAnimation" parent="android:Animation.Toast">
+        <item name="android:windowEnterAnimation">@anim/anim_alpha_action_v</item>
+        <item name="android:windowExitAnimation">@anim/anim_alpha_action_inv</item>
+    </style>
+
+    <style name="PopupWindowAnimation.SlideInFromTopOutToTop" parent="PopupWindowAnimation">
+        <item name="android:windowEnterAnimation">@anim/slide_in_from_top</item>
+        <item name="android:windowExitAnimation">@anim/slide_out_to_top</item>
+    </style>
+
+    <style name="PopupWindowAnimation.SlideInFromBottomOutToBottom" parent="PopupWindowAnimation">
+        <item name="android:windowEnterAnimation">@anim/slide_in_from_bottom</item>
+        <item name="android:windowExitAnimation">@anim/slide_out_to_bottom</item>
+    </style>
+
+    <style name="DialogAnimation" mce_bogus="1" parent="android:Animation.Dialog">
+        <item name="android:windowEnterAnimation">@anim/anim_alpha_action_v</item>
+        <item name="android:windowExitAnimation">@anim/anim_alpha_action_inv</item>
+    </style>
+
+    <style name="DialogAnimation.SlideInFromTopOutToTop" parent="DialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/slide_in_from_top</item>
+        <item name="android:windowExitAnimation">@anim/slide_out_to_top</item>
+    </style>
+
+    <style name="DialogAnimation.SlideInFromBottomOutToBottom" parent="DialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/slide_in_from_bottom</item>
+        <item name="android:windowExitAnimation">@anim/slide_out_to_bottom</item>
+    </style>
+    <!-- Animation End-->
+
+    <!-- ActionBarStyle Start-->
+    <style name="ActionBarStyle" parent="Widget.AppCompat.Light.ActionBar">
+        <item name="contentInsetStart">0dp</item>
+        <item name="contentInsetEnd">0dp</item>
+        <item name="background">@color/colorAppTheme</item>
+    </style>
+    <!-- ActionBarStyle End-->
+
+    <!-- DialogStyle Start-->
+    <style name="DialogTheme" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowCloseOnTouchOutside">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowAnimationStyle">@style/DialogAnimation</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <!-- 隐藏原来的ActionBar, 使用自定义ToolBar-->
+        <item name="windowActionBar">false</item>
+        <!-- 隐藏ActionBar的标题-->
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="DialogTheme.AppCompat" parent="@style/DialogTheme">
+        <!-- Theme base-->
+    </style>
+
+    <style name="DialogTheme.AppCompat.Fullscreen" parent="@style/DialogTheme.AppCompat">
+        <item name="android:windowFullscreen">true</item>
+    </style>
+    <!-- DialogStyle End-->
+
+    <!-- LineTheme Start-->
+    <style name="LineTheme">
+        <item name="android:background">@color/colorAppLine</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
+
+    <style name="LineTheme.Horizontal" parent="LineTheme">
+        <item name="android:layout_width">@dimen/lineSize</item>
+        <item name="android:layout_height">match_parent</item>
+    </style>
+
+    <style name="LineTheme.Vertical" parent="LineTheme">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/lineSize</item>
+    </style>
+    <!-- LineTheme End-->
+</resources>

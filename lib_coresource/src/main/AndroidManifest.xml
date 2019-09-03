@@ -1,0 +1,17 @@
+<manifest
+    package="androidx.demon"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+
+    <application
+        android:theme="@style/AppTheme.AppCompat">
+
+        <activity
+            android:name=".ui.AppCompatNavAgentActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustResize|stateAlwaysHidden"/>
+    </application>
+</manifest>

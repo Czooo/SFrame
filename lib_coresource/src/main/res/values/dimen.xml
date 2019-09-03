@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    // 默认圆角角度
+    <dimen name="radiusSize">4dp</dimen>
+    // 默认线条大小
+    <dimen name="lineSize">1dp</dimen>
+</resources>

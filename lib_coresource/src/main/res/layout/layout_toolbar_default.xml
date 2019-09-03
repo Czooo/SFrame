@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center">
+
+    <RelativeLayout
+        android:id="@id/app_toolbar_title_id"
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/actionBarSize"
+        android:layout_below="@id/app_toolbar_status_id">
+
+        <RelativeLayout
+            android:id="@id/app_container_pop_id"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_above="@id/app_toolbar_line_id"
+            android:layout_alignParentStart="true"
+            android:minWidth="?android:attr/actionBarSize"
+            android:paddingEnd="12dp"
+            android:paddingStart="12dp">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@id/app_pop_icon_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:src="@drawable/sel_back_arrow_black"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@id/app_pop_text_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:gravity="center"
+                android:text="返回"
+                android:textColor="@color/_FFFFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:visibility="gone"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@id/app_container_title_id"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_above="@id/app_toolbar_line_id"
+            android:layout_centerInParent="true">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@id/app_title_icon_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:visibility="gone"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@id/app_title_text_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:gravity="center"
+                android:textColor="@color/_FFFFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@id/app_container_menu_id"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_above="@id/app_toolbar_line_id"
+            android:layout_alignParentEnd="true"
+            android:layout_toEndOf="@id/app_container_title_id">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@id/app_menu_List_id"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentEnd="true"
+                android:clipToPadding="false"
+                android:overScrollMode="never"/>
+        </RelativeLayout>
+
+        <View
+            android:id="@id/app_toolbar_line_id"
+            style="@style/LineTheme.Vertical"
+            android:layout_alignParentBottom="true"/>
+    </RelativeLayout>
+
+    <View
+        android:id="@id/app_toolbar_status_id"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"/>
+</RelativeLayout>

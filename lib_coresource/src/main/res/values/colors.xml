@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 主题颜色-->
+    <color name="colorAppTheme">@color/_FF1AC3BE</color>
+    <!-- 界面背景颜色-->
+    <color name="colorAppBackground">@color/_FFFFFFFF</color>
+    <!-- 导航栏颜色-->
+    <color name="colorAppNavigation">@color/_FF757575</color>
+    <!-- 状态栏颜色-->
+    <color name="colorAppStatus">@color/_FF757575</color>
+    <!-- 工具栏颜色-->
+    <color name="colorAppToolbar">@color/colorAppTheme</color>
+    <!-- 线条颜色-->
+    <color name="colorAppLine">@color/_FFF6F7F9</color>
+    <!-- 点击颜色-->
+    <color name="colorClick">@color/_FFF1F0F5</color>
+
+    <color name="_FF7033CC">#FF7033CC</color>
+    <color name="_00000000">#00000000</color>
+    <color name="_80000000">#80000000</color>
+    <color name="_FFFF0000">#FFFF0000</color>
+    <color name="_FFFFFFFF">#FFFFFFFF</color>
+    <color name="_FF000000">#FF000000</color>
+    <color name="_60000000">#60000000</color>
+    <color name="_FF1AC3BE">#FF1AC3BE</color>
+    <color name="_FFF1F0F5">#FFF1F0F5</color>
+    <color name="_FF222222">#FF222222</color>
+    <color name="_FFB7BBCC">#FFB7BBCC</color>
+    <color name="_FF757575">#FF757575</color>
+    <color name="_FFA2A5B3">#FFA2A5B3</color>
+    <color name="_FFAEB1BF">#FFAEB1BF</color>
+    <color name="_FFF6F7F9">#FFF6F7F9</color>
+</resources>
