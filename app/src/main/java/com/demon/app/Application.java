@@ -1,6 +1,5 @@
 package com.demon.app;
 
-import androidx.demon.compat.LogCompat;
 import androidx.demon.ui.abs.AbsApplication;
 
 /**
@@ -13,6 +12,5 @@ public class Application extends AbsApplication {
 	public void onCreate() {
 		super.onCreate();
 
-		LogCompat.enableDebugLogging(true);
 	}
 }
