@@ -22,7 +22,7 @@ public interface PopupWindowPageController<Page> extends AppPageController<Page>
 	/**
 	 * 全屏透明度
 	 * */
-	PopupWindowPageController<Page> setBackgroundAlpha(@FloatRange(from = 0, to = 1.f) float alpha);
+	PopupWindowPageController<Page> setWindowBackgroundAlpha(@FloatRange(from = 0, to = 1.f) float alpha);
 
 	PopupWindowPageController<Page> setMarginLeft(int marginLeft);
 

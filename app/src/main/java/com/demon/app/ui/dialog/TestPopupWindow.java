@@ -52,6 +52,6 @@ public class TestPopupWindow extends AbsPopupWindow {
 				})
 		;
 		this.getPageController()
-				.setBackgroundAlpha(0.88f);
+				.setWindowBackgroundAlpha(0.55f);
 	}
 }

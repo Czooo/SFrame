@@ -70,7 +70,7 @@ public class TestListPopupWindow extends AbsListPopupWindow<String> {
 				.setDragCloseEnabled(true);
 
 		this.getPageController()
-				.setBackgroundAlpha(0.55f)
+				.setWindowBackgroundAlpha(0.55f)
 				.setAnimationStyle(R.style.PopupWindowAnimation_SlideInFromBottomOutToBottom);
 	}
 

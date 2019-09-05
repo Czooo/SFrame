@@ -18,7 +18,6 @@ import androidx.annotation.CallSuper;
 import androidx.annotation.FloatRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelStore;
@@ -35,9 +34,7 @@ import androidx.sframe.widget.AppCompatPopupWindow;
 public class AppPagePopupWindowControllerImpl extends AbsPageControllerImpl<AppCompatPopupWindow> implements PopupWindowPageController<AppCompatPopupWindow> {
 
 	private final Rect mRect = new Rect();
-	private float mLayoutBackgroundAlpha = -1.F;
 	private float mLayoutBackgroundViewAlpha = 0.F;
-	private float mOldLayoutBackgroundAlpha = -1.F;
 	private int mLayoutEnterAnimationResId;
 	private int mLayoutExitAnimationResId;
 
@@ -59,6 +56,9 @@ public class AppPagePopupWindowControllerImpl extends AbsPageControllerImpl<AppC
 			if (savedInstanceState == null) {
 				final View contentView = this.onCreateView(LayoutInflater.from(AppPageControllerHelper.requireContext(this)), null, savedInstanceState);
 				if (contentView != null) {
+					contentView.setClickable(true);
+					contentView.setFocusable(true);
+					contentView.setFocusableInTouchMode(true);
 					prePopupWindow.setContentView(contentView);
 				}
 			}
@@ -85,18 +85,6 @@ public class AppPagePopupWindowControllerImpl extends AbsPageControllerImpl<AppC
 			}
 			prePopupWindow.setWidth(preWidth);
 			prePopupWindow.setHeight(preHeight);
-
-			if (this.mLayoutBackgroundAlpha > 0) {
-				final FragmentActivity preFragmentActivity = AppPageControllerHelper.requireActivity(this);
-				final Window preWindow = preFragmentActivity.getWindow();
-				if (preWindow != null) {
-					WindowManager.LayoutParams preLayoutParams = preWindow.getAttributes();
-					this.mOldLayoutBackgroundAlpha = preLayoutParams.alpha;
-					preLayoutParams.alpha = this.mLayoutBackgroundAlpha;
-					preWindow.setAttributes(preLayoutParams);
-					preWindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-				}
-			}
 
 			if (this.mLayoutEnterAnimationResId != 0) {
 				final View mContentView = prePopupWindow.getContentView();
@@ -174,8 +162,13 @@ public class AppPagePopupWindowControllerImpl extends AbsPageControllerImpl<AppC
 	}
 
 	@Override
-	public final PopupWindowPageController<AppCompatPopupWindow> setBackgroundAlpha(@FloatRange(from = 0, to = 1.f) float alpha) {
-		this.mLayoutBackgroundAlpha = alpha;
+	public PopupWindowPageController<AppCompatPopupWindow> setWindowBackgroundAlpha(@FloatRange(from = 0.F, to = 1.F) float alpha) {
+		final Window preWindow = AppPageControllerHelper.requireActivity(this).getWindow();
+		if (preWindow != null) {
+			WindowManager.LayoutParams preLayoutParams = preWindow.getAttributes();
+			preLayoutParams.alpha = alpha;
+			preWindow.setAttributes(preLayoutParams);
+		}
 		return this;
 	}
 
@@ -243,16 +236,6 @@ public class AppPagePopupWindowControllerImpl extends AbsPageControllerImpl<AppC
 	}
 
 	private void performOnDestroy() {
-		if (this.mOldLayoutBackgroundAlpha != -1.F) {
-			final FragmentActivity preFragmentActivity = AppPageControllerHelper.requireActivity(this);
-			final Window preWindow = preFragmentActivity.getWindow();
-			if (preWindow != null) {
-				WindowManager.LayoutParams preLayoutParams = preWindow.getAttributes();
-				preLayoutParams.alpha = this.mOldLayoutBackgroundAlpha;
-				preWindow.setAttributes(preLayoutParams);
-				preWindow.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-			}
-			this.mOldLayoutBackgroundAlpha = -1.F;
-		}
+		this.setWindowBackgroundAlpha(1.F);
 	}
 }

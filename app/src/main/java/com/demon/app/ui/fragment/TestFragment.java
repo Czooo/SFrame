@@ -77,10 +77,8 @@ public class TestFragment extends AbsListFragment<TestModel> implements Recycler
 				.setTitle("TestFragment")
 				.addMenu(new AppMenuModel(1, "Menu"))
 				.setOnMenuClickListener(new AppToolbarMethod.OnMenuClickListener() {
-
 					@Override
 					public void onMenuClick(@NonNull View view, @NonNull RecyclerAdapter.ViewHolder<AppMenuModel> holder, int position) {
-
 						TestPopupWindow popupWindow = new TestPopupWindow(getPageController());
 						popupWindow.showAsDropDown(view, 0, 0, Gravity.CENTER);
 					}
