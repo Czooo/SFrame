@@ -24,11 +24,11 @@ public class AppPageActivityControllerImpl extends AbsPageControllerImpl<Fragmen
 	@Override
 	public void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		this.mNavHostController = this.createAppCompatNavHostController(savedInstanceState);
-
 		final FragmentActivity preFragmentActivity = this.getPageOwner();
 		this.setViewModelStore(preFragmentActivity.getViewModelStore());
 		this.setLifecycleOwner(preFragmentActivity);
+
+		this.mNavHostController = this.createAppCompatNavHostController(savedInstanceState);
 
 		if (savedInstanceState == null) {
 			final View prePageView = this.onCreateView(LayoutInflater.from(AppPageControllerHelper.requireContext(this)), null, null);
