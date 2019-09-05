@@ -125,12 +125,10 @@ public class PageDragHelper<Page> extends DragRelativeLayout.DragManager {
 		consumed[1] = dy;
 
 		int direction = helper.getScrollDirection();
-		if (direction == 0) {
-			if (this.canScrollHorizontally()) {
-				direction = helper.getPreScrollDirection(dx);
-			} else if (this.canScrollVertically()) {
-				direction = helper.getPreScrollDirection(dy);
-			}
+		if (this.canScrollHorizontally()) {
+			direction = helper.getPreScrollDirection(dx);
+		} else if (this.canScrollVertically()) {
+			direction = helper.getPreScrollDirection(dy);
 		}
 
 		final int preScrollOffsetX = (int) ((helper.getScrollOffsetX() + consumed[0]) * this.getFrictionRatio() + NestedHelper.getDirectionDifference(direction));

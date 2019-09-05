@@ -194,16 +194,19 @@ public class UILayoutControllerImpl implements UILayoutController, UILayoutState
 		return this.mLayoutStateHandler.getNowLayoutState();
 	}
 
+	@NonNull
 	@Override
 	public View getParentView() {
 		return this.mParentView;
 	}
 
+	@Nullable
 	@Override
 	public UILayout getLayoutAt(int key) {
 		return this.mLayoutPool.get(key);
 	}
 
+	@NonNull
 	@Override
 	public UILayout requireLayoutAt(int key) {
 		final UILayout nowLayout = this.getLayoutAt(key);
@@ -213,11 +216,13 @@ public class UILayoutControllerImpl implements UILayoutController, UILayoutState
 		return nowLayout;
 	}
 
+	@NonNull
 	@Override
 	public UIViewController getViewController() {
 		return this.mViewController;
 	}
 
+	@NonNull
 	@Override
 	public UIToolbarController getToolbarController() {
 		return ViewModelProviders.of(this).get(UIToolbarControllerImpl.class);
@@ -446,10 +451,13 @@ public class UILayoutControllerImpl implements UILayoutController, UILayoutState
 
 	@Override
 	public UILayoutController setLayoutStableModeAt(int key, boolean flag) {
-		final UILayout oldlayout = this.requireLayoutAt(key);
-		final UILayout nowLayout = oldlayout.build().setLayoutStableMode(flag).build();
-		this.mLayoutPool.replace(key, oldlayout, nowLayout);
-		return this.requestLayout();
+		final UILayout oldLayout = this.getLayoutAt(key);
+		if (oldLayout != null) {
+			final UILayout nowLayout = oldLayout.build().setLayoutStableMode(flag).build();
+			this.mLayoutPool.replace(key, oldLayout, nowLayout);
+			return this.requestLayout();
+		}
+		return this;
 	}
 
 	@Override
