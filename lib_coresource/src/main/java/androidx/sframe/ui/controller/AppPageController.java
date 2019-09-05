@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.ViewModelStore;
 import androidx.lifecycle.ViewModelStoreOwner;
 
 /**
@@ -25,10 +24,6 @@ public interface AppPageController<Page> extends LifecycleOwner, ViewModelStoreO
 	void onViewCreated(@Nullable Bundle savedInstanceState);
 
 	void onSaveInstanceState(@NonNull Bundle savedInstanceState);
-
-	void setLifecycleOwner(@NonNull LifecycleOwner owner);
-
-	void setViewModelStore(@NonNull ViewModelStore viewModelStore);
 
 	@NonNull
 	Page getPageOwner();

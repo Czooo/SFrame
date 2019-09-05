@@ -10,6 +10,9 @@ import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleEventObserver;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.sframe.annotation.RunWithAsync;
 import androidx.sframe.compat.LogCompat;
 import androidx.sframe.helper.AnnotationHelper;
@@ -21,10 +24,6 @@ import androidx.sframe.ui.controller.UILayoutController;
 import androidx.sframe.ui.controller.UIToolbarController;
 import androidx.sframe.ui.controller.UIViewController;
 import androidx.sframe.widget.OverlapRelativeLayout;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleEventObserver;
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.ViewModelStore;
 
 /**
  * Author create by ok on 2019-06-18
@@ -35,9 +34,6 @@ abstract class AbsPageControllerImpl<Page> implements AppPageController<Page>, U
 	private final PageProvider mPageProvider;
 	private AppNavController<Page> mAppNavController;
 
-	private LifecycleOwner mLifecycleOwner;
-	private ViewModelStore mViewModelStore;
-
 	AbsPageControllerImpl(@NonNull PageProvider pageProvider) {
 		this.mPageProvider = pageProvider;
 	}
@@ -46,6 +42,10 @@ abstract class AbsPageControllerImpl<Page> implements AppPageController<Page>, U
 	@Override
 	public void onCreate(@Nullable Bundle savedInstanceState) {
 		this.mAppNavController = new AppNavControllerImpl<>(this);
+
+		if (Build.VERSION.SDK_INT >= 19) {
+			this.getLifecycle().addObserver(this);
+		}
 	}
 
 	private View mPageView;
@@ -171,36 +171,6 @@ abstract class AbsPageControllerImpl<Page> implements AppPageController<Page>, U
 		if (!this.getAppNavController().navigateUp()) {
 			ActivityCompat.finishAfterTransition(AppPageControllerHelper.requireActivity(this));
 		}
-	}
-
-	@Override
-	public final void setLifecycleOwner(@NonNull LifecycleOwner owner) {
-		this.mLifecycleOwner = owner;
-
-		if (Build.VERSION.SDK_INT >= 19) {
-			this.mLifecycleOwner.getLifecycle().addObserver(this);
-		}
-	}
-
-	@Override
-	public final void setViewModelStore(@NonNull ViewModelStore viewModelStore) {
-		this.mViewModelStore = viewModelStore;
-	}
-
-	@NonNull
-	@Override
-	public final Lifecycle getLifecycle() {
-		return this.mLifecycleOwner.getLifecycle();
-	}
-
-	@NonNull
-	@Override
-	public final ViewModelStore getViewModelStore() {
-		if (this.mViewModelStore == null) {
-			throw new IllegalStateException("Your page " + this.getPageOwner() + " is not yet attached to the "
-					+ "Application instance. You can't request ViewModel before onCreate call.");
-		}
-		return this.mViewModelStore;
 	}
 
 	@NonNull

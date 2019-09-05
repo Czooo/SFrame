@@ -21,6 +21,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.ViewModelStore;
 import androidx.sframe.R;
 import androidx.sframe.listener.OnAnimationListener;
 import androidx.sframe.ui.controller.PopupWindowPageController;
@@ -49,22 +50,21 @@ public class AppPagePopupWindowControllerImpl extends AbsPageControllerImpl<AppC
 	public void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		final AppCompatPopupWindow prePopupWindow = this.getPageOwner();
-		this.setViewModelStore(prePopupWindow.getViewModelStore());
-		this.setLifecycleOwner(prePopupWindow);
 
-		if (savedInstanceState == null) {
-			final View prePageView = this.onCreateView(LayoutInflater.from(AppPageControllerHelper.requireContext(this)), null, null);
-			if (prePageView != null) {
-				this.getPageOwner().setContentView(prePageView);
-			}
-		}
 		int preWidth = -2;
 		int preHeight = -2;
-		View preView = null;
+		View preContentView = null;
+
 		try {
-			preView = this.getLayoutController().getLayoutAt(UILayoutController.LayoutType.Content.key).getContentView();
+			if (savedInstanceState == null) {
+				final View contentView = this.onCreateView(LayoutInflater.from(AppPageControllerHelper.requireContext(this)), null, savedInstanceState);
+				if (contentView != null) {
+					prePopupWindow.setContentView(contentView);
+				}
+			}
+			preContentView = this.getLayoutController().getLayoutAt(UILayoutController.LayoutType.Content.key).getContentView();
 		} catch (IllegalStateException e) {
-			preView = this.getPageView();
+			preContentView = this.getPageView();
 		} finally {
 			prePopupWindow.setFocusable(true);
 			prePopupWindow.setTouchable(true);
@@ -78,8 +78,8 @@ public class AppPagePopupWindowControllerImpl extends AbsPageControllerImpl<AppC
 			preBackgroundDrawable.setAlpha((int) (this.mLayoutBackgroundViewAlpha * 255));
 			prePopupWindow.setBackgroundDrawable(preBackgroundDrawable);
 			// 设置Width／Height
-			if (preView != null) {
-				final ViewGroup.LayoutParams preLayoutParams = preView.getLayoutParams();
+			if (preContentView != null) {
+				final ViewGroup.LayoutParams preLayoutParams = preContentView.getLayoutParams();
 				preWidth = preLayoutParams.width;
 				preHeight = preLayoutParams.height;
 			}
@@ -99,16 +99,44 @@ public class AppPagePopupWindowControllerImpl extends AbsPageControllerImpl<AppC
 			}
 
 			if (this.mLayoutEnterAnimationResId != 0) {
-				final View preContentView = prePopupWindow.getContentView();
+				final View mContentView = prePopupWindow.getContentView();
 				prePopupWindow.setAnimationStyle(0);
-				final Animation preAnimation = AnimationUtils.loadAnimation(preContentView.getContext(), this.mLayoutEnterAnimationResId);
+				final Animation preAnimation = AnimationUtils.loadAnimation(mContentView.getContext(), this.mLayoutEnterAnimationResId);
 				preAnimation.setFillEnabled(true);
 				preAnimation.setFillAfter(true);
-				preContentView.clearAnimation();
-				preContentView.startAnimation(preAnimation);
+				mContentView.clearAnimation();
+				mContentView.startAnimation(preAnimation);
 			}
 			prePopupWindow.update();
 		}
+	}
+
+	@NonNull
+	@Override
+	public final AppCompatPopupWindow getPageOwner() {
+		return (AppCompatPopupWindow) this.getPageProvider();
+	}
+
+	/**
+	 * Returns the Lifecycle of the provider.
+	 *
+	 * @return The lifecycle of the provider.
+	 */
+	@NonNull
+	@Override
+	public Lifecycle getLifecycle() {
+		return this.getPageOwner().getLifecycle();
+	}
+
+	/**
+	 * Returns owned {@link ViewModelStore}
+	 *
+	 * @return a {@code ViewModelStore}
+	 */
+	@NonNull
+	@Override
+	public ViewModelStore getViewModelStore() {
+		return this.getPageOwner().getViewModelStore();
 	}
 
 	@Override
@@ -124,12 +152,6 @@ public class AppPagePopupWindowControllerImpl extends AbsPageControllerImpl<AppC
 		} else if (Lifecycle.Event.ON_DESTROY == event) {
 			this.performOnDestroy();
 		}
-	}
-
-	@NonNull
-	@Override
-	public final AppCompatPopupWindow getPageOwner() {
-		return (AppCompatPopupWindow) this.getPageProvider();
 	}
 
 	@Override

@@ -1,10 +1,9 @@
 package androidx.sframe.ui.controller.impl;
 
-import android.os.Bundle;
-
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.ViewModelStore;
 
 /**
  * Author create by ok on 2019-06-18
@@ -16,11 +15,25 @@ abstract class AppPageFragmentControllerImpl<Page extends Fragment> extends AbsP
 		super(pageProvider);
 	}
 
+	/**
+	 * Returns the Lifecycle of the provider.
+	 *
+	 * @return The lifecycle of the provider.
+	 */
+	@NonNull
 	@Override
-	public void onCreate(@Nullable Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		final Fragment preFragment = this.getPageOwner();
-		this.setViewModelStore(preFragment.getViewModelStore());
-		this.setLifecycleOwner(preFragment);
+	public Lifecycle getLifecycle() {
+		return this.getPageOwner().getLifecycle();
+	}
+
+	/**
+	 * Returns owned {@link ViewModelStore}
+	 *
+	 * @return a {@code ViewModelStore}
+	 */
+	@NonNull
+	@Override
+	public ViewModelStore getViewModelStore() {
+		return this.getPageOwner().getViewModelStore();
 	}
 }

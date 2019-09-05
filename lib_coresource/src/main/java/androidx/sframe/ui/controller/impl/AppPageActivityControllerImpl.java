@@ -6,8 +6,10 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.sframe.ui.controller.AppCompatNavHostController;
 import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.ViewModelStore;
+import androidx.sframe.ui.controller.AppCompatNavHostController;
 
 /**
  * Author create by ok on 2019-06-18
@@ -24,16 +26,12 @@ public class AppPageActivityControllerImpl extends AbsPageControllerImpl<Fragmen
 	@Override
 	public void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		final FragmentActivity preFragmentActivity = this.getPageOwner();
-		this.setViewModelStore(preFragmentActivity.getViewModelStore());
-		this.setLifecycleOwner(preFragmentActivity);
-
 		this.mNavHostController = this.createAppCompatNavHostController(savedInstanceState);
 
 		if (savedInstanceState == null) {
 			final View prePageView = this.onCreateView(LayoutInflater.from(AppPageControllerHelper.requireContext(this)), null, null);
 			if (prePageView != null) {
-				preFragmentActivity.setContentView(prePageView);
+				this.getPageOwner().setContentView(prePageView);
 			}
 		}
 		this.onViewCreated(savedInstanceState);
@@ -51,6 +49,28 @@ public class AppPageActivityControllerImpl extends AbsPageControllerImpl<Fragmen
 	@Override
 	public final FragmentActivity getPageOwner() {
 		return (FragmentActivity) this.getPageProvider();
+	}
+
+	/**
+	 * Returns the Lifecycle of the provider.
+	 *
+	 * @return The lifecycle of the provider.
+	 */
+	@NonNull
+	@Override
+	public Lifecycle getLifecycle() {
+		return this.getPageOwner().getLifecycle();
+	}
+
+	/**
+	 * Returns owned {@link ViewModelStore}
+	 *
+	 * @return a {@code ViewModelStore}
+	 */
+	@NonNull
+	@Override
+	public ViewModelStore getViewModelStore() {
+		return this.getPageOwner().getViewModelStore();
 	}
 
 	@NonNull
