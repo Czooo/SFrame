@@ -24,13 +24,11 @@ public class AppPageActivityControllerImpl extends AbsPageControllerImpl<Fragmen
 	@Override
 	public void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		final FragmentActivity preFragmentActivity = AppPageControllerHelper.requireActivity(this);
+		this.mNavHostController = this.createAppCompatNavHostController(savedInstanceState);
+
+		final FragmentActivity preFragmentActivity = this.getPageOwner();
 		this.setViewModelStore(preFragmentActivity.getViewModelStore());
 		this.setLifecycleOwner(preFragmentActivity);
-
-		this.mNavHostController = new AppCompatNavHostController(this);
-		this.mNavHostController.setViewNavHostController(preFragmentActivity);
-		this.mNavHostController.restoreState(savedInstanceState);
 
 		if (savedInstanceState == null) {
 			final View prePageView = this.onCreateView(LayoutInflater.from(AppPageControllerHelper.requireContext(this)), null, null);
@@ -53,5 +51,13 @@ public class AppPageActivityControllerImpl extends AbsPageControllerImpl<Fragmen
 	@Override
 	public final FragmentActivity getPageOwner() {
 		return (FragmentActivity) this.getPageProvider();
+	}
+
+	@NonNull
+	protected AppCompatNavHostController createAppCompatNavHostController(@Nullable Bundle savedInstanceState) {
+		final AppCompatNavHostController mAppCompatNavHostController = new AppCompatNavHostController(this);
+		mAppCompatNavHostController.setViewNavHostController(this.getPageOwner());
+		mAppCompatNavHostController.restoreState(savedInstanceState);
+		return mAppCompatNavHostController;
 	}
 }

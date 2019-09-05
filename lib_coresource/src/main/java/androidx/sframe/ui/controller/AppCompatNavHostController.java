@@ -155,7 +155,7 @@ public class AppCompatNavHostController {
 	}
 
 	@NonNull
-	private NavDestination createActivityDestinationAt(@NonNull Class<? extends FragmentActivity> fragmentActivityClass) {
+	public NavDestination createActivityDestinationAt(@NonNull Class<? extends FragmentActivity> fragmentActivityClass) {
 		final @IdRes Integer destinationId = this.findDestinationIdAt(fragmentActivityClass);
 		final NavigatorProvider preNavigatorProvider = this.mNavHostController.getNavigatorProvider();
 		final ActivityNavigator preNavigator = preNavigatorProvider.getNavigator(ActivityNavigator.class);
@@ -167,7 +167,7 @@ public class AppCompatNavHostController {
 	}
 
 	@NonNull
-	private NavDestination createFragmentDestinationAt(@NonNull Class<? extends Fragment> fragmentClass) {
+	public NavDestination createFragmentDestinationAt(@NonNull Class<? extends Fragment> fragmentClass) {
 		final @IdRes Integer destinationId = this.findDestinationIdAt(fragmentClass);
 		final NavigatorProvider preNavigatorProvider = this.mNavHostController.getNavigatorProvider();
 		final FragmentNavigator preNavigator = preNavigatorProvider.getNavigator(FragmentNavigator.class);
@@ -179,7 +179,7 @@ public class AppCompatNavHostController {
 	}
 
 	@NonNull
-	private NavDestination createDialogFragmentDestinationAt(@NonNull Class<? extends DialogFragment> dialogFragmentClass) {
+	public NavDestination createDialogFragmentDestinationAt(@NonNull Class<? extends DialogFragment> dialogFragmentClass) {
 		final @IdRes Integer destinationId = this.findDestinationIdAt(dialogFragmentClass);
 		final NavigatorProvider preNavigatorProvider = this.mNavHostController.getNavigatorProvider();
 		final DialogFragmentNavigator preNavigator = preNavigatorProvider.getNavigator(DialogFragmentNavigator.class);
@@ -191,7 +191,7 @@ public class AppCompatNavHostController {
 	}
 
 	@NonNull
-	private NavGraph createNavGraph(@NonNull NavDestination navDestination) {
+	public NavGraph createNavGraph(@NonNull NavDestination navDestination) {
 		final NavigatorProvider preNavigatorProvider = this.mNavHostController.getNavigatorProvider();
 		final NavGraphNavigator preNavigator = preNavigatorProvider.getNavigator(NavGraphNavigator.class);
 		final NavGraph navGraph = preNavigator.createDestination();
@@ -212,7 +212,7 @@ public class AppCompatNavHostController {
 
 	@IdRes
 	@NonNull
-	private Integer findDestinationIdAt(Class<?> pageClass) {
+	public Integer findDestinationIdAt(Class<?> pageClass) {
 		Integer destinationId = this.mDestinationIds.get(pageClass.getName());
 		if (destinationId == null) {
 			destinationId = View.generateViewId();
@@ -222,12 +222,12 @@ public class AppCompatNavHostController {
 	}
 
 	@NonNull
-	private FragmentActivity requireActivity() {
+	public FragmentActivity requireActivity() {
 		return this.getPageController().getPageOwner();
 	}
 
 	@NonNull
-	private Context requireContext() {
+	public Context requireContext() {
 		return this.getPageController().getPageOwner();
 	}
 }
