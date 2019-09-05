@@ -10,9 +10,9 @@ import com.demon.app.R;
 import java.util.List;
 
 import androidx.annotation.Nullable;
-import androidx.demon.ui.abs.AbsChildDelegate;
-import androidx.demon.ui.controller.RecyclerAdapterController;
-import androidx.demon.widget.adapter.RecyclerChildAdapter;
+import androidx.sframe.ui.abs.AbsChildDelegate;
+import androidx.sframe.ui.controller.RecyclerAdapterController;
+import androidx.sframe.widget.adapter.RecyclerChildAdapter;
 
 /**
  * Author create by ok on 2019-06-19

@@ -5,7 +5,7 @@ import android.os.Bundle;
 import com.demon.app.R;
 
 import androidx.annotation.Nullable;
-import androidx.demon.ui.abs.AbsFragment;
+import androidx.sframe.ui.abs.AbsFragment;
 
 /**
  * Author create by ok on 2019-06-17

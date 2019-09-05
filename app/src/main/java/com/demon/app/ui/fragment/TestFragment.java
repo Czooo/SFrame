@@ -29,17 +29,17 @@ import java.util.List;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDialogFragment;
-import androidx.demon.annotation.RunWithAsync;
-import androidx.demon.compat.DataCompat;
-import androidx.demon.compat.ToastCompat;
-import androidx.demon.model.AppMenuModel;
-import androidx.demon.ui.abs.AbsListFragment;
-import androidx.demon.ui.controller.AppNavigation;
-import androidx.demon.ui.controller.DialogFragmentPageController;
-import androidx.demon.ui.controller.RecyclerAdapterController;
-import androidx.demon.ui.controller.impl.AppToolbarMethod;
-import androidx.demon.widget.adapter.RecyclerAdapter;
-import androidx.demon.widget.adapter.RecyclerChildAdapter;
+import androidx.sframe.annotation.RunWithAsync;
+import androidx.sframe.compat.DataCompat;
+import androidx.sframe.compat.ToastCompat;
+import androidx.sframe.model.AppMenuModel;
+import androidx.sframe.ui.abs.AbsListFragment;
+import androidx.sframe.ui.controller.AppNavigation;
+import androidx.sframe.ui.controller.DialogFragmentPageController;
+import androidx.sframe.ui.controller.RecyclerAdapterController;
+import androidx.sframe.ui.controller.impl.AppToolbarMethod;
+import androidx.sframe.widget.adapter.RecyclerAdapter;
+import androidx.sframe.widget.adapter.RecyclerChildAdapter;
 
 /**
  * Author create by ok on 2019-06-17

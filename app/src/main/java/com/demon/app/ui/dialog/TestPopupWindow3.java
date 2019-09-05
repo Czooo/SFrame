@@ -6,14 +6,12 @@ import android.view.View;
 import com.demon.app.R;
 import com.demon.app.ui.fragment.test.PublicFragment;
 
-import org.parent.refreshview.helper.DragHelper;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.demon.helper.AppPageDragHelper;
-import androidx.demon.ui.abs.AbsPopupWindow;
-import androidx.demon.ui.controller.AppNavigation;
-import androidx.demon.ui.controller.AppPageController;
+import androidx.sframe.helper.PageDragHelper;
+import androidx.sframe.ui.abs.AbsPopupWindow;
+import androidx.sframe.ui.controller.AppNavigation;
+import androidx.sframe.ui.controller.AppPageController;
 
 /**
  * Author create by ok on 2019-06-19
@@ -56,8 +54,10 @@ public class TestPopupWindow3 extends AbsPopupWindow {
 		;
 
 		/* 阻尼效果：DragHelper.DragMode.NONE(取消滑动移除，却有阻尼效果)*/
-		AppPageDragHelper.attachToPage(this.getPageController())
-				.setDraggedCloseDirection(DragHelper.DragMode.DRAG_START);
+		PageDragHelper.attachToPage(this.getPageController())
+				.setDragCloseDirection(PageDragHelper.DRAG_DIRECTION_BOTTOM)
+				.setDragCloseEnabled(true);
+
 		// anim
 		this.getPageController()
 //				.setBackgroundAlpha(0.55f)

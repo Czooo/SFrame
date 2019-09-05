@@ -7,12 +7,12 @@ import com.demon.app.R;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.demon.model.AppMenuModel;
-import androidx.demon.ui.abs.AbsDialogFragment;
-import androidx.demon.ui.controller.AppNavigation;
-import androidx.demon.ui.controller.AppPageController;
-import androidx.demon.ui.controller.impl.AppToolbarMethod;
-import androidx.demon.widget.adapter.RecyclerAdapter;
+import androidx.sframe.model.AppMenuModel;
+import androidx.sframe.ui.abs.AbsDialogFragment;
+import androidx.sframe.ui.controller.AppNavigation;
+import androidx.sframe.ui.controller.AppPageController;
+import androidx.sframe.ui.controller.impl.AppToolbarMethod;
+import androidx.sframe.widget.adapter.RecyclerAdapter;
 
 /**
  * Author create by ok on 2019-06-14

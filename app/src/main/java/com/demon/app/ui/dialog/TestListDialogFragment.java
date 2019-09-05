@@ -11,11 +11,11 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.demon.compat.DataCompat;
-import androidx.demon.ui.abs.AbsListDialogFragment;
-import androidx.demon.ui.controller.AppPageController;
-import androidx.demon.ui.controller.RecyclerAdapterController;
-import androidx.demon.widget.adapter.RecyclerAdapter;
+import androidx.sframe.compat.DataCompat;
+import androidx.sframe.ui.abs.AbsListDialogFragment;
+import androidx.sframe.ui.controller.AppPageController;
+import androidx.sframe.ui.controller.RecyclerAdapterController;
+import androidx.sframe.widget.adapter.RecyclerAdapter;
 
 /**
  * Author create by ok on 2019-06-17

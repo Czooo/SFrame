@@ -8,20 +8,18 @@ import android.view.ViewGroup;
 
 import com.demon.app.R;
 
-import org.parent.refreshview.helper.DragHelper;
-import org.parent.refreshview.widget.RefreshMode;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.demon.compat.DataCompat;
-import androidx.demon.helper.AppPageDragHelper;
-import androidx.demon.ui.abs.AbsListPopupWindow;
-import androidx.demon.ui.controller.AppPageController;
-import androidx.demon.ui.controller.RecyclerAdapterController;
-import androidx.demon.widget.adapter.RecyclerAdapter;
+import androidx.demon.widget.RefreshMode;
+import androidx.sframe.compat.DataCompat;
+import androidx.sframe.helper.PageDragHelper;
+import androidx.sframe.ui.abs.AbsListPopupWindow;
+import androidx.sframe.ui.controller.AppPageController;
+import androidx.sframe.ui.controller.RecyclerAdapterController;
+import androidx.sframe.widget.adapter.RecyclerAdapter;
 
 /**
  * Author create by ok on 2019-06-17
@@ -63,11 +61,13 @@ public class TestListPopupWindow extends AbsListPopupWindow<String> {
 				.setTitle("ListPopupWindow");
 
 		this.getObjectListController()
+				// 避免滑动发生冲突
 				.setRefreshMode(RefreshMode.REFRESH_MODE_END)
-				.setDragStartEnabled(false);
+				.setDraggingToStart(false);
 
-		AppPageDragHelper.attachToPage(this.getPageController())
-				.setDraggedCloseDirection(DragHelper.DragMode.DRAG_START);
+		PageDragHelper.attachToPage(this.getPageController())
+				.setDragCloseDirection(PageDragHelper.DRAG_DIRECTION_BOTTOM)
+				.setDragCloseEnabled(true);
 
 		this.getPageController()
 				.setBackgroundAlpha(0.55f)

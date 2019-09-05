@@ -1,6 +1,6 @@
 package com.demon.app;
 
-import androidx.demon.ui.abs.AbsApplication;
+import androidx.sframe.ui.abs.AbsApplication;
 
 /**
  * Author create by ok on 2019-06-14

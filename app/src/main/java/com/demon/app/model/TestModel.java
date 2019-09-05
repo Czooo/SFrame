@@ -1,6 +1,6 @@
 package com.demon.app.model;
 
-import androidx.demon.model.AbsModel;
+import androidx.sframe.model.AbsModel;
 
 /**
  * Author create by ok on 2019-06-17

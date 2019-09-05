@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<org.parent.refreshview.widget.RefreshView
+<androidx.demon.widget.RefreshLayout
     android:id="@id/listContainer"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -8,9 +8,9 @@
     app:refreshMode="all">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@id/refreshTargetId"
+        android:id="@id/app_refresh_view_id"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/colorAppBackground"
         android:clipToPadding="false"/>
-</org.parent.refreshview.widget.RefreshView>
+</androidx.demon.widget.RefreshLayout>
