@@ -35,8 +35,6 @@ import androidx.sframe.ui.controller.UILayoutController;
 import androidx.sframe.ui.controller.UIObjectListController;
 import androidx.sframe.ui.controller.UIToolbarController;
 import androidx.sframe.ui.controller.UIViewController;
-import androidx.sframe.widget.FooterLoadView;
-import androidx.sframe.widget.HeaderLoadView;
 import androidx.sframe.widget.RefreshLoadView;
 import androidx.sframe.widget.adapter.RecyclerAdapter;
 import androidx.sframe.widget.adapter.RecyclerChildAdapter;
@@ -85,8 +83,6 @@ public class UIObjectListControllerImpl<PageType, DataSource> implements UIObjec
 		final RefreshLayout preRefreshLayout = this.getRefreshLayout();
 		preRefreshLayout.addOnScrollListener(this);
 		preRefreshLayout.setOnRefreshListener(this);
-		preRefreshLayout.setHeaderLoadView(new HeaderLoadView());
-		preRefreshLayout.setFooterLoadView(new FooterLoadView());
 
 		View mLoadingView = View.inflate(preRecyclerView.getContext(), R.layout.layout_loading_default, null);
 		RecyclerView.LayoutParams mLayoutParams = new RecyclerView.LayoutParams(-1, -1);

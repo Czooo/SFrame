@@ -41,5 +41,5 @@ dependencies {
     api "androidx.navigation:navigation-fragment:$nav_version"
     api "androidx.navigation:navigation-ui:$nav_version"
 
-    api 'com.github.czooo:widgets:1.0.3'
+    api 'com.github.czooo:widgets:1.0.4'
 }
