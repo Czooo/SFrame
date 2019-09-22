@@ -5,10 +5,10 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.sframe.compat.LogCompat;
 import androidx.sframe.model.AgentNavModel;
 import androidx.sframe.ui.abs.AbsActivity;
 import androidx.sframe.ui.controller.AppPageController;
+import androidx.sframe.utils.LoggerCompat;
 
 /**
  * Author create by ok on 2019-06-04
@@ -66,7 +66,7 @@ public class AppCompatNavAgentActivity extends AbsActivity implements AppPageCon
 						.addGraph(navResId);
 			}
 		} catch (Exception e) {
-			LogCompat.e(e.getMessage(), e);
+			LoggerCompat.e(e.getMessage(), e);
 		}
 	}
 }

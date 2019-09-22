@@ -2,242 +2,227 @@ package androidx.sframe.ui.controller.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Objects;
 
-import androidx.annotation.CallSuper;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.sframe.ui.controller.DataSourceController;
+import androidx.sframe.utils.Collections;
 
 /**
- * Author create by ok on 2019/2/9
- * Email : ok@163.com.
+ * @Author create by Zoran on 2019-09-12
+ * @Email : 171905184@qq.com
+ * @Description :
  */
-public class DataSourceControllerImpl<DataType> implements DataSourceController<DataType> {
+public class DataSourceControllerImpl<DataSource> implements DataSourceController<DataSource> {
 
-	private List<DataType> mDataSourceList;
-
-	private List<DataType> mMarkerDataSourceList;
+	private ArrayList<DataSource> mDataSources;
+	private ArrayList<DataSource> mSelectedDataSources;
 
 	@Override
-	public final DataSourceController<DataType> setDataSource(DataType dataType) {
-		return setDataSource(dataType, size());
+	public final DataSourceController<DataSource> setDataSource(@NonNull DataSource dataSource) {
+		return this.setDataSource(Collections.toList(dataSource));
 	}
 
 	@Override
-	public final DataSourceController<DataType> setDataSource(DataType dataType, int index) {
-		List<DataType> mDataTypeList = new ArrayList<>();
-		mDataTypeList.add(dataType);
-		return setDataSourceList(mDataTypeList, index);
-	}
-
-	@Override
-	public DataSourceController<DataType> setDataSourceList(Collection<? extends DataType> dataTypeList) {
-		return setDataSourceList(dataTypeList, size());
-	}
-
-	@Override
-	public DataSourceController<DataType> setDataSourceList(Collection<? extends DataType> dataTypeList, int index) {
-		return removeAll().addDataSourceList(dataTypeList, index);
-	}
-
-	@Override
-	public final DataSourceController<DataType> addDataSource(DataType dataType) {
-		return addDataSource(dataType, size());
-	}
-
-	@Override
-	public final DataSourceController<DataType> addDataSource(DataType dataType, int index) {
-		List<DataType> mDataTypeList = new ArrayList<>();
-		mDataTypeList.add(dataType);
-		return addDataSourceList(mDataTypeList, index);
-	}
-
-	@Override
-	public final DataSourceController<DataType> addDataSourceList(Collection<? extends DataType> dataTypeList) {
-		return addDataSourceList(dataTypeList, size());
-	}
-
-	@Override
-	@CallSuper
-	public DataSourceController<DataType> addDataSourceList(Collection<? extends DataType> dataTypeList, int index) {
-		getAllDataSource().addAll(Math.min(Math.max(index, 0), size()), dataTypeList);
-		return this;
-	}
-
-	@Override
-	@CallSuper
-	public DataSourceController<DataType> removeDataSource(int position) {
-		if (!assertIndexOutOfBounds(position)) {
-			getAllDataSource().remove(position);
-		}
-		return this;
-	}
-
-	@Override
-	public final DataSourceController<DataType> removeDataSource(DataType dataType) {
-		return removeDataSource(indexOf(dataType));
-	}
-
-	@Override
-	@CallSuper
-	public DataSourceController<DataType> removeDataSource(Collection<? extends DataType> dataTypeList) {
-		getAllDataSource().removeAll(dataTypeList);
-		return this;
-	}
-
-	@Override
-	@CallSuper
-	public DataSourceController<DataType> removeAll() {
-		if (mDataSourceList != null) {
-			mDataSourceList.clear();
-		}
-		return this;
-	}
-
-	@Override
-	@CallSuper
-	public DataSourceController<DataType> moveDataSourceOf(int fromPosition, int toPosition) {
-		if (!assertIndexOutOfBounds(fromPosition) &&
-				!assertIndexOutOfBounds(toPosition)) {
-			addDataSource(getAllDataSource().remove(fromPosition), toPosition);
-		}
-		return null;
-	}
-
-	@Override
-	public final DataSourceController<DataType> moveDataSourceToStart(int fromPosition) {
-		return moveDataSourceOf(fromPosition, 0);
-	}
-
-	@Override
-	public final DataSourceController<DataType> moveDataSourceToEnd(int fromPosition) {
-		return moveDataSourceOf(fromPosition, size() - 1);
-	}
-
-	@Override
-	@CallSuper
-	public DataSourceController<DataType> markerAll() {
-		getAllMarkerDataSource().clear();
-		getAllMarkerDataSource().addAll(getAllDataSource());
-		return this;
-	}
-
-	@Override
-	@CallSuper
-	public DataSourceController<DataType> unmarkerAll() {
-		getAllMarkerDataSource().clear();
-		return this;
-	}
-
-	@Override
-	public final List<DataType> getAllMarkerDataSource() {
-		if (mMarkerDataSourceList == null) {
-			synchronized (this) {
-				mMarkerDataSourceList = new ArrayList<>();
-			}
-		}
-		return mMarkerDataSourceList;
-	}
-
-	@Override
-	public final List<DataType> getAllDataSource() {
+	public final DataSourceController<DataSource> setDataSource(@NonNull Collection<? extends DataSource> dataSources) {
 		synchronized (this) {
-			if (mDataSourceList == null) {
-				mDataSourceList = new ArrayList<>();
+			this.removeAll();
+		}
+		return this.addDataSource(dataSources);
+	}
+
+	@Override
+	public final DataSourceController<DataSource> addDataSource(@NonNull DataSource dataSource) {
+		return this.addDataSource(Collections.toList(dataSource));
+	}
+
+	@Override
+	public final DataSourceController<DataSource> addDataSource(@NonNull DataSource dataSource, int index) {
+		return this.addDataSource(Collections.toList(dataSource), index);
+	}
+
+	@Override
+	public final DataSourceController<DataSource> addDataSource(@NonNull Collection<? extends DataSource> dataSources) {
+		return this.addDataSource(dataSources, this.getDataSourceCount());
+	}
+
+	@Override
+	public DataSourceController<DataSource> addDataSource(@NonNull Collection<? extends DataSource> dataSources, int index) {
+		synchronized (this) {
+			this.getDataSourceList().addAll(Math.min(Math.max(index, 0), this.getDataSourceCount()), dataSources);
+		}
+		return this;
+	}
+
+	@Override
+	public DataSourceController<DataSource> removeAll() {
+		this.getDataSourceList().clear();
+		return this;
+	}
+
+	@Override
+	public DataSourceController<DataSource> removeDataSource(int position) {
+		if (this.assertIndexOutOfBounds(position)) {
+			return this;
+		}
+		this.getDataSourceList().remove(position);
+		return this;
+	}
+
+	@Override
+	public final DataSourceController<DataSource> removeDataSource(@Nullable DataSource dataSource) {
+		return this.removeDataSource(this.indexOf(dataSource));
+	}
+
+	@Override
+	public DataSourceController<DataSource> moveDataSourceOf(int fromPosition, int toPosition) {
+		if (this.assertIndexOutOfBounds(fromPosition)
+				|| this.assertIndexOutOfBounds(toPosition)) {
+			return this;
+		}
+		this.addDataSource(this.getDataSourceList().remove(fromPosition), toPosition);
+		return this;
+	}
+
+	@Override
+	public final DataSourceController<DataSource> moveDataSourceToStart(int fromPosition) {
+		return this.moveDataSourceOf(fromPosition, 0);
+	}
+
+	@Override
+	public final DataSourceController<DataSource> moveDataSourceToEnd(int fromPosition) {
+		return this.moveDataSourceOf(fromPosition, this.getDataSourceCount() - 1);
+	}
+
+	@NonNull
+	@Override
+	public final ArrayList<DataSource> getDataSourceList() {
+		if (this.mDataSources == null) {
+			synchronized (this) {
+				if (this.mDataSources == null) {
+					this.mDataSources = new ArrayList<>();
+				}
 			}
 		}
-		return mDataSourceList;
+		return this.mDataSources;
 	}
 
+	@NonNull
 	@Override
-	@SuppressWarnings("unchecked")
-	public final List<DataType> clone() {
-		return (List<DataType>) ((ArrayList<DataType>) getAllDataSource()).clone();
-	}
-
-	@Override
-	public final DataType findDataSourceByPosition(int position) {
-		if (!assertIndexOutOfBounds(position)) {
-			return getAllDataSource().get(position);
+	public final ArrayList<DataSource> getSelectedDataSourceList() {
+		if (this.mSelectedDataSources == null) {
+			synchronized (this) {
+				if (this.mSelectedDataSources == null) {
+					this.mSelectedDataSources = new ArrayList<>();
+				}
+			}
 		}
-		return null;
+		return this.mSelectedDataSources;
+	}
+
+	@NonNull
+	@Override
+	public final DataSource findDataSourceByPosition(int position) {
+		if (this.assertIndexOutOfBounds(position)) {
+			throw new IndexOutOfBoundsException("Index: " + position + ", Size: " + this.getDataSourceCount());
+		}
+		return this.getDataSourceList().get(position);
 	}
 
 	@Override
-	public final int size() {
-		return getAllDataSource().size();
+	public final int getDataSourceCount() {
+		return this.getDataSourceList().size();
 	}
 
 	@Override
-	public final int indexOf(DataType dataType) {
-		return getAllDataSource().indexOf(dataType);
+	public final int indexOf(@Nullable DataSource dataSource) {
+		if (dataSource == null) {
+			return -1;
+		}
+		return this.getDataSourceList().indexOf(dataSource);
 	}
 
 	@Override
-	public final int lastIndexOf(DataType dataType) {
-		return getAllDataSource().lastIndexOf(dataType);
+	public final int lastIndexOf(@Nullable DataSource dataSource) {
+		if (dataSource == null) {
+			return -1;
+		}
+		return this.getDataSourceList().lastIndexOf(dataSource);
+	}
+
+	@Override
+	public final boolean contains(@Nullable DataSource dataSource) {
+		if (dataSource == null) {
+			return false;
+		}
+		return this.getDataSourceList().contains(dataSource);
 	}
 
 	@Override
 	public final boolean isEmpty() {
-		return getAllDataSource().isEmpty();
+		return this.mDataSources == null
+				|| this.mDataSources.isEmpty();
 	}
 
 	@Override
-	public final boolean contains(DataType dataType) {
-		return getAllDataSource().contains(dataType);
-	}
-
-	@Override
-	public final boolean containsList(Collection<? extends DataType> dataTypeList) {
-		return getAllDataSource().containsAll(dataTypeList);
-	}
-
-	@Override
-	public final boolean marker(int position) {
-		return marker(findDataSourceByPosition(position));
-	}
-
-	@Override
-	@CallSuper
-	public boolean marker(DataType dataType) {
-		List<DataType> mDataTypeList = getAllMarkerDataSource();
-		if (mDataTypeList.indexOf(dataType) == -1) {
-			return mDataTypeList.add(dataType);
-		} else {
-			mDataTypeList.remove(dataType);
+	public boolean switchedSelectStateByAll() {
+		if (this.getSelectedDataSourceList().isEmpty()) {
+			return this.getSelectedDataSourceList().addAll(this.getDataSourceList());
 		}
+		this.getSelectedDataSourceList().clear();
 		return false;
 	}
 
 	@Override
-	public final boolean singleMarker(int position) {
-		return singleMarker(findDataSourceByPosition(position));
+	public final boolean switchedSelectStateOf(int position) {
+		return this.switchedSelectStateOf(this.findDataSourceByPosition(position));
 	}
 
 	@Override
-	@CallSuper
-	public boolean singleMarker(DataType dataType) {
-		boolean isMarker = marker(dataType);
-
-		if (isMarker) {
-			List<DataType> mDataTypeList = getAllMarkerDataSource();
-			mDataTypeList.clear();
-			mDataTypeList.add(dataType);
+	public boolean switchedSelectStateOf(@NonNull DataSource dataSource) {
+		if (this.isSelectedState(dataSource)) {
+			this.getSelectedDataSourceList().remove(dataSource);
+			return false;
 		}
-		return isMarker;
+		return this.getSelectedDataSourceList().add(dataSource);
 	}
 
 	@Override
-	public final boolean isMarker(int position) {
-		return isMarker(findDataSourceByPosition(position));
+	public final boolean switchedSingleSelectStateOf(int position) {
+		return this.switchedSingleSelectStateOf(this.findDataSourceByPosition(position));
 	}
 
 	@Override
-	public final boolean isMarker(DataType dataType) {
-		return getAllMarkerDataSource().indexOf(dataType) != -1;
+	public final boolean switchedSingleSelectStateOf(@NonNull DataSource dataSource) {
+		for (DataSource oldDataSource : this.getSelectedDataSourceList()) {
+			if (Objects.equals(oldDataSource, dataSource)) {
+				continue;
+			}
+			this.switchedSelectStateOf(oldDataSource);
+		}
+		return this.switchedSelectStateOf(dataSource);
 	}
 
-	private boolean assertIndexOutOfBounds(int positioin) {
-		return positioin < 0 || positioin >= size();
+	@Override
+	public final boolean isSelectedStateByAll() {
+		if (this.getSelectedDataSourceList().isEmpty()) {
+			return false;
+		}
+		return this.getSelectedDataSourceList().size() == this.getDataSourceList().size();
+	}
+
+	@Override
+	public final boolean isSelectedState(int position) {
+		return this.isSelectedState(this.findDataSourceByPosition(position));
+	}
+
+	@Override
+	public final boolean isSelectedState(@NonNull DataSource dataSource) {
+		return this.getSelectedDataSourceList().indexOf(dataSource) != -1;
+	}
+
+	protected final boolean assertIndexOutOfBounds(int index) {
+		return index < 0 || index >= this.getDataSourceCount();
 	}
 }

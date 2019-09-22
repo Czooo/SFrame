@@ -28,7 +28,7 @@ import com.bumptech.glide.request.RequestOptions;
 import java.io.InputStream;
 
 import androidx.annotation.NonNull;
-import androidx.sframe.compat.FileCompat;
+import androidx.sframe.utils.SFrameManager;
 
 /**
  * Author create by ok on 2019/2/5
@@ -68,7 +68,7 @@ public final class ImageAppGlideModule extends AppGlideModule {
 				.setDiskCacheExecutor(GlideExecutor.newDiskCacheExecutor(mUncaughtThrowableStrategy))
 				// 未捕获异常策略
 				.setSourceExecutor(GlideExecutor.newSourceExecutor(mUncaughtThrowableStrategy))
-				.setDiskCache(new DiskLruCacheFactory(FileCompat.getCacheImagePath(), DiskCache.Factory.DEFAULT_DISK_CACHE_SIZE));
+				.setDiskCache(new DiskLruCacheFactory(SFrameManager.getInstance().getOptions().getImageCachePath(), DiskCache.Factory.DEFAULT_DISK_CACHE_SIZE));
 	}
 
 	@Override

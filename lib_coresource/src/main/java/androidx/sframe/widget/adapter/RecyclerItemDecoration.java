@@ -66,13 +66,13 @@ public class RecyclerItemDecoration extends RecyclerView.ItemDecoration {
 
 			if (RecyclerAdapter.HOST_ITEM_TYPE_HEADER == hostItemViewType ||
 					RecyclerAdapter.HOST_ITEM_TYPE_FOOTER == hostItemViewType ||
-					RecyclerAdapter.HOST_ITEM_TYPE_LOAD == hostItemViewType ||
+					RecyclerAdapter.HOST_ITEM_TYPE_LOADING == hostItemViewType ||
 					RecyclerAdapter.HOST_ITEM_TYPE_EMPTY == hostItemViewType) {
 				return;
 			}
 
-			if (mRecyclerAdapter.hasHeaderAdapter()) {
-				realIgnoreFirstCount = ignoreFirstCount + mRecyclerAdapter.getHeaderAdapter().getItemCount();
+			if (mRecyclerAdapter.isShouldHeaderEnabled()) {
+				realIgnoreFirstCount = ignoreFirstCount + mRecyclerAdapter.getHeaderRecyclerAdapter().getItemCount();
 			}
 		}
 

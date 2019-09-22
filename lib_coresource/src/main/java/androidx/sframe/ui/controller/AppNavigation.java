@@ -112,7 +112,7 @@ public class AppNavigation {
 //		final NavDestination currentDestination = preNavHostController.getCurrentDestination();
 //		if (currentDestination != null) {
 //			final Set<Integer> mTopLevelDestinations = new HashSet<>();
-//			mTopLevelDestinations.add(findStartDestination(preNavHostController.getGraph()).getId());
+//			mTopLevelDestinations.add(findStartDestination(preNavHostController.getGraph()).getLayoutId());
 //			return matchDestinations(currentDestination, mTopLevelDestinations);
 //		}
 //		return false;
@@ -130,7 +130,7 @@ public class AppNavigation {
 //	static boolean matchDestinations(@NonNull NavDestination destination, @NonNull Set<Integer> destinationIds) {
 //		NavDestination currentDestination = destination;
 //		do {
-//			if (destinationIds.contains(currentDestination.getId())) {
+//			if (destinationIds.contains(currentDestination.getLayoutId())) {
 //				return true;
 //			}
 //			currentDestination = currentDestination.getParent();

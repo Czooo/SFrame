@@ -1,21 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="OverlapRelativeLayout">
-        <attr name="preAsyncRefreshed" format="boolean"/>
-        <attr name="preManualLayoutMode" format="boolean"/>
-        <attr name="preLayoutKey" format="integer|reference|flags">
+    <declare-styleable name="SRelativeLayout">
+        <attr name="layoutAutoMode" format="boolean"/>
+        <attr name="layoutRunWithAsync" format="boolean"/>
+        <attr name="layoutPreKey" format="integer|reference|flags">
+            <flag name="toolbar" value="1"/>
             <flag name="content" value="2"/>
             <flag name="loading" value="3"/>
             <flag name="error" value="4"/>
         </attr>
-        <attr name="preTitleText" format="string|reference"/>
-        <attr name="preTitleImage" format="reference"/>
     </declare-styleable>
-    <declare-styleable name="OverlapRelativeLayout_Layout">
-        <attr name="layoutKey" format="integer|reference"/>
+
+    <declare-styleable name="SRelativeLayout_Layout">
+        <attr name="layoutStableMode" format="boolean"/>
         <attr name="layoutEnterAnimation" format="reference"/>
         <attr name="layoutExitAnimation" format="reference"/>
-        <attr name="layoutEnabled" format="boolean"/>
-        <attr name="layoutStableMode" format="boolean"/>
+        <attr name="layoutKey" format="integer|reference|flags">
+            <flag name="toolbar" value="1"/>
+            <flag name="content" value="2"/>
+            <flag name="loading" value="3"/>
+            <flag name="error" value="4"/>
+        </attr>
     </declare-styleable>
 </resources>

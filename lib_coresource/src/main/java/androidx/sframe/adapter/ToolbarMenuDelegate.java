@@ -1,32 +1,32 @@
 package androidx.sframe.adapter;
 
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.List;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.sframe.R;
 import androidx.sframe.model.AppMenuModel;
 import androidx.sframe.ui.abs.AbsDelegate;
-import androidx.sframe.ui.controller.RecyclerAdapterController;
 import androidx.sframe.widget.adapter.RecyclerAdapter;
-import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * Author create by ok on 2019-06-15
  * Email : ok@163.com.
  */
-public class MenuDelegate extends AbsDelegate<AppMenuModel> {
+public class ToolbarMenuDelegate extends AbsDelegate<AppMenuModel> {
 
+	@NonNull
 	@Override
-	public View onCreateItemView(RecyclerAdapterController<AppMenuModel> adapterController, LayoutInflater inflater, ViewGroup parent, int itemViewType) {
-		return inflater.inflate(R.layout.item_menu_layout, parent, false);
+	public RecyclerAdapter.ViewHolder<AppMenuModel> onCreateViewHolder(@NonNull RecyclerAdapter<AppMenuModel> adapter, @NonNull ViewGroup parent, int itemViewType) {
+		return RecyclerAdapter.createViewHolder(R.layout.item_menu_layout, parent);
 	}
 
 	@Override
-	public void onBindItemView(RecyclerAdapter.ViewHolder<AppMenuModel> holder, int position, @Nullable List<Object> payloads) {
+	public void onBindViewHolder(@NonNull RecyclerAdapter.ViewHolder<AppMenuModel> holder, int position, @Nullable List<Object> payloads) {
 		final AppMenuModel mMenuModel = holder.findDataSourceByPosition(position);
 		mMenuModel.setPosition(position);
 
@@ -44,7 +44,7 @@ public class MenuDelegate extends AbsDelegate<AppMenuModel> {
 					.findAt(R.id.titleTextView).setVisibility(View.GONE);
 		}
 
-		final int count = holder.getDataSourceNotifyController().size();
+		final int count = holder.getDataSourceController().getDataSourceCount();
 		final int sizeOf12 = 12;
 		final RecyclerView.LayoutParams mLayoutParams = (RecyclerView.LayoutParams) holder.itemView.getLayoutParams();
 
@@ -54,7 +54,7 @@ public class MenuDelegate extends AbsDelegate<AppMenuModel> {
 				// first position
 				mLayoutParams.leftMargin = sizeOf12 * 2;
 				mLayoutParams.rightMargin = sizeOf12;
-			} else if (position >= holder.getDataSourceNotifyController().size() - 1) {
+			} else if (position >= holder.getDataSourceController().getDataSourceCount() - 1) {
 				// last position
 				mLayoutParams.leftMargin = sizeOf12;
 				mLayoutParams.rightMargin = sizeOf12 * 2;

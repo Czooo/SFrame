@@ -1,4 +1,4 @@
-package androidx.sframe.compat;
+package androidx.sframe.utils;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -21,6 +21,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import androidx.annotation.NonNull;
+
 /**
  * Author create by ok on 2018/6/6 0006
  * Email : ok@163.com.
@@ -30,10 +32,10 @@ public class NetCompat {
 	/**
 	 * 打开网络设置界面
 	 */
-	public static void openWirelessSettings() {
+	public static void openWirelessSettings(@NonNull Context context) {
 		Intent mIntent = new Intent(Settings.ACTION_WIRELESS_SETTINGS);
 		mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		CoreCompat.getContext().startActivity(mIntent);
+		context.startActivity(mIntent);
 	}
 
 	/**
@@ -41,8 +43,8 @@ public class NetCompat {
 	 * <p>需添加权限 {@code <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>}</p>
 	 */
 	@SuppressLint("MissingPermission")
-	private static NetworkInfo getActiveNetworkInfo() {
-		ConnectivityManager mConnectivityManager = (ConnectivityManager) CoreCompat.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+	private static NetworkInfo getActiveNetworkInfo(@NonNull Context context) {
+		ConnectivityManager mConnectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		if (mConnectivityManager != null) {
 			return mConnectivityManager.getActiveNetworkInfo();
 		}
@@ -54,7 +56,11 @@ public class NetCompat {
 	 * <p>需添加权限 {@code <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>}</p>
 	 */
 	public static boolean isConnected() {
-		NetworkInfo info = getActiveNetworkInfo();
+		return isConnected(SFrameManager.getInstance().getContext());
+	}
+
+	public static boolean isConnected(@NonNull Context context) {
+		NetworkInfo info = getActiveNetworkInfo(context);
 		return info != null && info.isConnected();
 	}
 
@@ -62,9 +68,9 @@ public class NetCompat {
 	 * 判断移动数据是否打开
 	 */
 	@SuppressLint("PrivateApi")
-	public static boolean hasDataEnabled() {
+	public static boolean hasDataEnabled(@NonNull Context context) {
 		try {
-			TelephonyManager mTelephonyManager = (TelephonyManager) CoreCompat.getContext().getSystemService(Context.TELEPHONY_SERVICE);
+			TelephonyManager mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 			if (mTelephonyManager != null) {
 				Method getMobileDataEnabledMethod = mTelephonyManager.getClass().getDeclaredMethod("getDataEnabled");
 				if (null != getMobileDataEnabledMethod) {
@@ -81,9 +87,9 @@ public class NetCompat {
 	 * 打开或关闭移动数据
 	 * <p>需系统应用 需添加权限{@code <uses-permission android:name="android.permission.MODIFY_PHONE_STATE"/>}</p>
 	 */
-	public static void setDataEnabled(boolean enabled) {
+	public static void setDataEnabled(@NonNull Context context, boolean enabled) {
 		try {
-			TelephonyManager mTelephonyManager = (TelephonyManager) CoreCompat.getContext().getSystemService(Context.TELEPHONY_SERVICE);
+			TelephonyManager mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 			if (mTelephonyManager != null) {
 				Method setMobileDataEnabledMethod = mTelephonyManager.getClass().getDeclaredMethod("setDataEnabled", boolean.class);
 				if (null != setMobileDataEnabledMethod) {
@@ -99,8 +105,8 @@ public class NetCompat {
 	 * 判断网络是否是4G
 	 * <p>需添加权限 {@code <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>}</p>
 	 */
-	public static boolean is4G() {
-		NetworkInfo info = getActiveNetworkInfo();
+	public static boolean is4G(@NonNull Context context) {
+		NetworkInfo info = getActiveNetworkInfo(context);
 		return info != null && info.isAvailable() && info.getSubtype() == TelephonyManager.NETWORK_TYPE_LTE;
 	}
 
@@ -108,8 +114,8 @@ public class NetCompat {
 	 * 判断wifi是否打开
 	 * <p>需添加权限 {@code <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>}</p>
 	 */
-	public static boolean hasWifiEnabled() {
-		WifiManager mWifiManager = (WifiManager) CoreCompat.getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+	public static boolean hasWifiEnabled(@NonNull Context context) {
+		WifiManager mWifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 		return mWifiManager != null && mWifiManager.isWifiEnabled();
 	}
 
@@ -118,8 +124,8 @@ public class NetCompat {
 	 * <p>需添加权限 {@code <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>}</p>
 	 */
 	@SuppressLint("MissingPermission")
-	public static void setWifiEnabled(boolean enabled) {
-		WifiManager mWifiManager = (WifiManager) CoreCompat.getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+	public static void setWifiEnabled(@NonNull Context context, boolean enabled) {
+		WifiManager mWifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 		if (mWifiManager != null) {
 			if (enabled) {
 				if (!mWifiManager.isWifiEnabled()) {
@@ -138,8 +144,8 @@ public class NetCompat {
 	 * <p>需添加权限 {@code <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>}</p>
 	 */
 	@SuppressLint("MissingPermission")
-	public static boolean isWifiConnected() {
-		ConnectivityManager mConnectivityManager = (ConnectivityManager) CoreCompat.getContext()
+	public static boolean isWifiConnected(@NonNull Context context) {
+		ConnectivityManager mConnectivityManager = (ConnectivityManager) context
 				.getSystemService(Context.CONNECTIVITY_SERVICE);
 		return mConnectivityManager != null && mConnectivityManager.getActiveNetworkInfo() != null
 				&& mConnectivityManager.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI;
@@ -150,8 +156,8 @@ public class NetCompat {
 	 * <p>需添加权限 {@code <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>}</p>
 	 * <p>需添加权限 {@code <uses-permission android:name="android.permission.INTERNET"/>}</p>
 	 */
-	public static boolean isWifiAvailable() {
-		return hasWifiEnabled() && isWifiConnected();
+	public static boolean isWifiAvailable(@NonNull Context context) {
+		return hasWifiEnabled(context) && isWifiConnected(context);
 	}
 
 	/**
@@ -160,8 +166,8 @@ public class NetCompat {
 	 *
 	 * @return 运营商名称
 	 */
-	public static String getNetworkOperatorName() {
-		TelephonyManager mTelephonyManager = (TelephonyManager) CoreCompat.getContext().getSystemService(Context.TELEPHONY_SERVICE);
+	public static String getNetworkOperatorName(@NonNull Context context) {
+		TelephonyManager mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 		return mTelephonyManager != null ? mTelephonyManager.getNetworkOperatorName() : null;
 	}
 

@@ -1,4 +1,4 @@
-package androidx.sframe.compat;
+package androidx.sframe.utils;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -15,7 +15,6 @@ import androidx.annotation.StringRes;
 import androidx.core.content.ContextCompat;
 import androidx.sframe.R;
 
-
 /**
  * 作者：Administrator on 2016/9/23 15:11
  * 邮箱：Zoran@kewaimiao.com
@@ -24,7 +23,7 @@ public class ResCompat {
 
 	@ColorInt
 	public static int getColorAppTheme() {
-		return getColorAppTheme(CoreCompat.getContext());
+		return getColorAppTheme(SFrameManager.getInstance().getContext());
 	}
 
 	@ColorInt
@@ -34,7 +33,7 @@ public class ResCompat {
 
 	@ColorInt
 	public static int getColorAppBackground() {
-		return getColorAppBackground(CoreCompat.getContext());
+		return getColorAppBackground(SFrameManager.getInstance().getContext());
 	}
 
 	@ColorInt
@@ -44,7 +43,7 @@ public class ResCompat {
 
 	@ColorInt
 	public static int getColorAppStatus() {
-		return getColorAppStatus(CoreCompat.getContext());
+		return getColorAppStatus(SFrameManager.getInstance().getContext());
 	}
 
 	@ColorInt
@@ -54,7 +53,7 @@ public class ResCompat {
 
 	@ColorInt
 	public static int getColorAppToolbar() {
-		return getColorAppToolbar(CoreCompat.getContext());
+		return getColorAppToolbar(SFrameManager.getInstance().getContext());
 	}
 
 	@ColorInt
@@ -64,7 +63,7 @@ public class ResCompat {
 
 	@ColorInt
 	public static int getColorAppNavigation() {
-		return getColorAppNavigation(CoreCompat.getContext());
+		return getColorAppNavigation(SFrameManager.getInstance().getContext());
 	}
 
 	@ColorInt
@@ -74,7 +73,7 @@ public class ResCompat {
 
 	@ColorInt
 	public static int getColorAppLine() {
-		return getColorAppLine(CoreCompat.getContext());
+		return getColorAppLine(SFrameManager.getInstance().getContext());
 	}
 
 	@ColorInt
@@ -84,7 +83,7 @@ public class ResCompat {
 
 	@ColorInt
 	public static int getColorTransparent() {
-		return getColorTransparent(CoreCompat.getContext());
+		return getColorTransparent(SFrameManager.getInstance().getContext());
 	}
 
 	@ColorInt
@@ -93,11 +92,11 @@ public class ResCompat {
 	}
 
 	public static float dp2px(float dpValue) {
-		return dp2px(CoreCompat.getContext(), dpValue);
+		return dp2px(SFrameManager.getInstance().getContext(), dpValue);
 	}
 
 	public static float sp2px(float spValue) {
-		return sp2px(CoreCompat.getContext(), spValue);
+		return sp2px(SFrameManager.getInstance().getContext(), spValue);
 	}
 
 	public static float dp2px(@NonNull Context context, float dpValue) {
@@ -113,7 +112,7 @@ public class ResCompat {
 	}
 
 	public static Resources getResources() {
-		return CoreCompat.getContext().getResources();
+		return SFrameManager.getInstance().getContext().getResources();
 	}
 
 	public static Resources getResources(@NonNull Context context) {
@@ -161,7 +160,7 @@ public class ResCompat {
 	}
 
 	public static int getColor(@ColorRes int resId) {
-		return getColor(CoreCompat.getContext(), resId);
+		return getColor(SFrameManager.getInstance().getContext(), resId);
 	}
 
 	public static int getColor(@NonNull Context context, @ColorRes int resId) {
@@ -169,28 +168,10 @@ public class ResCompat {
 	}
 
 	public static Drawable getDrawable(@DrawableRes int resId) {
-		return getDrawable(CoreCompat.getContext(), resId);
+		return getDrawable(SFrameManager.getInstance().getContext(), resId);
 	}
 
 	public static Drawable getDrawable(@NonNull Context context, @DrawableRes int resId) {
 		return ContextCompat.getDrawable(context, resId);
 	}
-
-//	public static List<LocationModel> findCityListByAssets(String assetsName) {
-//		List<LocationModel> mList = new ArrayList<>();
-//		try {
-//			AssetManager mAssetManager = CoreCompat.getContext().getAssets();
-//			InputStream mInputStream = mAssetManager.open(assetsName);
-//			byte[] buffer = new byte[mInputStream.available()];
-//			mInputStream.read(buffer);
-//			String result = new String(buffer, "utf-8");
-//			mInputStream.close();
-//			List<LocationModel> resultList = new Gson().fromJson(result, new TypeToken<List<LocationModel>>() {
-//			}.getType());
-//			mList.addAll(resultList);
-//			return mList;
-//		} catch (Exception e) {
-//			return mList;
-//		}
-//	}
 }

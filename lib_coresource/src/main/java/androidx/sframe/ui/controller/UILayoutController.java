@@ -3,6 +3,7 @@ package androidx.sframe.ui.controller;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.AnimRes;
 import androidx.annotation.ColorInt;
@@ -10,9 +11,9 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.sframe.ui.controller.impl.UILayout;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelStoreOwner;
+import androidx.sframe.ui.controller.impl.UILayout;
 
 /**
  * Author create by ok on 2019-06-10
@@ -47,11 +48,11 @@ public interface UILayoutController extends ViewModelStoreOwner {
 
 	UILayoutController onSaveInstanceState(@NonNull Bundle savedInstanceState);
 
-	UILayoutController restoreState(@NonNull Bundle savedInstanceState);
+	UILayoutController onRestoreInstanceState(@NonNull Bundle savedInstanceState);
 
-	UILayoutController setShouldAsyncRefreshed(boolean shouldAsyncRefreshed);
+	UILayoutController setShouldRunWithAsync(boolean shouldRunWithAsync);
 
-	UILayoutController setShouldManualLayoutMode(boolean shouldManualLayoutMode);
+	UILayoutController setShouldAutoLayoutMode(boolean shouldAutoLayoutMode);
 
 	UILayoutController setBackground(Drawable drawable);
 
@@ -75,11 +76,13 @@ public interface UILayoutController extends ViewModelStoreOwner {
 
 	UILayoutController setErrorLayout(@NonNull View preView);
 
-	UILayoutController addLayoutInternal(int key, @LayoutRes int layoutId);
-
-	UILayoutController addLayoutInternal(int key, @NonNull View preView);
-
 	UILayoutController addLayoutInternal(@NonNull UILayout layout);
+
+	UILayoutController addLayoutInternal(@NonNull UILayout layout, int index);
+
+	UILayoutController addLayoutInternal(@NonNull UILayout layout, @NonNull ViewGroup.LayoutParams params);
+
+	UILayoutController addLayoutInternal(@NonNull UILayout layout, int index, @Nullable ViewGroup.LayoutParams params);
 
 	UILayoutController setLayoutEnabledAt(int key, boolean flag);
 

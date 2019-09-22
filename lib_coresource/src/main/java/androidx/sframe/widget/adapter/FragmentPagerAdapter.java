@@ -57,7 +57,7 @@ public class FragmentPagerAdapter extends androidx.fragment.app.FragmentPagerAda
 
 	@Override
 	public int getCount() {
-		return this.getDataSourceController().size();
+		return this.getDataSourceController().getDataSourceCount();
 	}
 
 	@NonNull

@@ -16,21 +16,21 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable;
 import androidx.appcompat.widget.AppCompatImageView;
-import androidx.sframe.R;
-import androidx.sframe.adapter.MenuDelegate;
-import androidx.sframe.compat.CoreCompat;
-import androidx.sframe.compat.ResCompat;
-import androidx.sframe.model.AppMenuModel;
-import androidx.sframe.ui.controller.RecyclerAdapterController;
-import androidx.sframe.ui.controller.UILayoutController;
-import androidx.sframe.widget.adapter.RecyclerAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.sframe.R;
+import androidx.sframe.adapter.ToolbarMenuDelegate;
+import androidx.sframe.model.AppMenuModel;
+import androidx.sframe.ui.controller.UILayoutController;
+import androidx.sframe.utils.ResCompat;
+import androidx.sframe.utils.SystemCompat;
+import androidx.sframe.widget.SRelativeLayout;
+import androidx.sframe.widget.adapter.RecyclerAdapter;
 
 /**
  * Author create by ok on 2019-06-13
  * Email : ok@163.com.
  */
-public class AppToolbarMethod extends UIToolbarMethod implements UILayoutController.OnLayoutListener, RecyclerAdapterController.OnItemClickListener<AppMenuModel> {
+public class AppToolbarMethod extends UIToolbarMethod implements UILayoutController.OnLayoutListener, RecyclerAdapter.OnItemClickListener<AppMenuModel> {
 
 	public AppToolbarMethod(@NonNull UILayoutController layoutController) {
 		super(layoutController);
@@ -61,7 +61,7 @@ public class AppToolbarMethod extends UIToolbarMethod implements UILayoutControl
 
 	@Override
 	public void onLayoutChanged(@NonNull UILayoutController layoutController, @NonNull UILayout layout, @Nullable Object object) {
-		if (UILayoutController.LayoutType.Error.key == layout.getKey()) {
+		if (UILayoutController.LayoutType.Error.key == layout.getLayoutKey()) {
 			if (object instanceof Throwable) {
 				this.setErrorText(((Throwable) object).getMessage());
 			} else if (object instanceof String) {
@@ -144,7 +144,7 @@ public class AppToolbarMethod extends UIToolbarMethod implements UILayoutControl
 	public AppToolbarMethod setStatusEnabled(boolean flag) {
 		final View preView = this.getStatusView();
 		if (flag) {
-			final int statusHeight = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ? CoreCompat.getStatusBarHeight() : 0;
+			final int statusHeight = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ? SystemCompat.getStatusBarHeight(this.getContext()) : 0;
 			preView.setVisibility(View.VISIBLE);
 			preView.getLayoutParams().height = statusHeight;
 		} else {
@@ -154,7 +154,7 @@ public class AppToolbarMethod extends UIToolbarMethod implements UILayoutControl
 	}
 
 	public AppToolbarMethod setShadowEnabled(boolean flag) {
-		View preView = this.getViewController().findViewById(R.id.app_toolbar_shadow_id);
+		View preView = this.findViewById(R.id.app_toolbar_shadow_id);
 		if (flag && preView == null) {
 			final AppCompatImageView appCompatImageView = new AppCompatImageView(this.getContext());
 			appCompatImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
@@ -162,16 +162,16 @@ public class AppToolbarMethod extends UIToolbarMethod implements UILayoutControl
 			appCompatImageView.setId(R.id.app_toolbar_shadow_id);
 
 			final UILayout nowLayout = this.getLayoutController().requireLayoutAt(UILayoutController.LayoutType.Toolbar.key);
-			final int nowLayoutId = nowLayout.getId();
-			UILayout shadowLayout = new UILayout.Builder(UILayout.NO_KEY)
+			final int nowLayoutId = nowLayout.getLayoutId();
+
+			final SRelativeLayout.LayoutParams layoutParams = new SRelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+			layoutParams.height = (int) ResCompat.dp2px(this.getContext(), 4);
+			layoutParams.addRule(RelativeLayout.BELOW, nowLayoutId);
+			layoutParams.addRule(RelativeLayout.ALIGN_LEFT, nowLayoutId);
+			layoutParams.addRule(RelativeLayout.ALIGN_RIGHT, nowLayoutId);
+			this.getLayoutController().addLayoutInternal(new UILayout.Builder(UILayout.NO_KEY)
 					.setContentView(appCompatImageView)
-					.addRule(RelativeLayout.BELOW, nowLayoutId)
-					.addRule(RelativeLayout.ALIGN_LEFT, nowLayoutId)
-					.addRule(RelativeLayout.ALIGN_RIGHT, nowLayoutId)
-					.setLayoutWidth(ViewGroup.LayoutParams.MATCH_PARENT)
-					.setLayoutHeight((int) ResCompat.dp2px(this.getContext(), 4))
-					.build();
-			this.getLayoutController().addLayoutInternal(shadowLayout);
+					.build(), layoutParams);
 			// set view
 			preView = appCompatImageView;
 		}
@@ -186,11 +186,10 @@ public class AppToolbarMethod extends UIToolbarMethod implements UILayoutControl
 	}
 
 	public AppToolbarMethod setLineEnabled(boolean flag) {
-		final View preView = this.findViewById(R.id.app_toolbar_line_id);
 		if (flag) {
-			preView.setVisibility(View.VISIBLE);
+			this.findViewById(R.id.app_toolbar_line_id).setVisibility(View.VISIBLE);
 		} else {
-			preView.setVisibility(View.GONE);
+			this.findViewById(R.id.app_toolbar_line_id).setVisibility(View.GONE);
 		}
 		return this;
 	}
@@ -350,29 +349,29 @@ public class AppToolbarMethod extends UIToolbarMethod implements UILayoutControl
 		return this;
 	}
 
-	private RecyclerAdapter<AppMenuModel> mMenuAdapter;
+	private RecyclerAdapter<AppMenuModel> mToolbarMenuAdapter;
 	private OnMenuClickListener mMenuClickListener;
 
 	public AppToolbarMethod addMenu(@NonNull AppMenuModel menuModel) {
-		if (this.mMenuAdapter == null) {
-			this.mMenuAdapter = new RecyclerAdapter<>();
-			this.mMenuAdapter.setDelegate(new MenuDelegate());
-			this.mMenuAdapter.setOnItemClickListener(this);
+		if (this.mToolbarMenuAdapter == null) {
+			this.mToolbarMenuAdapter = new RecyclerAdapter<>(new ToolbarMenuDelegate());
+			this.mToolbarMenuAdapter.setOnItemClickListener(this);
 
 			this.getViewController()
 					.findAt(R.id.app_menu_List_id)
-					.methodAtRecyclerView().setLayoutManager(new LinearLayoutManager(this.getContext(), LinearLayoutManager.HORIZONTAL, false))
-					.setAdapter(this.mMenuAdapter);
+					.methodAtRecyclerView()
+					.setLayoutManager(new LinearLayoutManager(this.getContext(), LinearLayoutManager.HORIZONTAL, false))
+					.setAdapter(this.mToolbarMenuAdapter);
 		}
-		this.mMenuAdapter.getDataSourceController().addDataSource(menuModel);
+		this.mToolbarMenuAdapter.getDataSourceController().addDataSource(menuModel);
 		return this;
 	}
 
 	public AppToolbarMethod removeMenuById(int menuId) {
-		if (this.mMenuAdapter != null) {
+		if (this.mToolbarMenuAdapter != null) {
 			int position = 0;
-			while (position < this.mMenuAdapter.getItemCount()) {
-				final AppMenuModel model = this.mMenuAdapter.findDataSourceByPosition(position);
+			while (position < this.mToolbarMenuAdapter.getItemCount()) {
+				final AppMenuModel model = this.mToolbarMenuAdapter.findDataSourceByPosition(position);
 				if (menuId == model.getId()) {
 					this.removeMenuByPosition(position);
 					break;
@@ -384,22 +383,21 @@ public class AppToolbarMethod extends UIToolbarMethod implements UILayoutControl
 	}
 
 	public AppToolbarMethod removeMenuByPosition(int position) {
-		if (this.mMenuAdapter != null) {
-			this.mMenuAdapter.getDataSourceController().removeDataSource(position);
+		if (this.mToolbarMenuAdapter != null) {
+			this.mToolbarMenuAdapter.getDataSourceController().removeDataSource(position);
 		}
 		return this;
 	}
 
 	@Override
-	public void onItemClick(View childView, RecyclerAdapter.ViewHolder<AppMenuModel> holder, int position) {
+	public void onItemClick(@NonNull RecyclerAdapter.ViewHolder<AppMenuModel> holder, int position) {
 		if (this.mMenuClickListener != null) {
-			this.mMenuClickListener.onMenuClick(childView, holder, position);
+			this.mMenuClickListener.onMenuClick(holder.getItemView(), holder, position);
 		}
 	}
 
 	public AppToolbarMethod setOnPopClickListener(@NonNull final OnPopClickListener listener) {
 		this.findViewById(R.id.app_container_pop_id).setOnClickListener(new View.OnClickListener() {
-
 			@Override
 			public void onClick(View view) {
 				listener.onPopClick(view);

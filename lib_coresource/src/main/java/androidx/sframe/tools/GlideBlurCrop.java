@@ -15,7 +15,7 @@ import java.security.MessageDigest;
 
 import androidx.annotation.FloatRange;
 import androidx.annotation.NonNull;
-import androidx.sframe.compat.CoreCompat;
+import androidx.sframe.utils.SFrameManager;
 
 /**
  * Author create by ok on 2018/3/1 0001
@@ -37,7 +37,7 @@ public class GlideBlurCrop extends BitmapTransformation {
 	public GlideBlurCrop(int blur) {
 		this.blur = blur;
 		// 创建RenderScript内核对象
-		this.rs = RenderScript.create(CoreCompat.getContext());
+		this.rs = RenderScript.create(SFrameManager.getInstance().getContext());
 	}
 
 	@Override

@@ -6,16 +6,16 @@ import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.sframe.ui.controller.AppPageController;
-import androidx.sframe.ui.controller.RecyclerAdapterController;
 import androidx.sframe.ui.controller.UIObjectListController;
 import androidx.sframe.ui.controller.impl.UIObjectListControllerImpl;
 import androidx.sframe.widget.AppCompatPopupWindow;
+import androidx.sframe.widget.adapter.RecyclerAdapter;
 
 /**
  * Author create by ok on 2019-06-03
  * Email : ok@163.com.
  */
-public abstract class AbsListPopupWindow<DataSource> extends AbsPopupWindow implements UIObjectListController.OnDataSourceListener, RecyclerAdapterController.Delegate<DataSource> {
+public abstract class AbsListPopupWindow<DataSource> extends AbsPopupWindow implements UIObjectListController.OnDataSourceListener, RecyclerAdapter.Delegate<DataSource> {
 
 	private UIObjectListController<AppCompatPopupWindow, DataSource> mObjectListController;
 
@@ -49,7 +49,7 @@ public abstract class AbsListPopupWindow<DataSource> extends AbsPopupWindow impl
 	}
 
 	@Override
-	public int getItemViewType(RecyclerAdapterController<DataSource> adapterController, int position) {
+	public int getItemViewType(@NonNull RecyclerAdapter<DataSource> adapter, int position) {
 		return 0;
 	}
 }

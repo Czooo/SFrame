@@ -4,10 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
 
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -23,37 +20,35 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.sframe.R;
-import androidx.sframe.compat.CoreCompat;
-import androidx.sframe.ui.abs.AbsChildDelegate;
 import androidx.sframe.ui.controller.AppPageController;
-import androidx.sframe.ui.controller.DataSourceController;
+import androidx.sframe.ui.controller.DataSourceNotifyController;
 import androidx.sframe.ui.controller.DataSourceNotifyController2;
-import androidx.sframe.ui.controller.RecyclerAdapterController;
 import androidx.sframe.ui.controller.UILayoutController;
 import androidx.sframe.ui.controller.UIObjectListController;
 import androidx.sframe.ui.controller.UIToolbarController;
 import androidx.sframe.ui.controller.UIViewController;
+import androidx.sframe.utils.Collections;
+import androidx.sframe.utils.SystemCompat;
 import androidx.sframe.widget.RefreshLoadView;
 import androidx.sframe.widget.adapter.RecyclerAdapter;
 import androidx.sframe.widget.adapter.RecyclerChildAdapter;
+import androidx.sframe.widget.adapter.RecyclerFragment;
 
 /**
  * Author create by ok on 2019/1/5
  * Email : ok@163.com.
  */
-public class UIObjectListControllerImpl<PageType, DataSource> implements UIObjectListController<PageType, DataSource>, RefreshLayout.OnRefreshListener, RefreshLayout.OnScrollListener, LifecycleEventObserver {
+public class UIObjectListControllerImpl<Page, DataSource> implements UIObjectListController<Page, DataSource>, RefreshLayout.OnRefreshListener, LifecycleEventObserver {
 
-	private final AppPageController<PageType> mPageController;
-	private RecyclerAdapter<DataSource> mRecyclerAdapter;
+	private final AppPageController<Page> mPageController;
 
 	private OnFindViewListener mFindViewListener;
 	private OnDataSourceListener mDataSourceListener;
 
 	private int page = 1;
 
-	public UIObjectListControllerImpl(@NonNull AppPageController<PageType> pageController) {
+	public UIObjectListControllerImpl(@NonNull AppPageController<Page> pageController) {
 		this.mPageController = pageController;
 	}
 
@@ -67,48 +62,50 @@ public class UIObjectListControllerImpl<PageType, DataSource> implements UIObjec
 		this.getPageController()
 				.getLifecycle().addObserver(this);
 
+		final Page pageOwner = this.getPageController().getPageOwner();
+		if (pageOwner instanceof RecyclerAdapter.Delegate) {
+			this.setDelegate((RecyclerAdapter.Delegate<DataSource>) pageOwner);
+		}
+		if (pageOwner instanceof RecyclerAdapter.OnItemClickListener) {
+			this.setOnItemClickListener((RecyclerAdapter.OnItemClickListener<DataSource>) pageOwner);
+		}
+		if (pageOwner instanceof OnDataSourceListener) {
+			this.setOnDataSourceListener((OnDataSourceListener) pageOwner);
+		}
+
 		this.getLayoutController()
-				.setShouldManualLayoutMode(true)
-				.getViewController()
+				.setShouldAutoLayoutMode(true);
+		this.getViewController()
 				.addOnFindViewListener((mFindViewListener = new OnFindViewListener()));
 
-		final RecyclerView preRecyclerView = this.getRecyclerView();
-		preRecyclerView.setHasFixedSize(true);
-		preRecyclerView.setAdapter(this.getRecyclerAdapter());
-
-		DefaultItemAnimator defaultItemAnimator = new DefaultItemAnimator();
-		defaultItemAnimator.setSupportsChangeAnimations(false);
-		preRecyclerView.setItemAnimator(defaultItemAnimator);
-
 		final RefreshLayout preRefreshLayout = this.getRefreshLayout();
-		preRefreshLayout.addOnScrollListener(this);
 		preRefreshLayout.setOnRefreshListener(this);
 
-		View mLoadingView = View.inflate(preRecyclerView.getContext(), R.layout.layout_loading_default, null);
-		RecyclerView.LayoutParams mLayoutParams = new RecyclerView.LayoutParams(-1, -1);
-		mLoadingView.setLayoutParams(mLayoutParams);
-		this.setLoadingView(mLoadingView).setLoadingEnabled(true);
+		final LinearLayoutManager layoutManager = new LinearLayoutManager(preRefreshLayout.getContext());
+		DefaultItemAnimator defaultItemAnimator = new DefaultItemAnimator();
+		defaultItemAnimator.setSupportsChangeAnimations(false);
 
-		View mEmptyView = View.inflate(preRecyclerView.getContext(), R.layout.layout_empty_default, null);
-		mLayoutParams = new RecyclerView.LayoutParams(-1, -1);
-		mEmptyView.setLayoutParams(mLayoutParams);
-		this.setEmptyView(mEmptyView).setEmptyEnabled(true);
+		final RecyclerView preRecyclerView = this.getRecyclerView();
+//		preRecyclerView.setItemAnimator(defaultItemAnimator);
+		preRecyclerView.setLayoutManager(layoutManager);
+		preRecyclerView.setHasFixedSize(true);
 
-		final PageType prePageType = this.getPageController().getPageOwner();
+		this.setLoadingView(R.layout.layout_loading_default)
+				.setLoadingEnabled(true);
+		this.setEmptyView(R.layout.layout_empty_default)
+				.setEmptyEnabled(true);
+	}
 
-		if (prePageType instanceof RecyclerAdapterController.Delegate) {
-			this.setDelegate((RecyclerAdapterController.Delegate<DataSource>) prePageType);
+	@Override
+	public void onRefreshing(@NonNull RefreshLayout refreshLayout, @NonNull RefreshMode mode) {
+		if (RefreshMode.REFRESH_MODE_START == mode) {
+			page = 1;
+		} else if (RefreshMode.REFRESH_MODE_END == mode) {
+			++page;
 		}
-
-		if (prePageType instanceof RecyclerAdapterController.OnItemClickListener) {
-			this.setOnItemClickListener((RecyclerAdapterController.OnItemClickListener<DataSource>) prePageType);
+		if (RefreshMode.REFRESH_MODE_NONE != mode) {
+			this.getLayoutController().refreshed();
 		}
-
-		if (prePageType instanceof OnDataSourceListener) {
-			this.setOnDataSourceListener((OnDataSourceListener) prePageType);
-		}
-
-		this.setLayoutManager(new LinearLayoutManager(preRecyclerView.getContext()));
 	}
 
 	@Override
@@ -121,548 +118,470 @@ public class UIObjectListControllerImpl<PageType, DataSource> implements UIObjec
 	@Override
 	public void onStateChanged(@NonNull LifecycleOwner source, @NonNull Lifecycle.Event event) {
 		if (Lifecycle.Event.ON_DESTROY == event) {
-			this.getViewController()
-					.removeOnFindViewListener(mFindViewListener);
+			this.getViewController().removeOnFindViewListener(mFindViewListener);
 		}
 	}
 
-	@Override
 	public UIViewController getViewController() {
 		return this.getPageController().getViewController();
 	}
 
-	@Override
 	public UILayoutController getLayoutController() {
 		return this.getPageController().getLayoutController();
 	}
 
-	@Override
 	public UIToolbarController getToolbarController() {
 		return this.getLayoutController().getToolbarController();
 	}
 
-	@Override
-	public AppPageController<PageType> getPageController() {
-		return mPageController;
-	}
-
-	@Override
-	public RefreshLayout getRefreshLayout() {
-		return getViewController().findViewById(R.id.listContainer);
+	public AppPageController<Page> getPageController() {
+		return this.mPageController;
 	}
 
 	@Override
 	public RecyclerView getRecyclerView() {
-		return getViewController().findViewById(R.id.app_refresh_view_id);
+		return this.getViewController().findViewById(R.id.app_refresh_view_id);
 	}
 
 	@Override
-	public DataSource findDataSourceByPosition(int position) {
-		return getDataSourceController().findDataSourceByPosition(position);
+	public RefreshLayout getRefreshLayout() {
+		return this.getViewController().findViewById(R.id.listContainer);
 	}
 
+	@NonNull
 	@Override
-	public DataSourceController<DataSource> getDataSourceController() {
-		return getRecyclerAdapterController().getDataSourceController();
-	}
-
-	@Override
-	public RecyclerAdapterController<DataSource> getRecyclerAdapterController() {
-		return getRecyclerAdapter().getAdapter();
-	}
-
-	@Override
-	public DataSourceNotifyController2<RecyclerAdapter<DataSource>, DataSource> getDataSourceNotifyController() {
-		return getRecyclerAdapterController().getDataSourceNotifyController();
-	}
-
-	@Override
-	public <HDataSource> UIObjectListController<PageType, DataSource> setHeaderAdapter(@NonNull RecyclerChildAdapter<HDataSource, DataSource> adapter) {
-		getRecyclerAdapter().setHeaderAdapter(adapter);
-		return this;
-	}
-
-	@Override
-	public <HDataSource> RecyclerChildAdapter<HDataSource, DataSource> setHeaderDelegate(@NonNull RecyclerAdapterController.ChildDelegate<HDataSource, DataSource> delegate) {
-		final RecyclerChildAdapter<HDataSource, DataSource> preChildAdapter = RecyclerChildAdapter.create(delegate);
-		getRecyclerAdapter().setHeaderAdapter(preChildAdapter);
-		return preChildAdapter;
-	}
-
-	@Override
-	public <FDataSource> UIObjectListController<PageType, DataSource> setFooterAdapter(@NonNull RecyclerChildAdapter<FDataSource, DataSource> adapter) {
-		getRecyclerAdapter().setFooterAdapter(adapter);
-		return this;
-	}
-
-	@Override
-	public <FDataSource> RecyclerChildAdapter<FDataSource, DataSource> setFooterDelegate(@NonNull RecyclerAdapterController.ChildDelegate<FDataSource, DataSource> delegate) {
-		final RecyclerChildAdapter<FDataSource, DataSource> preChildAdapter = RecyclerChildAdapter.create(delegate);
-		getRecyclerAdapter().setFooterAdapter(preChildAdapter);
-		return preChildAdapter;
-	}
-
-	@Override
-	public <HDataSource> RecyclerChildAdapter<HDataSource, DataSource> getHeaderAdapter() {
-		return getRecyclerAdapter().getHeaderAdapter();
-	}
-
-	@Override
-	public <FDataSource> RecyclerChildAdapter<FDataSource, DataSource> getFooterAdapter() {
-		return getRecyclerAdapter().getFooterAdapter();
-	}
-
-	private RecyclerChildAdapter<ViewModel, DataSource> mHeaderAdapter;
-	private RecyclerChildAdapter<ViewModel, DataSource> mFooterAdapter;
-
-	@Override
-	public UIObjectListController<PageType, DataSource> addHeaderView(@NonNull View children) {
-		if (mHeaderAdapter == null) {
-			mHeaderAdapter = RecyclerChildAdapter.create(new ViewDelegate());
+	public RecyclerAdapter<DataSource> getRecyclerAdapter() {
+		RecyclerView.Adapter adapter = this.getRecyclerView().getAdapter();
+		if (adapter instanceof RecyclerAdapter) {
+			return (RecyclerAdapter<DataSource>) adapter;
 		}
-		ViewModel mViewModel = new ViewModel(mHeaderAdapter.getDataSourceController().size(), children);
-		mHeaderAdapter.getDataSourceController().addDataSource(mViewModel);
-		return setHeaderAdapter(mHeaderAdapter);
+		throw new IllegalStateException("UIObjectListController " + this + " not set RecyclerAdapter");
 	}
 
 	@Override
-	public UIObjectListController<PageType, DataSource> addHeaderLayout(@LayoutRes int layoutId) {
-		return addHeaderView(getViewController().findAtParent().inflate(layoutId, getRecyclerView(), false));
+	public DataSourceNotifyController<? extends RecyclerAdapter<DataSource>, DataSource> getDataSourceController() {
+		return this.getRecyclerAdapter().getDataSourceController();
 	}
 
 	@Override
-	public UIObjectListController<PageType, DataSource> addFooterView(@NonNull View children) {
-		if (mFooterAdapter == null) {
-			mFooterAdapter = RecyclerChildAdapter.create(new ViewDelegate());
+	public DataSourceNotifyController2<? extends RecyclerAdapter<DataSource>, DataSource> getDataSourceController2() {
+		DataSourceNotifyController<? extends RecyclerAdapter<DataSource>, DataSource> dataSourceController = this.getDataSourceController();
+		if (dataSourceController instanceof DataSourceNotifyController2) {
+			return (DataSourceNotifyController2<? extends RecyclerAdapter<DataSource>, DataSource>) dataSourceController;
 		}
-		ViewModel mViewModel = new ViewModel(mFooterAdapter.getDataSourceController().size(), children);
-		mFooterAdapter.getDataSourceController().addDataSource(mViewModel);
-		return setFooterAdapter(mFooterAdapter);
+		return null;
 	}
 
 	@Override
-	public UIObjectListController<PageType, DataSource> addFooterLayout(@LayoutRes int layoutId) {
-		return addFooterView(getViewController().findAtParent().inflate(layoutId, getRecyclerView(), false));
+	public <HDataSource> UIObjectListController<Page, DataSource> setHeaderAdapter(@NonNull RecyclerChildAdapter<HDataSource, DataSource> adapter) {
+		this.getRecyclerAdapter().setHeaderRecyclerAdapter(adapter);
+		return this;
 	}
 
 	@Override
-	public UIObjectListController<PageType, DataSource> removeHeaderViewAt(int position) {
-		RecyclerChildAdapter<Object, DataSource> headerAdapter = getHeaderAdapter();
-		if (headerAdapter != null && position >= 0 && position < headerAdapter.getDataSourceController().size()) {
-			headerAdapter.getDataSourceController().removeDataSource(position);
+	public <FDataSource> UIObjectListController<Page, DataSource> setFooterAdapter(@NonNull RecyclerChildAdapter<FDataSource, DataSource> adapter) {
+		this.getRecyclerAdapter().setFooterRecyclerAdapter(adapter);
+		return this;
+	}
+
+	@Override
+	public <HDataSource> RecyclerChildAdapter<HDataSource, DataSource> setHeaderDelegate(@NonNull RecyclerChildAdapter.Delegate<HDataSource, DataSource> delegate) {
+		RecyclerChildAdapter<HDataSource, DataSource> adapter = RecyclerChildAdapter.create(delegate);
+		this.getRecyclerAdapter().setHeaderRecyclerAdapter(adapter);
+		return adapter;
+	}
+
+	@Override
+	public <FDataSource> RecyclerChildAdapter<FDataSource, DataSource> setFooterDelegate(@NonNull RecyclerChildAdapter.Delegate<FDataSource, DataSource> delegate) {
+		RecyclerChildAdapter<FDataSource, DataSource> adapter = RecyclerChildAdapter.create(delegate);
+		this.getRecyclerAdapter().setFooterRecyclerAdapter(adapter);
+		return adapter;
+	}
+
+	@Override
+	public <HDataSource> RecyclerChildAdapter<HDataSource, DataSource> getHeaderRecyclerAdapter() {
+		return this.getRecyclerAdapter().getHeaderRecyclerAdapter();
+	}
+
+	@Override
+	public <FDataSource> RecyclerChildAdapter<FDataSource, DataSource> getFooterRecyclerAdapter() {
+		return this.getRecyclerAdapter().getFooterRecyclerAdapter();
+	}
+
+	@Override
+	public UIObjectListController<Page, DataSource> addHeaderView(@LayoutRes int layoutId) {
+		return this.addHeaderView(this.getViewController().findAtParent().inflate(layoutId, this.getRecyclerView(), false));
+	}
+
+	@Override
+	public UIObjectListController<Page, DataSource> addHeaderView(@NonNull final View view) {
+		this.addHeaderView(new SimpleRecyclerFragment(view));
+		return this;
+	}
+
+	@Override
+	public UIObjectListController<Page, DataSource> addFooterView(@LayoutRes int layoutId) {
+		return this.addFooterView(this.getViewController().findAtParent().inflate(layoutId, this.getRecyclerView(), false));
+	}
+
+	@Override
+	public UIObjectListController<Page, DataSource> addFooterView(@NonNull final View view) {
+		this.addFooterView(new SimpleRecyclerFragment(view));
+		return this;
+	}
+
+	@Override
+	public UIObjectListController<Page, DataSource> addHeaderView(@NonNull RecyclerFragment recyclerFragment) {
+		this.getRecyclerAdapter().addHeaderView(recyclerFragment);
+		return this;
+	}
+
+	@Override
+	public UIObjectListController<Page, DataSource> addFooterView(@NonNull RecyclerFragment recyclerFragment) {
+		this.getRecyclerAdapter().addFooterView(recyclerFragment);
+		return this;
+	}
+
+	@Override
+	public UIObjectListController<Page, DataSource> removeHeaderViewAt(int position) {
+		this.getHeaderRecyclerAdapter().getDataSourceController().removeDataSource(position);
+		return this;
+	}
+
+	@Override
+	public UIObjectListController<Page, DataSource> removeFooterViewAt(int position) {
+		this.getFooterRecyclerAdapter().getDataSourceController().removeDataSource(position);
+		return this;
+	}
+
+	@Override
+	public UIObjectListController<Page, DataSource> setDraggingToStart(boolean dragEnabled) {
+		this.getRefreshLayout().setDraggingToStart(dragEnabled);
+		return this;
+	}
+
+	@Override
+	public UIObjectListController<Page, DataSource> setDraggingToEnd(boolean dragEnabled) {
+		this.getRefreshLayout().setDraggingToEnd(dragEnabled);
+		return this;
+	}
+
+	@Override
+	public UIObjectListController<Page, DataSource> setHeaderEnabled(boolean enabled) {
+		this.getRecyclerAdapter().setShouldHeaderEnabled(enabled);
+		return this;
+	}
+
+	@Override
+	public UIObjectListController<Page, DataSource> setFooterEnabled(boolean enabled) {
+		this.getRecyclerAdapter().setShouldFooterEnabled(enabled);
+		return this;
+	}
+
+	@Override
+	public UIObjectListController<Page, DataSource> setLoadingEnabled(boolean enabled) {
+		this.getRecyclerAdapter().setShouldLoadingEnabled(enabled);
+		return this;
+	}
+
+	@Override
+	public UIObjectListController<Page, DataSource> setEmptyEnabled(boolean enabled) {
+		this.getRecyclerAdapter().setShouldEmptyEnabled(enabled);
+		return this;
+	}
+
+	@Override
+	public UIObjectListController<Page, DataSource> setLoadingView(@LayoutRes int layoutId) {
+		return this.setLoadingView(this.getViewController().findAtParent().inflate(layoutId, this.getRecyclerView(), false));
+	}
+
+	@Override
+	public UIObjectListController<Page, DataSource> setLoadingView(@NonNull View view) {
+		this.getRecyclerAdapter().setLoadingView(view);
+		return this;
+	}
+
+	@Override
+	public UIObjectListController<Page, DataSource> setEmptyView(@LayoutRes int layoutId) {
+		return this.setEmptyView(this.getViewController().findAtParent().inflate(layoutId, this.getRecyclerView(), false));
+	}
+
+	@Override
+	public UIObjectListController<Page, DataSource> setEmptyView(@NonNull View view) {
+		this.getRecyclerAdapter().setEmptyView(view);
+		return this;
+	}
+
+	@Override
+	public UIObjectListController<Page, DataSource> setHeaderStickyView(@LayoutRes int layoutId) {
+		return this.setHeaderStickyView(this.getViewController().findAtParent().inflate(layoutId, this.getRefreshLayout(), false));
+	}
+
+	private View mHeaderStickyView;
+	private View mFooterStickyView;
+
+	@Override
+	public UIObjectListController<Page, DataSource> setHeaderStickyView(@NonNull View view) {
+		final RecyclerView recyclerView = this.getRecyclerView();
+		int paddingLeft = recyclerView.getPaddingLeft();
+		int paddingTop = recyclerView.getPaddingTop();
+		int paddingRight = recyclerView.getPaddingRight();
+		int paddingBottom = recyclerView.getPaddingBottom();
+
+		final RefreshLayout refreshLayout = this.getRefreshLayout();
+		final int orientation = refreshLayout.getOrientation();
+		if (this.mHeaderStickyView != null && this.mHeaderStickyView.getParent() == refreshLayout) {
+			if (RefreshLayout.HORIZONTAL == orientation) {
+				paddingLeft -= this.mHeaderStickyView.getMeasuredWidth();
+			} else if (RefreshLayout.VERTICAL == orientation) {
+				paddingTop -= this.mHeaderStickyView.getMeasuredHeight();
+			}
+			refreshLayout.removeView(this.mHeaderStickyView);
 		}
-		return this;
-	}
 
-	@Override
-	public UIObjectListController<PageType, DataSource> removeFooterViewAt(int position) {
-		RecyclerChildAdapter<Object, DataSource> footerAdapter = getFooterAdapter();
-		if (footerAdapter != null && position >= 0 && position < footerAdapter.getDataSourceController().size()) {
-			footerAdapter.getDataSourceController().removeDataSource(position);
-		}
-		return this;
-	}
-
-	@Override
-	public UIObjectListController<PageType, DataSource> setDraggingToStart(boolean dragEnabled) {
-		getRefreshLayout().setDraggingToStart(dragEnabled);
-		return this;
-	}
-
-	@Override
-	public UIObjectListController<PageType, DataSource> setDraggingToEnd(boolean dragEnabled) {
-		getRefreshLayout().setDraggingToEnd(dragEnabled);
-		return this;
-	}
-
-	@Override
-	public UIObjectListController<PageType, DataSource> setHeaderEnabled(boolean enabled) {
-		getRecyclerAdapter().setHeaderEnabled(enabled);
-		return this;
-	}
-
-	@Override
-	public UIObjectListController<PageType, DataSource> setFooterEnabled(boolean enabled) {
-		getRecyclerAdapter().setFooterEnabled(enabled);
-		return this;
-	}
-
-	@Override
-	public UIObjectListController<PageType, DataSource> setLoadingEnabled(boolean enabled) {
-		getRecyclerAdapter().setLoadingEnabled(enabled);
-		return this;
-	}
-
-	@Override
-	public UIObjectListController<PageType, DataSource> setEmptyEnabled(boolean enabled) {
-		getRecyclerAdapter().setEmptyEnabled(enabled);
-		return this;
-	}
-
-	@Override
-	public UIObjectListController<PageType, DataSource> setLoadingView(@NonNull View view) {
-		getRecyclerAdapter().setLoadingView(view);
-		return this;
-	}
-
-	@Override
-	public UIObjectListController<PageType, DataSource> setEmptyView(@NonNull View view) {
-		getRecyclerAdapter().setEmptyView(view);
-		return this;
-	}
-
-	@Override
-	public UIObjectListController<PageType, DataSource> setStartStickLayout(int layoutId) {
-		return setStartStickView(getViewController().findAtParent().inflate(layoutId, getRefreshLayout(), false));
-	}
-
-	private WeakReference<View> mStartStickViewReference;
-	private WeakReference<View> mEndStickViewReference;
-
-	@Override
-	public UIObjectListController<PageType, DataSource> setStartStickView(@NonNull View view) {
-		if (mStartStickViewReference != null) {
-			CoreCompat.removeInParentView(mStartStickViewReference.get());
-			mStartStickViewReference.clear();
-			mStartStickViewReference = null;
-		}
-		getRefreshLayout().addView(view);
-		// save
-		mStartStickViewReference = new WeakReference<>(view);
-		return setOrientation(getRefreshLayout().getOrientation());
-	}
-
-	@Override
-	public UIObjectListController<PageType, DataSource> setEndStickLayout(int layoutId) {
-		return setEndStickView(getViewController().findAtParent().inflate(layoutId, getRefreshLayout(), false));
-	}
-
-	@Override
-	public UIObjectListController<PageType, DataSource> setEndStickView(@NonNull View view) {
-		if (mEndStickViewReference != null) {
-			CoreCompat.removeInParentView(mEndStickViewReference.get());
-			mEndStickViewReference.clear();
-			mEndStickViewReference = null;
-		}
-		getRefreshLayout().addView(view);
-		// save
-		mEndStickViewReference = new WeakReference<>(view);
-		return setOrientation(getRefreshLayout().getOrientation());
-	}
-
-	@Override
-	public UIObjectListController<PageType, DataSource> setRefreshMode(@NonNull RefreshMode mode) {
-		getRefreshLayout().setRefreshMode(mode);
-		return this;
-	}
-
-	@Override
-	public UIObjectListController<PageType, DataSource> setDelegate(@NonNull RecyclerAdapterController.Delegate<DataSource> delegate) {
-		getRecyclerAdapter().setDelegate(delegate);
-		return this;
-	}
-
-	@Override
-	public UIObjectListController<PageType, DataSource> setHeaderOrFooterSpanSizeLookup(@NonNull RecyclerAdapterController.SpanSizeLookup spanSizeLookup) {
-		getRecyclerAdapter().setHeaderOrFooterSpanSizeLookup(spanSizeLookup);
-		return this;
-	}
-
-	@Override
-	public UIObjectListController<PageType, DataSource> setLayoutManager(@NonNull RecyclerView.LayoutManager layoutManager) {
-		getRecyclerView().setLayoutManager(layoutManager);
-		getRecyclerAdapter().onAttachedToRecyclerView(getRecyclerView());
-
-		final int orientation;
-		// 滚动方向
-		if (layoutManager instanceof LinearLayoutManager) {
-			orientation = ((LinearLayoutManager) layoutManager).getOrientation();
-		} else if (layoutManager instanceof StaggeredGridLayoutManager) {
-			orientation = ((StaggeredGridLayoutManager) layoutManager).getOrientation();
+		final RefreshLayout.LayoutParams preLayoutParams;
+		final ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+		if (layoutParams == null) {
+			preLayoutParams = new RefreshLayout.LayoutParams(RefreshLayout.LayoutParams.WRAP_CONTENT, RefreshLayout.LayoutParams.WRAP_CONTENT);
+			view.setLayoutParams(preLayoutParams);
+		} else if (!(layoutParams instanceof RefreshLayout.LayoutParams)) {
+			preLayoutParams = new RefreshLayout.LayoutParams(layoutParams);
+			view.setLayoutParams(preLayoutParams);
 		} else {
-			orientation = LinearLayoutManager.VERTICAL;
+			preLayoutParams = (RefreshLayout.LayoutParams) layoutParams;
 		}
-		return setOrientation(orientation);
-	}
+		preLayoutParams.mScrollFlag = RefreshLayout.LayoutParams.SCROLL_FLAG_START;
 
-	private UIObjectListController<PageType, DataSource> setOrientation(int orientation) {
-		// 暂只考虑RefreshView的Orientation，不考虑LinearLayout
-		getRefreshLayout().setOrientation(orientation);
-		// TODO 其他布局的方向改变：StartStickView／EndStickView
-
-		if (mStartStickViewReference != null || mEndStickViewReference != null) {
-			int paddingLeft = getRecyclerView().getPaddingLeft();
-			int paddingTop = getRecyclerView().getPaddingTop();
-			int paddingRight = getRecyclerView().getPaddingRight();
-			int paddingBottom = getRecyclerView().getPaddingBottom();
-
-			View children;
-			RelativeLayout.LayoutParams mLayoutParams;
-
-			if (mStartStickViewReference != null) {
-				children = mStartStickViewReference.get();
-
-				if (RefreshLayout.VERTICAL == getRefreshLayout().getOrientation()) {
-					mLayoutParams = new RelativeLayout.LayoutParams(-1, -2);
-					mLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-				} else {
-					mLayoutParams = new RelativeLayout.LayoutParams(-2, -1);
-					mLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-				}
-				children.setLayoutParams(mLayoutParams);
-				children.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-
-				if (RefreshLayout.VERTICAL == getRefreshLayout().getOrientation()) {
-					paddingTop = children.getMeasuredHeight();
-				} else {
-					paddingLeft = children.getMeasuredWidth();
-				}
-			}
-
-			if (mEndStickViewReference != null) {
-				children = mEndStickViewReference.get();
-
-				if (RefreshLayout.VERTICAL == getRefreshLayout().getOrientation()) {
-					mLayoutParams = new RelativeLayout.LayoutParams(-1, -2);
-					mLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-				} else {
-					mLayoutParams = new RelativeLayout.LayoutParams(-2, -1);
-					mLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-				}
-				children.setLayoutParams(mLayoutParams);
-				children.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-
-				if (RefreshLayout.VERTICAL == getRefreshLayout().getOrientation()) {
-					paddingBottom = children.getMeasuredHeight();
-				} else {
-					paddingRight = children.getMeasuredWidth();
-				}
-			}
-			getRecyclerView().setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
+		if (RefreshLayout.HORIZONTAL == orientation) {
+			preLayoutParams.addRule(RefreshLayout.ALIGN_PARENT_LEFT);
+			preLayoutParams.addRule(RefreshLayout.CENTER_VERTICAL);
+		} else if (RefreshLayout.VERTICAL == orientation) {
+			preLayoutParams.addRule(RefreshLayout.ALIGN_PARENT_TOP);
+			preLayoutParams.addRule(RefreshLayout.CENTER_HORIZONTAL);
 		}
+		refreshLayout.addView(view, preLayoutParams);
+		this.mHeaderStickyView = view;
+		this.mHeaderStickyView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+
+		if (RefreshLayout.HORIZONTAL == orientation) {
+			paddingLeft += this.mHeaderStickyView.getMeasuredWidth();
+		} else if (RefreshLayout.VERTICAL == orientation) {
+			paddingTop += this.mHeaderStickyView.getMeasuredHeight();
+		}
+		recyclerView.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
 		return this;
 	}
 
 	@Override
-	public UIObjectListController<PageType, DataSource> setOnDataSourceListener(@NonNull OnDataSourceListener listener) {
+	public UIObjectListController<Page, DataSource> setFooterStickyView(@LayoutRes int layoutId) {
+		return this.setFooterStickyView(this.getViewController().findAtParent().inflate(layoutId, this.getRefreshLayout(), false));
+	}
+
+	@Override
+	public UIObjectListController<Page, DataSource> setFooterStickyView(@NonNull View view) {
+		final RecyclerView recyclerView = this.getRecyclerView();
+		int paddingLeft = recyclerView.getPaddingLeft();
+		int paddingTop = recyclerView.getPaddingTop();
+		int paddingRight = recyclerView.getPaddingRight();
+		int paddingBottom = recyclerView.getPaddingBottom();
+
+		final RefreshLayout refreshLayout = this.getRefreshLayout();
+		final int orientation = refreshLayout.getOrientation();
+		if (this.mFooterStickyView != null && this.mFooterStickyView.getParent() == refreshLayout) {
+			if (RefreshLayout.HORIZONTAL == orientation) {
+				paddingRight -= this.mFooterStickyView.getMeasuredWidth();
+			} else if (RefreshLayout.VERTICAL == orientation) {
+				paddingBottom -= this.mFooterStickyView.getMeasuredHeight();
+			}
+			refreshLayout.removeView(this.mFooterStickyView);
+		}
+
+		final RefreshLayout.LayoutParams preLayoutParams;
+		final ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+		if (layoutParams == null) {
+			preLayoutParams = new RefreshLayout.LayoutParams(RefreshLayout.LayoutParams.WRAP_CONTENT, RefreshLayout.LayoutParams.WRAP_CONTENT);
+			view.setLayoutParams(preLayoutParams);
+		} else if (!(layoutParams instanceof RefreshLayout.LayoutParams)) {
+			preLayoutParams = new RefreshLayout.LayoutParams(layoutParams);
+			view.setLayoutParams(preLayoutParams);
+		} else {
+			preLayoutParams = (RefreshLayout.LayoutParams) layoutParams;
+		}
+		preLayoutParams.mScrollFlag = RefreshLayout.LayoutParams.SCROLL_FLAG_END;
+
+		if (RefreshLayout.HORIZONTAL == orientation) {
+			preLayoutParams.addRule(RefreshLayout.ALIGN_PARENT_RIGHT);
+			preLayoutParams.addRule(RefreshLayout.CENTER_VERTICAL);
+		} else if (RefreshLayout.VERTICAL == orientation) {
+			preLayoutParams.addRule(RefreshLayout.ALIGN_PARENT_BOTTOM);
+			preLayoutParams.addRule(RefreshLayout.CENTER_HORIZONTAL);
+		}
+		refreshLayout.addView(view, preLayoutParams);
+		this.mFooterStickyView = view;
+		this.mFooterStickyView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+
+		if (RefreshLayout.HORIZONTAL == orientation) {
+			paddingRight += this.mFooterStickyView.getMeasuredWidth();
+		} else if (RefreshLayout.VERTICAL == orientation) {
+			paddingBottom += this.mFooterStickyView.getMeasuredHeight();
+		}
+		recyclerView.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
+		return this;
+	}
+
+	@Override
+	public UIObjectListController<Page, DataSource> setRefreshMode(@NonNull RefreshMode mode) {
+		this.getRefreshLayout().setRefreshMode(mode);
+		return this;
+	}
+
+	@Override
+	public UIObjectListController<Page, DataSource> setAdapter(@NonNull RecyclerAdapter<DataSource> adapter) {
+		this.getRecyclerView().setAdapter(adapter);
+		return this;
+	}
+
+	@Override
+	public UIObjectListController<Page, DataSource> setDelegate(@NonNull RecyclerAdapter.Delegate<DataSource> delegate) {
+		return this.setAdapter(new RecyclerAdapter<>(delegate));
+	}
+
+	@Override
+	public UIObjectListController<Page, DataSource> setLayoutManager(@NonNull RecyclerView.LayoutManager layoutManager) {
+		this.getRecyclerView().setLayoutManager(layoutManager);
+		return this;
+	}
+
+	@Override
+	public UIObjectListController<Page, DataSource> setOnDataSourceListener(@NonNull OnDataSourceListener listener) {
 		this.mDataSourceListener = listener;
 		return this;
 	}
 
 	@Override
-	public UIObjectListController<PageType, DataSource> setOnItemClickListener(@NonNull RecyclerAdapterController.OnItemClickListener<DataSource> listener) {
-		getRecyclerAdapter().setOnItemClickListener(listener);
+	public UIObjectListController<Page, DataSource> setOnItemClickListener(@NonNull RecyclerAdapter.OnItemClickListener<DataSource> listener) {
+		this.getRecyclerAdapter().setOnItemClickListener(listener);
 		return this;
 	}
 
 	@Override
-	public UIObjectListController<PageType, DataSource> setOnItemTouchListener(@NonNull RecyclerAdapterController.OnItemTouchListener<DataSource> listener) {
-		getRecyclerAdapter().setOnItemTouchListener(listener);
+	public UIObjectListController<Page, DataSource> setOnItemLongClickListener(@NonNull RecyclerAdapter.OnItemLongClickListener<DataSource> listener) {
+		this.getRecyclerAdapter().setOnItemLongClickListener(listener);
 		return this;
 	}
 
 	@Override
-	public UIObjectListController<PageType, DataSource> setOnItemLongClickListener(@NonNull RecyclerAdapterController.OnItemLongClickListener<DataSource> listener) {
-		getRecyclerAdapter().setOnItemLongClickListener(listener);
+	public UIObjectListController<Page, DataSource> setItemAnimator(@NonNull RecyclerView.ItemAnimator animator) {
+		this.getRecyclerView().setItemAnimator(animator);
 		return this;
 	}
 
 	@Override
-	public UIObjectListController<PageType, DataSource> setItemAnimator(@NonNull RecyclerView.ItemAnimator animator) {
-		getRecyclerView().setItemAnimator(animator);
+	public UIObjectListController<Page, DataSource> addItemDecoration(@NonNull RecyclerView.ItemDecoration itemDecoration) {
+		return this.addItemDecoration(itemDecoration, -1);
+	}
+
+	@Override
+	public UIObjectListController<Page, DataSource> addItemDecoration(@NonNull RecyclerView.ItemDecoration itemDecoration, int index) {
+		this.getRecyclerView().addItemDecoration(itemDecoration, index);
 		return this;
 	}
 
 	@Override
-	public UIObjectListController<PageType, DataSource> addItemDecoration(@NonNull RecyclerView.ItemDecoration itemDecoration) {
-		return addItemDecoration(itemDecoration, -1);
-	}
-
-	@Override
-	public UIObjectListController<PageType, DataSource> addItemDecoration(@NonNull RecyclerView.ItemDecoration itemDecoration, int index) {
-		getRecyclerView().addItemDecoration(itemDecoration, index);
+	public UIObjectListController<Page, DataSource> removeItemDecorationAt(int index) {
+		this.getRecyclerView().removeItemDecorationAt(index);
 		return this;
 	}
 
 	@Override
-	public UIObjectListController<PageType, DataSource> removeItemDecorationAt(int index) {
-		getRecyclerView().removeItemDecorationAt(index);
+	public UIObjectListController<Page, DataSource> removeItemDecoration(@NonNull RecyclerView.ItemDecoration itemDecoration) {
+		this.getRecyclerView().removeItemDecoration(itemDecoration);
 		return this;
 	}
 
 	@Override
-	public UIObjectListController<PageType, DataSource> removeItemDecoration(@NonNull RecyclerView.ItemDecoration itemDecoration) {
-		getRecyclerView().removeItemDecoration(itemDecoration);
+	public UIObjectListController<Page, DataSource> addOnScrollListener(@NonNull RecyclerView.OnScrollListener listener) {
+		this.getRecyclerView().addOnScrollListener(listener);
 		return this;
 	}
 
 	@Override
-	public UIObjectListController<PageType, DataSource> addOnScrollListener(RecyclerView.OnScrollListener listener) {
-		getRecyclerView().addOnScrollListener(listener);
+	public UIObjectListController<Page, DataSource> removeOnScrollListener(@NonNull RecyclerView.OnScrollListener listener) {
+		this.getRecyclerView().removeOnScrollListener(listener);
 		return this;
 	}
 
 	@Override
-	public UIObjectListController<PageType, DataSource> removeOnScrollListener(RecyclerView.OnScrollListener listener) {
-		getRecyclerView().removeOnScrollListener(listener);
-		return this;
-	}
-
-	@Override
-	public UIObjectListController<PageType, DataSource> test(final List<DataSource> dataSourceList) {
-		getViewController().postDelayed(new Runnable() {
-
+	public UIObjectListController<Page, DataSource> test(@NonNull final List<DataSource> dataSourceList) {
+		this.getViewController().postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				setDataSourceList(dataSourceList);
+				setDataSource(dataSourceList);
 			}
 		}, 2000);
 		return this;
 	}
 
 	@Override
-	public UIObjectListController<PageType, DataSource> removeAll() {
-		getDataSourceController().removeAll();
+	public UIObjectListController<Page, DataSource> removeAll() {
+		this.getDataSourceController().removeAll();
 		return this;
 	}
 
 	@Override
-	public UIObjectListController<PageType, DataSource> setDataSource(DataSource dataSource) {
-		return setDataSource(dataSource, getDataSourceController().size());
+	public UIObjectListController<Page, DataSource> setDataSource(@NonNull DataSource dataSource) {
+		return this.removeAll().addDataSource(dataSource);
 	}
 
 	@Override
-	public UIObjectListController<PageType, DataSource> setDataSource(DataSource dataSource, int index) {
-		List<DataSource> mDataSourceList = new ArrayList<>();
-		mDataSourceList.add(dataSource);
-		return setDataSourceList(mDataSourceList, index);
+	public UIObjectListController<Page, DataSource> setDataSource(@NonNull Collection<? extends DataSource> dataSources) {
+		return this.removeAll().addDataSource(dataSources);
 	}
 
 	@Override
-	public UIObjectListController<PageType, DataSource> setDataSourceList(Collection<? extends DataSource> dataSourceList) {
-		return setDataSourceList(dataSourceList, getDataSourceController().size());
+	public UIObjectListController<Page, DataSource> addDataSource(@NonNull DataSource dataSource) {
+		return this.addDataSource(dataSource, this.getDataSourceController().getDataSourceCount());
 	}
 
 	@Override
-	public UIObjectListController<PageType, DataSource> setDataSourceList(Collection<? extends DataSource> dataSourceList, int index) {
-		return removeAll().addDataSourceList(dataSourceList, index);
+	public UIObjectListController<Page, DataSource> addDataSource(@NonNull DataSource dataSource, int index) {
+		return this.addDataSource(Collections.toList(dataSource), index);
 	}
 
 	@Override
-	public UIObjectListController<PageType, DataSource> addDataSource(DataSource dataSource) {
-		return addDataSource(dataSource, getDataSourceController().size());
+	public UIObjectListController<Page, DataSource> addDataSource(@NonNull Collection<? extends DataSource> dataSources) {
+		return this.addDataSource(dataSources, this.getDataSourceController().getDataSourceCount());
 	}
 
 	@Override
-	public UIObjectListController<PageType, DataSource> addDataSource(DataSource dataSource, int index) {
-		List<DataSource> mDataSourceList = new ArrayList<>();
-		mDataSourceList.add(dataSource);
-		return addDataSourceList(mDataSourceList, index);
-	}
-
-	@Override
-	public UIObjectListController<PageType, DataSource> addDataSourceList(Collection<? extends DataSource> dataSourceList) {
-		return addDataSourceList(dataSourceList, getDataSourceController().size());
-	}
-
-	@Override
-	public UIObjectListController<PageType, DataSource> addDataSourceList(Collection<? extends DataSource> dataSourceList, int index) {
-		AddDataSourceRunnable mDataSourceRunnable = new AddDataSourceRunnable(dataSourceList, index);
-		if (CoreCompat.isOnMainThread()) {
-			mDataSourceRunnable.run();
+	public UIObjectListController<Page, DataSource> addDataSource(@NonNull Collection<? extends DataSource> dataSources, int index) {
+		UpdateDataSourceTask mUpdateDataSourceTask = new UpdateDataSourceTask(dataSources, index);
+		if (SystemCompat.isOnMainThread()) {
+			mUpdateDataSourceTask.run();
 			return this;
 		}
-		getViewController().post(mDataSourceRunnable);
+		this.getViewController().post(mUpdateDataSourceTask);
 		return this;
 	}
 
 	@Override
-	public UIObjectListController<PageType, DataSource> notifyDataSetChanged() {
-		getRecyclerAdapter().notifyDataSetChanged();
+	public UIObjectListController<Page, DataSource> notifyDataSetChanged() {
+		this.getRecyclerAdapter().notifyDataSetChanged();
 		return this;
 	}
 
 	@Override
-	public UIObjectListController<PageType, DataSource> notifyHeaderDataSetChanged() {
-		getRecyclerAdapter().notifyHeaderDataSetChanged();
-		return this;
+	public DataSource findDataSourceByPosition(int position) {
+		return this.getDataSourceController().findDataSourceByPosition(position);
 	}
 
-	@Override
-	public UIObjectListController<PageType, DataSource> notifyFooterDataSetChanged() {
-		getRecyclerAdapter().notifyFooterDataSetChanged();
-		return this;
-	}
+	/* package */ final class UpdateDataSourceTask implements Runnable {
 
-	private RecyclerAdapter<DataSource> getRecyclerAdapter() {
-		if (mRecyclerAdapter == null) {
-			mRecyclerAdapter = new RecyclerAdapter<>();
-		}
-		return mRecyclerAdapter;
-	}
+		private final Collection<? extends DataSource> mDataSources;
+		private final int index;
 
-	@Override
-	public void onRefreshing(@NonNull RefreshLayout refreshLayout, @NonNull RefreshMode mode) {
-		if (RefreshMode.REFRESH_MODE_START == mode) {
-			page = 1;
-		} else if (RefreshMode.REFRESH_MODE_END == mode) {
-			++page;
-		}
-
-		if (RefreshMode.REFRESH_MODE_NONE != mode) {
-			getLayoutController()
-					.refreshed();
-		}
-	}
-
-	@Override
-	public void onScrolled(@NonNull ViewGroup container, int dx, int dy) {
-		final RefreshLayout mRefreshLayout = (RefreshLayout) container;
-		final int scrollOffset = mRefreshLayout.getNestedScrollingHelper().getScrollOffset();
-		final int scrollDirection = mRefreshLayout.getNestedScrollingHelper().getScrollDirection();
-
-		if (scrollDirection < 0) {
-			this.ensureStickViewOffsetChange(RefreshMode.REFRESH_MODE_START, scrollOffset);
-		} else if (scrollDirection > 0) {
-			this.ensureStickViewOffsetChange(RefreshMode.REFRESH_MODE_END, scrollOffset);
-		}
-	}
-
-	@Override
-	public void onScrollStateChanged(@NonNull ViewGroup container, int scrollState) {
-
-	}
-
-	private void ensureStickViewOffsetChange(@NonNull RefreshMode mode, float scrollOffset) {
-		View children = null;
-
-		if (RefreshMode.REFRESH_MODE_START == mode) {
-			if (mStartStickViewReference != null) {
-				children = mStartStickViewReference.get();
-			}
-		} else if (RefreshMode.REFRESH_MODE_END == mode) {
-			if (mEndStickViewReference != null) {
-				children = mEndStickViewReference.get();
-			}
-		}
-
-		if (children != null && children.isShown()) {
-			if (RefreshLayout.VERTICAL == getRefreshLayout().getOrientation()) {
-				children.setTranslationY(scrollOffset);
-			} else {
-				children.setTranslationX(scrollOffset);
-			}
-		}
-	}
-
-	final class AddDataSourceRunnable implements Runnable {
-
-		final Collection<? extends DataSource> mDataSourceList;
-
-		final int index;
-
-		AddDataSourceRunnable(Collection<? extends DataSource> dataSourceList, int index) {
-			this.mDataSourceList = dataSourceList;
+		UpdateDataSourceTask(@Nullable Collection<? extends DataSource> dataSources, int index) {
+			this.mDataSources = dataSources;
 			this.index = index;
 		}
 
@@ -671,20 +590,19 @@ public class UIObjectListControllerImpl<PageType, DataSource> implements UIObjec
 			if (Lifecycle.State.DESTROYED == getPageController().getLifecycle().getCurrentState()) {
 				return;
 			}
-
 			setLoadingEnabled(false);
 
-			if (page == 1) {
-				getDataSourceController()
-						.setDataSourceList(mDataSourceList, index);
-			} else {
-				getDataSourceController()
-						.addDataSourceList(mDataSourceList, index);
-			}
-
-			if (mDataSourceList == null || mDataSourceList.isEmpty()) {
+			if (this.mDataSources == null || this.mDataSources.isEmpty()) {
 				page--;
 				page = page <= 0 ? 1 : page;
+				// update list
+				getDataSourceController().notifyDataSetChanged();
+			} else {
+				if (page == 1) {
+					getDataSourceController().setDataSource(this.mDataSources);
+				} else {
+					getDataSourceController().addDataSource(this.mDataSources, this.index);
+				}
 			}
 
 			int mLayoutState = getLayoutController().getCurLayoutKey();
@@ -698,48 +616,14 @@ public class UIObjectListControllerImpl<PageType, DataSource> implements UIObjec
 
 			final RefreshLayout.LoadView mLoadView = getRefreshLayout().getFooterLoadView();
 			if (mLoadView instanceof RefreshLoadView) {
-				if (mDataSourceList != null && mDataSourceList.size() >= LIST_LIMIT) {
-					((RefreshLoadView) mLoadView).setRefreshTips(false);
-				} else {
+				if (this.mDataSources == null
+						|| this.mDataSources.isEmpty()
+						|| this.mDataSources.size() < LIST_LIMIT) {
 					((RefreshLoadView) mLoadView).setRefreshTips(true);
+				} else {
+					((RefreshLoadView) mLoadView).setRefreshTips(false);
 				}
 			}
-		}
-	}
-
-	/* package */ final class ViewModel {
-
-		private final View itemView;
-
-		private final int itemViewType;
-
-		ViewModel(int itemViewType, View itemView) {
-			this.itemView = itemView;
-			this.itemViewType = itemViewType;
-		}
-	}
-
-	/* package */ final class ViewDelegate extends AbsChildDelegate<ViewModel, DataSource> {
-
-		@Override
-		public int getItemViewType(RecyclerAdapterController<DataSource> adapterController, RecyclerChildAdapter<ViewModel, DataSource> recyclerChildAdapter, int position) {
-			ViewModel mViewModel = recyclerChildAdapter.findDataSourceByPosition(position);
-			return mViewModel.itemViewType;
-		}
-
-		@Override
-		public View onCreateItemView(RecyclerAdapterController<DataSource> adapterController, RecyclerChildAdapter<ViewModel, DataSource> recyclerChildAdapter, LayoutInflater inflater, ViewGroup parent, int itemViewType) {
-			for (ViewModel mViewModel : recyclerChildAdapter.getDataSourceController().getAllDataSource()) {
-				if (mViewModel.itemViewType == itemViewType) {
-					return mViewModel.itemView;
-				}
-			}
-			return null;
-		}
-
-		@Override
-		public void onBindItemView(RecyclerChildAdapter.ViewHolder<ViewModel, DataSource> holder, int position, @Nullable List<Object> payloads) {
-			// not-op
 		}
 	}
 
@@ -747,45 +631,34 @@ public class UIObjectListControllerImpl<PageType, DataSource> implements UIObjec
 
 		public <V extends View> V findViewById(@IdRes int id) {
 			View children;
-
-			if (mHeaderAdapter != null) {
-
-				for (ViewModel mViewModel : mHeaderAdapter.getDataSourceController().getAllDataSource()) {
-					children = mViewModel.itemView.findViewById(id);
-
-					if (children != null) {
-						return (V) children;
-					}
-				}
-			}
-
-			if (mFooterAdapter != null) {
-
-				for (ViewModel mViewModel : mFooterAdapter.getDataSourceController().getAllDataSource()) {
-					children = mViewModel.itemView.findViewById(id);
-
-					if (children != null) {
-						return (V) children;
-					}
-				}
-			}
-
 			if (getRecyclerAdapter().getLoadingView() != null) {
 				children = getRecyclerAdapter().getLoadingView().findViewById(id);
-
 				if (children != null) {
 					return (V) children;
 				}
 			}
-
 			if (getRecyclerAdapter().getEmptyView() != null) {
 				children = getRecyclerAdapter().getEmptyView().findViewById(id);
-
 				if (children != null) {
 					return (V) children;
 				}
 			}
 			return null;
+		}
+	}
+
+	/* package */ final class SimpleRecyclerFragment extends RecyclerFragment {
+
+		private final View view;
+
+		SimpleRecyclerFragment(@NonNull View view) {
+			this.view = view;
+		}
+
+		@NonNull
+		@Override
+		public View onCreateView(@NonNull LayoutInflater inflater, @NonNull ViewGroup parent) {
+			return this.view;
 		}
 	}
 }

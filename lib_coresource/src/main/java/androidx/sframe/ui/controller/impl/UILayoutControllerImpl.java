@@ -18,19 +18,19 @@ import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.collection.SparseArrayCompat;
-import androidx.sframe.R;
-import androidx.sframe.ViewModelProviders;
-import androidx.sframe.helper.AnnotationHelper;
-import androidx.sframe.tools.AsyncRequest;
-import androidx.sframe.listener.OnAnimationListener;
-import androidx.sframe.ui.controller.UILayoutController;
-import androidx.sframe.ui.controller.UIToolbarController;
-import androidx.sframe.ui.controller.UIViewController;
-import androidx.sframe.widget.OverlapRelativeLayout;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleEventObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelStore;
+import androidx.sframe.R;
+import androidx.sframe.helper.ViewModelProviders;
+import androidx.sframe.helper.AnnotationHelper;
+import androidx.sframe.listener.OnAnimationListener;
+import androidx.sframe.tools.AsyncRequest;
+import androidx.sframe.ui.controller.UILayoutController;
+import androidx.sframe.ui.controller.UIToolbarController;
+import androidx.sframe.ui.controller.UIViewController;
+import androidx.sframe.widget.SRelativeLayout;
 
 /**
  * Author create by ok on 2019-06-10
@@ -49,7 +49,7 @@ public class UILayoutControllerImpl implements UILayoutController, UILayoutState
 
 	private final ViewModelStore mViewModelStore = new ViewModelStore();
 
-	private final OverlapRelativeLayout mParentView;
+	private final SRelativeLayout mParentView;
 	private final AsyncRequest mAsyncRequest;
 	private final UIViewController mViewController;
 	private final UILayoutStateHandler mLayoutStateHandler;
@@ -57,11 +57,11 @@ public class UILayoutControllerImpl implements UILayoutController, UILayoutState
 
 	private boolean mIsFirstRequestCompletedFlag;
 	private boolean mIsFirstLayoutCompletedFlag;
-	private boolean mIsShouldAsyncRefreshed;
 	private boolean mIsSnapStateAsStopFlag;
-	private boolean mIsShouldManualLayoutMode;
+	private boolean mIsShouldRunWithAsync = false;
+	private boolean mIsShouldAutoLayoutMode = true;
 
-	public UILayoutControllerImpl(@NonNull OverlapRelativeLayout parentView) {
+	public UILayoutControllerImpl(@NonNull SRelativeLayout parentView) {
 		this.mParentView = parentView;
 		this.mAsyncRequest = AsyncRequest.get();
 		this.mViewController = new UIViewControllerImpl(parentView);
@@ -77,7 +77,7 @@ public class UILayoutControllerImpl implements UILayoutController, UILayoutState
 		// hide oldLayout
 		final boolean mIsShouldHideAnimation = this.shouldHideLayoutAt(oldLayoutState);
 		// dispatch layout changed
-		if (!this.dispatchLayoutChange(nowLayoutState, params, mIsShouldHideAnimation)) {
+		if (!this.dispatchLayoutChanged(nowLayoutState, params, mIsShouldHideAnimation)) {
 			// unvaild layout
 			if (LayoutType.Content.key == nowLayoutState) {
 				this.onLayoutChanged(nowLayoutState, params);
@@ -96,9 +96,9 @@ public class UILayoutControllerImpl implements UILayoutController, UILayoutState
 		return false;
 	}
 
-	private boolean dispatchLayoutChange(int nowLayoutState, @Nullable Object params, boolean shouldStartAnimation) {
+	private boolean dispatchLayoutChanged(int nowLayoutState, @Nullable Object params, boolean shouldStartAnimation) {
 		final UILayout nowLayout = this.mLayoutPool.get(nowLayoutState);
-		if (nowLayout == null || !nowLayout.isEnabled()) {
+		if (nowLayout == null || !nowLayout.isLayoutEnabled()) {
 			return false;
 		}
 		final View contentView = nowLayout.getContentView();
@@ -110,7 +110,7 @@ public class UILayoutControllerImpl implements UILayoutController, UILayoutState
 		}
 		if (nowLayout.getEnterAnimation() == 0
 				|| !shouldStartAnimation) {
-			this.onLayoutChanged(nowLayout.getKey(), params);
+			this.onLayoutChanged(nowLayout.getLayoutKey(), params);
 		} else {
 			final Animation animation = AnimationUtils.loadAnimation(contentView.getContext(), nowLayout.getEnterAnimation());
 			animation.setAnimationListener(new OnShowAnimationListener(nowLayout, params));
@@ -135,12 +135,12 @@ public class UILayoutControllerImpl implements UILayoutController, UILayoutState
 			this.mIsFirstLayoutCompletedFlag = true;
 		}
 		if (this.hasAsyncLoadDataSourceFlag(key)) {
-			if (this.mIsShouldAsyncRefreshed
+			if (this.mIsShouldRunWithAsync
 					|| AnnotationHelper.isShouldRunInAsyncAnn(this.mOnDataSourceListener)) {
 				this.mAsyncRequest.execute(params, this);
 			} else {
 				this.performOnDataSourceChanged(params);
-				if (!this.mIsShouldManualLayoutMode) {
+				if (this.mIsShouldAutoLayoutMode) {
 					// auto layoutComplete
 					this.layoutOfContent(null, LAYOUT_WAIT_DELAY_TIME);
 				}
@@ -167,7 +167,7 @@ public class UILayoutControllerImpl implements UILayoutController, UILayoutState
 		final View contentView = nowLayout.getContentView();
 		if (contentView.getVisibility() == View.VISIBLE) {
 			if (nowLayout.getExitAnimation() == 0
-					|| !nowLayout.isEnabled()) {
+					|| !nowLayout.isLayoutEnabled()) {
 				this.shouldHideLayout(nowLayout);
 			} else {
 				final Animation animation = AnimationUtils.loadAnimation(contentView.getContext(), nowLayout.getExitAnimation());
@@ -181,7 +181,7 @@ public class UILayoutControllerImpl implements UILayoutController, UILayoutState
 
 	private void shouldHideLayout(@NonNull UILayout nowLayout) {
 		final View contentView = nowLayout.getContentView();
-		if (LayoutType.Content.key == nowLayout.getKey()) {
+		if (LayoutType.Content.key == nowLayout.getLayoutKey()) {
 			contentView.setVisibility(View.INVISIBLE);
 		} else {
 			contentView.setVisibility(View.GONE);
@@ -261,7 +261,7 @@ public class UILayoutControllerImpl implements UILayoutController, UILayoutState
 	}
 
 	@Override
-	public UILayoutController restoreState(@NonNull Bundle savedInstanceState) {
+	public UILayoutController onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
 		final int curLayoutKey = savedInstanceState.getInt(KEY_CUR_LAYOUT_KEY, this.getCurLayoutKey());
 		this.mIsFirstRequestCompletedFlag = savedInstanceState.getBoolean(KEY_FIRST_REQUEST_COMPLETED_FLAG, this.mIsFirstRequestCompletedFlag);
 		this.mIsFirstLayoutCompletedFlag = savedInstanceState.getBoolean(KEY_FIRST_LAYOUT_COMPLETED_FLAG, this.mIsFirstLayoutCompletedFlag);
@@ -269,14 +269,14 @@ public class UILayoutControllerImpl implements UILayoutController, UILayoutState
 	}
 
 	@Override
-	public UILayoutController setShouldAsyncRefreshed(boolean shouldAsyncRefreshed) {
-		this.mIsShouldAsyncRefreshed = shouldAsyncRefreshed;
+	public UILayoutController setShouldRunWithAsync(boolean shouldRunWithAsync) {
+		this.mIsShouldRunWithAsync = shouldRunWithAsync;
 		return this;
 	}
 
 	@Override
-	public UILayoutController setShouldManualLayoutMode(boolean shouldManualLayoutMode) {
-		this.mIsShouldManualLayoutMode = shouldManualLayoutMode;
+	public UILayoutController setShouldAutoLayoutMode(boolean shouldAutoLayoutMode) {
+		this.mIsShouldAutoLayoutMode = shouldAutoLayoutMode;
 		return this;
 	}
 
@@ -306,13 +306,11 @@ public class UILayoutControllerImpl implements UILayoutController, UILayoutState
 
 	@Override
 	public UILayoutController setToolbarLayout(@NonNull View preView) {
-		final UILayout nowLayout = new UILayout.Builder(LayoutType.Toolbar.key)
-				.setLayoutWidth(ViewGroup.LayoutParams.MATCH_PARENT)
-				.setLayoutHeight(ViewGroup.LayoutParams.WRAP_CONTENT)
-				.setLayoutId(R.id.app_layout_toolbar_id)
+		ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+		return this.addLayoutInternal(new UILayout.Builder(LayoutType.Toolbar.key)
+				.setLayoutSpareId(R.id.app_layout_toolbar_id)
 				.setContentView(preView)
-				.build();
-		return this.addLayoutInternal(nowLayout);
+				.build(), layoutParams);
 	}
 
 	@Override
@@ -323,13 +321,15 @@ public class UILayoutControllerImpl implements UILayoutController, UILayoutState
 
 	@Override
 	public UILayoutController setContentLayout(@NonNull View preView) {
-		final UILayout nowLayout = new UILayout.Builder(LayoutType.Content.key)
+		ViewGroup.LayoutParams layoutParams = preView.getLayoutParams();
+		if (layoutParams == null) {
+			layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+		}
+		return this.addLayoutInternal(new UILayout.Builder(LayoutType.Content.key)
 				.setLayoutEnterAnimation(R.anim.anim_alpha_action_v)
-				.setLayoutId(R.id.app_layout_content_id)
+				.setLayoutSpareId(R.id.app_layout_content_id)
 				.setContentView(preView)
-				.setLayoutIndex(0)
-				.build();
-		return this.addLayoutInternal(nowLayout);
+				.build(), layoutParams);
 	}
 
 	@Override
@@ -340,14 +340,12 @@ public class UILayoutControllerImpl implements UILayoutController, UILayoutState
 
 	@Override
 	public UILayoutController setLoadingLayout(@NonNull View preView) {
-		final UILayout nowLayout = new UILayout.Builder(LayoutType.Loading.key)
+		ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+		return this.addLayoutInternal(new UILayout.Builder(LayoutType.Loading.key)
 				.setLayoutEnterAnimation(R.anim.anim_alpha_action_v)
-				.setLayoutWidth(ViewGroup.LayoutParams.MATCH_PARENT)
-				.setLayoutHeight(ViewGroup.LayoutParams.MATCH_PARENT)
-				.setLayoutId(R.id.app_layout_loading_id)
+				.setLayoutSpareId(R.id.app_layout_loading_id)
 				.setContentView(preView)
-				.build();
-		return this.addLayoutInternal(nowLayout);
+				.build(), layoutParams);
 	}
 
 	@Override
@@ -358,60 +356,67 @@ public class UILayoutControllerImpl implements UILayoutController, UILayoutState
 
 	@Override
 	public UILayoutController setErrorLayout(@NonNull View preView) {
-		final UILayout nowLayout = new UILayout.Builder(LayoutType.Error.key)
+		ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+		return this.addLayoutInternal(new UILayout.Builder(LayoutType.Error.key)
 				.setLayoutEnterAnimation(R.anim.anim_alpha_action_v)
-				.setLayoutWidth(ViewGroup.LayoutParams.MATCH_PARENT)
-				.setLayoutHeight(ViewGroup.LayoutParams.MATCH_PARENT)
-				.setLayoutId(R.id.app_layout_error_id)
+				.setLayoutSpareId(R.id.app_layout_error_id)
 				.setContentView(preView)
-				.build();
-		return this.addLayoutInternal(nowLayout);
-	}
-
-	@Override
-	public UILayoutController addLayoutInternal(int key, @LayoutRes int layoutId) {
-		final UILayout nowLayout = new UILayout.Builder(key).setContentView(layoutId).build();
-		return this.addLayoutInternal(nowLayout);
-	}
-
-	@Override
-	public UILayoutController addLayoutInternal(int key, @NonNull View preView) {
-		final UILayout nowLayout = new UILayout.Builder(key).setContentView(preView).build();
-		return this.addLayoutInternal(nowLayout);
+				.build(), layoutParams);
 	}
 
 	@Override
 	public UILayoutController addLayoutInternal(@NonNull UILayout layout) {
+		return this.addLayoutInternal(layout, -1);
+	}
+
+	@Override
+	public UILayoutController addLayoutInternal(@NonNull UILayout layout, int index) {
+		return this.addLayoutInternal(layout, index, null);
+	}
+
+	@Override
+	public UILayoutController addLayoutInternal(@NonNull UILayout layout, @NonNull ViewGroup.LayoutParams params) {
+		return this.addLayoutInternal(layout, -1, params);
+	}
+
+	@Override
+	public UILayoutController addLayoutInternal(@NonNull UILayout layout, int index, @Nullable ViewGroup.LayoutParams params) {
 		if (layout.ignoreLayoutDirectPreview()) {
-			return this.addViewInternal(layout);
+			return this.addViewInternal(layout, index, params);
 		}
-		final UILayout oldLayout = this.mLayoutPool.get(layout.getKey());
+		final UILayout oldLayout = this.mLayoutPool.get(layout.getLayoutKey());
 		final UILayout nowLayout = layout.inflate(this.mParentView);
 		this.removeViewInParent(nowLayout.getContentView());
 		if (oldLayout == null) {
-			this.mLayoutPool.put(nowLayout.getKey(), nowLayout);
+			this.mLayoutPool.put(nowLayout.getLayoutKey(), nowLayout);
 		} else {
-			this.mLayoutPool.replace(oldLayout.getKey(), oldLayout, nowLayout);
+			this.mLayoutPool.replace(oldLayout.getLayoutKey(), oldLayout, nowLayout);
 			// remove oldLayout
 			this.removeViewInParent(oldLayout.getContentView());
 			this.getViewController().gc(oldLayout.getContentView());
 		}
-		if ((nowLayout.getKey() == LayoutType.Toolbar.key
-				|| nowLayout.getKey() == LayoutType.Content.key
-				|| nowLayout.getKey() == this.getCurLayoutKey()) && nowLayout.isEnabled()) {
-			this.addViewInternal(nowLayout);
+		if ((nowLayout.getLayoutKey() == LayoutType.Toolbar.key
+				|| nowLayout.getLayoutKey() == LayoutType.Content.key
+				|| nowLayout.getLayoutKey() == this.getCurLayoutKey()) && nowLayout.isLayoutEnabled()) {
+			this.addViewInternal(nowLayout, index, params);
 		}
-		if (nowLayout.getKey() == LayoutType.Content.key
-				&& nowLayout.getKey() != this.getCurLayoutKey()) {
+		if (nowLayout.getLayoutKey() == LayoutType.Content.key
+				&& nowLayout.getLayoutKey() != this.getCurLayoutKey()) {
 			this.shouldHideLayout(nowLayout);
 		}
 		return this.requestLayout();
 	}
 
 	private UILayoutController addViewInternal(@NonNull UILayout nowLayout) {
-		this.mParentView.addViewInternal(nowLayout.getContentView(),
-				nowLayout.getIndex(),
-				nowLayout.getLayoutParams());
+		return this.addViewInternal(nowLayout, -1, null);
+	}
+
+	private UILayoutController addViewInternal(@NonNull UILayout nowLayout, int index, @Nullable ViewGroup.LayoutParams params) {
+		if (LayoutType.Content.key == nowLayout.getLayoutKey()) {
+			this.mParentView.addViewInternal(nowLayout.getContentView(), 0, params);
+		} else {
+			this.mParentView.addViewInternal(nowLayout.getContentView(), index, params);
+		}
 		return this.requestLayout();
 	}
 
@@ -643,10 +648,12 @@ public class UILayoutControllerImpl implements UILayoutController, UILayoutState
 	@Override
 	public <T extends View> T findViewById(@IdRes int id) {
 		View preView = this.mParentView.findViewById(id);
-		int index = 0;
-		while (preView == null && index < this.mLayoutPool.size()) {
-			preView = this.mLayoutPool.valueAt(index).getContentView().findViewById(id);
-			index++;
+		for (int index = this.mLayoutPool.size() - 1; index >= 0 && preView == null; index--) {
+			UILayout uiLayout = this.mLayoutPool.valueAt(index);
+			if (uiLayout == null) {
+				continue;
+			}
+			preView = uiLayout.getContentView().findViewById(id);
 		}
 		return (T) preView;
 	}
@@ -658,7 +665,7 @@ public class UILayoutControllerImpl implements UILayoutController, UILayoutState
 
 	@Override
 	public void onPostExecute(@Nullable Object params) {
-		if (!this.mIsShouldManualLayoutMode) {
+		if (this.mIsShouldAutoLayoutMode) {
 			this.layoutOfContent(null, LAYOUT_WAIT_DELAY_TIME);
 		}
 	}
@@ -695,7 +702,7 @@ public class UILayoutControllerImpl implements UILayoutController, UILayoutState
 
 		@Override
 		public void onAnimationEnd(Animation animation) {
-			onLayoutChanged(this.nowLayout.getKey(), this.params);
+			onLayoutChanged(this.nowLayout.getLayoutKey(), this.params);
 		}
 	}
 

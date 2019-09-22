@@ -1,4 +1,4 @@
-package androidx.sframe.compat;
+package androidx.sframe.utils;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;

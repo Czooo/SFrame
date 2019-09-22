@@ -5,7 +5,8 @@ import android.view.View;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
-import androidx.sframe.ViewModelProviders;
+import androidx.annotation.Nullable;
+import androidx.sframe.helper.ViewModelProviders;
 import androidx.sframe.ui.controller.UILayoutController;
 import androidx.sframe.ui.controller.UIToolbarController;
 import androidx.sframe.ui.controller.UIViewController;
@@ -23,20 +24,19 @@ public abstract class UIToolbarMethod extends ViewModel implements UIToolbarCont
 		this.mLayoutController = layoutController;
 	}
 
-	@Override
+	@NonNull
 	public final Context getContext() {
 		return this.getViewController().getContext();
 	}
 
-	@Override
-	public final <V extends View> V findViewById(@IdRes int id) {
-		return this.getViewController().findViewById(id);
-	}
-
 	@NonNull
-	@Override
 	public final UIViewMethod<View> findAt(@IdRes int id) {
 		return this.getViewController().findAt(id);
+	}
+
+	@Nullable
+	public final <V extends View> V findViewById(@IdRes int id) {
+		return this.getViewController().findViewById(id);
 	}
 
 	@NonNull

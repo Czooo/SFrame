@@ -1,30 +1,26 @@
 package androidx.sframe.widget.adapter;
 
 import android.os.Bundle;
-import android.text.TextUtils;
 
+import java.io.Serializable;
+
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 /**
  * Author create by ok on 2019/2/6
  * Email : ok@163.com.
  */
-public class FragmentPager {
+public class FragmentPager implements Serializable {
 
-	private final int iconResId;
 	private final String title;
-	private final Bundle data;
+	private final Bundle args;
 	private final Class<? extends Fragment> fragmentClass;
 
-	FragmentPager(Builder builder) {
-		this.iconResId = builder.iconResId;
+	protected FragmentPager(@NonNull Builder builder) {
 		this.title = builder.title;
-		this.data = builder.data;
+		this.args = builder.args;
 		this.fragmentClass = builder.fragmentClass;
-	}
-
-	public int getIconResId() {
-		return iconResId;
 	}
 
 	public final String getTitle() {
@@ -32,7 +28,7 @@ public class FragmentPager {
 	}
 
 	public final Bundle getData() {
-		return data;
+		return args;
 	}
 
 	public final Class<? extends Fragment> getFragmentClass() {
@@ -41,18 +37,12 @@ public class FragmentPager {
 
 	public static class Builder {
 
-		private int iconResId;
 		private String title;
-		private Bundle data;
+		private Bundle args;
 		private Class<? extends Fragment> fragmentClass;
 
 		public Builder(Class<? extends Fragment> fragmentClass) {
 			this.fragmentClass = fragmentClass;
-		}
-
-		public Builder setIconResId(int iconResId) {
-			this.iconResId = iconResId;
-			return this;
 		}
 
 		public Builder setTitle(String title) {
@@ -60,17 +50,14 @@ public class FragmentPager {
 			return this;
 		}
 
-		public Builder setData(Bundle data) {
-			this.data = data;
+		public Builder setData(Bundle args) {
+			this.args = args;
 			return this;
 		}
 
 		public FragmentPager build() {
-			if (TextUtils.isEmpty(title)) {
-				title = fragmentClass.getName();
-			}
-			if (null == data) {
-				data = new Bundle();
+			if (this.args == null) {
+				this.args = new Bundle();
 			}
 			return new FragmentPager(this);
 		}

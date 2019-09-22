@@ -5,7 +5,6 @@ import android.os.Build;
 import java.io.IOException;
 
 import androidx.annotation.NonNull;
-import androidx.sframe.compat.CoreCompat;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -28,8 +27,8 @@ public class HttpHeaderInterceptor implements Interceptor {
 				.header("X-Oc-TimeStamp", String.valueOf(System.currentTimeMillis()))
 				.header("X-Oc-Device-IModel", Build.MODEL)
 				.header("X-Oc-Os-IModel", "Android " + Build.VERSION.RELEASE)
-				.header("X-Oc-App-Bundle", CoreCompat.getPackageName())
-				.header("X-Oc-App-Version", CoreCompat.getVersionName())
+//				.header("X-Oc-App-Bundle", SystemCompat.getPackageName())
+//				.header("X-Oc-App-Version", SystemCompat.getVersionName())
 				.build();
 //		return chain.proceed(request.newBuilder()
 //				.header("X-Oc-TimeStamp", String.valueOf(System.currentTimeMillis()))

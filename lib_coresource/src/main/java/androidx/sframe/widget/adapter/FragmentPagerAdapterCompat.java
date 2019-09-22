@@ -43,7 +43,7 @@ public class FragmentPagerAdapterCompat extends androidx.demon.widget.adapter.Fr
 
 	@Override
 	public int getItemCount() {
-		return this.getDataSourceController().size();
+		return this.getDataSourceController().getDataSourceCount();
 	}
 
 	@NonNull

@@ -2,140 +2,142 @@ package androidx.sframe.ui.controller.impl;
 
 import java.util.Collection;
 
+import androidx.annotation.NonNull;
 import androidx.sframe.ui.controller.DataSourceController;
 import androidx.sframe.ui.controller.DataSourceNotifyController;
 import androidx.sframe.ui.controller.DataSourceNotifyController2;
-import androidx.sframe.widget.adapter.RecyclerChildAdapter;
+import androidx.sframe.widget.adapter.RecyclerAdapter;
 
 /**
- * Author create by ok on 2019/2/9
- * Email : ok@163.com.
+ * @Author create by Zoran on 2019-09-12
+ * @Email : 171905184@qq.com
+ * @Description :
  */
-public class DataSourceNotifyControllerImpl2<DataType, ParentDataType> extends DataSourceControllerImpl<DataType> implements DataSourceNotifyController2<RecyclerChildAdapter<DataType, ParentDataType>, DataType> {
+public class DataSourceNotifyControllerImpl2<DataSource> extends DataSourceControllerImpl<DataSource> implements DataSourceNotifyController2<RecyclerAdapter<DataSource>, DataSource> {
 
-	private final RecyclerChildAdapter<DataType, ParentDataType> mAdapter;
+	private final RecyclerAdapter<DataSource> mAdapter;
 
-	public DataSourceNotifyControllerImpl2(RecyclerChildAdapter<DataType, ParentDataType> adapter) {
+	public DataSourceNotifyControllerImpl2(@NonNull RecyclerAdapter<DataSource> adapter) {
 		this.mAdapter = adapter;
 	}
 
 	@Override
-	public DataSourceController<DataType> addDataSourceList(Collection<? extends DataType> dataTypeList, int index) {
-		super.addDataSourceList(dataTypeList, index);
-		return notifyDataSetChanged();
-	}
-
-	@Override
-	public DataSourceController<DataType> removeDataSource(int position) {
-		super.removeDataSource(position);
-		notifyItemRemoved(position);
-		notifyItemRangeChanged(position, size() - position);
+	public DataSourceController<DataSource> addDataSource(@NonNull Collection<? extends DataSource> dataSources, int index) {
+		int positionStart = this.getDataSourceCount();
+		if (index >= 0 && index <= positionStart) {
+			positionStart = index;
+		}
+		super.addDataSource(dataSources, index);
+		this.notifyItemRangeInserted(positionStart, dataSources.size());
+		this.notifyItemRangeChanged(positionStart, this.getDataSourceCount() - positionStart);
 		return this;
 	}
 
 	@Override
-	public DataSourceController<DataType> removeDataSource(Collection<? extends DataType> dataTypeList) {
-		super.removeDataSource(dataTypeList);
-		return notifyDataSetChanged();
-	}
-
-	@Override
-	public DataSourceController<DataType> removeAll() {
+	public DataSourceController<DataSource> removeAll() {
+		int positionStart = 0;
+		int removeItemCount = this.getDataSourceCount();
 		super.removeAll();
-		return notifyDataSetChanged();
+		this.notifyItemRangeRemoved(positionStart, removeItemCount);
+		this.notifyItemRangeChanged(positionStart, this.getDataSourceCount() - positionStart);
+		return this;
 	}
 
 	@Override
-	public DataSourceController<DataType> moveDataSourceOf(int fromPosition, int toPosition) {
+	public DataSourceController<DataSource> removeDataSource(int position) {
+		super.removeDataSource(position);
+		this.notifyItemRemoved(position);
+		this.notifyItemRangeChanged(position, this.getDataSourceCount() - position);
+		return this;
+	}
+
+	@Override
+	public DataSourceController<DataSource> moveDataSourceOf(int fromPosition, int toPosition) {
 		super.moveDataSourceOf(fromPosition, toPosition);
 		if (fromPosition != toPosition) {
-			notifyItemMoved(fromPosition, toPosition);
-			notifyItemChanged(fromPosition);
-			notifyItemChanged(toPosition);
+			this.notifyItemMoved(fromPosition, toPosition);
+			this.notifyItemChanged(fromPosition);
+			this.notifyItemChanged(toPosition);
 		}
 		return this;
 	}
 
 	@Override
-	public DataSourceController<DataType> markerAll() {
-		super.markerAll();
-		notifyItemRangeChanged(0, size());
+	public boolean switchedSelectStateByAll() {
+		boolean state = super.switchedSelectStateByAll();
+		int positionStart = 0;
+		this.notifyItemRangeChanged(positionStart, this.getDataSourceCount() - positionStart);
+		return state;
+	}
+
+	@Override
+	public boolean switchedSelectStateOf(@NonNull DataSource dataSource) {
+		boolean state = super.switchedSelectStateOf(dataSource);
+		this.notifyItemChanged(this.indexOf(dataSource));
+		return state;
+	}
+
+	@Override
+	public DataSourceNotifyController2<RecyclerAdapter<DataSource>, DataSource> notifyItemRemoved(int position) {
+		return this.notifyItemRangeRemoved(position, 1);
+	}
+
+	@Override
+	public DataSourceNotifyController2<RecyclerAdapter<DataSource>, DataSource> notifyItemRangeRemoved(int positionStart, int itemCount) {
+		this.getDataSourceAdapter().notifyItemRangeRemoved(this.toRealPosition(positionStart), itemCount);
 		return this;
 	}
 
 	@Override
-	public DataSourceController<DataType> unmarkerAll() {
-		super.unmarkerAll();
-		notifyItemRangeChanged(0, size());
+	public DataSourceNotifyController2<RecyclerAdapter<DataSource>, DataSource> notifyItemChanged(int position) {
+		return this.notifyItemRangeChanged(position, 1);
+	}
+
+	@Override
+	public DataSourceNotifyController2<RecyclerAdapter<DataSource>, DataSource> notifyItemRangeChanged(int positionStart, int itemCount) {
+		return this.notifyItemRangeChanged(positionStart, itemCount, null);
+	}
+
+	@Override
+	public DataSourceNotifyController2<RecyclerAdapter<DataSource>, DataSource> notifyItemRangeChanged(int positionStart, int itemCount, Object payload) {
+		this.getDataSourceAdapter().notifyItemRangeChanged(this.toRealPosition(positionStart), itemCount, payload);
 		return this;
 	}
 
 	@Override
-	public boolean marker(DataType dataType) {
-		boolean isMarker = super.marker(dataType);
-		notifyItemChanged(indexOf(dataType));
-		return isMarker;
+	public DataSourceNotifyController2<RecyclerAdapter<DataSource>, DataSource> notifyItemInserted(int position) {
+		return this.notifyItemRangeInserted(position, 1);
 	}
 
 	@Override
-	public boolean singleMarker(DataType dataType) {
-		boolean isMarker = super.singleMarker(dataType);
-		notifyItemChanged(indexOf(dataType));
-		return isMarker;
-	}
-
-	@Override
-	public final DataSourceNotifyController2<RecyclerChildAdapter<DataType, ParentDataType>, DataType> notifyItemRemoved(int position) {
-		return notifyItemRangeRemoved(position, 1);
-	}
-
-	@Override
-	public final DataSourceNotifyController2<RecyclerChildAdapter<DataType, ParentDataType>, DataType> notifyItemRangeRemoved(int positionStart, int itemCount) {
-		getDataSourceAdapter().notifyItemRangeRemoved(positionStart, itemCount);
+	public DataSourceNotifyController2<RecyclerAdapter<DataSource>, DataSource> notifyItemRangeInserted(int positionStart, int itemCount) {
+		this.getDataSourceAdapter().notifyItemRangeInserted(this.toRealPosition(positionStart), itemCount);
 		return this;
 	}
 
 	@Override
-	public final DataSourceNotifyController2<RecyclerChildAdapter<DataType, ParentDataType>, DataType> notifyItemChanged(int position) {
-		return notifyItemRangeChanged(position, 1);
-	}
-
-	@Override
-	public final DataSourceNotifyController2<RecyclerChildAdapter<DataType, ParentDataType>, DataType> notifyItemRangeChanged(int positionStart, int itemCount) {
-		return notifyItemRangeChanged(positionStart, itemCount, null);
-	}
-
-	@Override
-	public final DataSourceNotifyController2<RecyclerChildAdapter<DataType, ParentDataType>, DataType> notifyItemRangeChanged(int positionStart, int itemCount, Object payload) {
-		getDataSourceAdapter().notifyItemRangeChanged(positionStart, itemCount, payload);
+	public DataSourceNotifyController2<RecyclerAdapter<DataSource>, DataSource> notifyItemMoved(int fromPosition, int toPosition) {
+		this.getDataSourceAdapter().notifyItemMoved(this.toRealPosition(fromPosition), this.toRealPosition(toPosition));
 		return this;
 	}
 
 	@Override
-	public final DataSourceNotifyController2<RecyclerChildAdapter<DataType, ParentDataType>, DataType> notifyItemInserted(int position) {
-		return notifyItemRangeInserted(position, 1);
-	}
-
-	@Override
-	public final DataSourceNotifyController2<RecyclerChildAdapter<DataType, ParentDataType>, DataType> notifyItemRangeInserted(int positionStart, int itemCount) {
-		getDataSourceAdapter().notifyItemRangeInserted(positionStart, itemCount);
+	public DataSourceNotifyController<RecyclerAdapter<DataSource>, DataSource> notifyDataSetChanged() {
+		this.getDataSourceAdapter().notifyDataSetChanged();
 		return this;
 	}
 
+	@NonNull
 	@Override
-	public final DataSourceNotifyController2<RecyclerChildAdapter<DataType, ParentDataType>, DataType> notifyItemMoved(int fromPosition, int toPosition) {
-		getDataSourceAdapter().notifyItemMoved(fromPosition, toPosition);
-		return this;
+	public final RecyclerAdapter<DataSource> getDataSourceAdapter() {
+		return this.mAdapter;
 	}
 
-	@Override
-	public final DataSourceNotifyController<RecyclerChildAdapter<DataType, ParentDataType>, DataType> notifyDataSetChanged() {
-		getDataSourceAdapter().notifyDataSetChanged();
-		return this;
-	}
-
-	@Override
-	public RecyclerChildAdapter<DataType, ParentDataType> getDataSourceAdapter() {
-		return mAdapter;
+	private int toRealPosition(int position) {
+		int realPosition = position;
+		if (this.getDataSourceAdapter().isShouldHeaderEnabled()) {
+			realPosition += this.getDataSourceAdapter().getHeaderRecyclerAdapter().getItemCount();
+		}
+		return realPosition;
 	}
 }

@@ -2,8 +2,6 @@ package com.demon.app.ui.dialog;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import com.demon.app.R;
@@ -14,11 +12,10 @@ import java.util.List;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.demon.widget.RefreshMode;
-import androidx.sframe.compat.DataCompat;
+import androidx.sframe.utils.DataCompat;
 import androidx.sframe.helper.PageDragHelper;
 import androidx.sframe.ui.abs.AbsListPopupWindow;
 import androidx.sframe.ui.controller.AppPageController;
-import androidx.sframe.ui.controller.RecyclerAdapterController;
 import androidx.sframe.widget.adapter.RecyclerAdapter;
 
 /**
@@ -38,13 +35,14 @@ public class TestListPopupWindow extends AbsListPopupWindow<String> {
 		super(hostPageController);
 	}
 
+	@NonNull
 	@Override
-	public View onCreateItemView(RecyclerAdapterController<String> adapterController, LayoutInflater inflater, ViewGroup parent, int itemViewType) {
-		return inflater.inflate(android.R.layout.simple_list_item_1, parent, false);
+	public RecyclerAdapter.ViewHolder<String> onCreateViewHolder(@NonNull RecyclerAdapter<String> adapter, @NonNull ViewGroup parent, int itemViewType) {
+		return RecyclerAdapter.createViewHolder(android.R.layout.simple_list_item_1, parent);
 	}
 
 	@Override
-	public void onBindItemView(RecyclerAdapter.ViewHolder<String> holder, int position, @Nullable List<Object> payloads) {
+	public void onBindViewHolder(@NonNull RecyclerAdapter.ViewHolder<String> holder, int position, @Nullable List<Object> payloads) {
 		holder.getViewController()
 				.findAt(android.R.id.text1)
 				.setBackgroundColor(colors[position % colors.length])
@@ -84,7 +82,7 @@ public class TestListPopupWindow extends AbsListPopupWindow<String> {
 
 					@Override
 					public void run() {
-						getObjectListController().addDataSourceList(models);
+						getObjectListController().addDataSource(models);
 					}
 				}, 2000);
 	}

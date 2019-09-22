@@ -29,7 +29,7 @@ public class PagerAdapter<DataSource> extends androidx.viewpager.widget.PagerAda
 
 	@Override
 	public int getCount() {
-		return this.getDataSourceController().size();
+		return this.getDataSourceController().getDataSourceCount();
 	}
 
 	@NonNull

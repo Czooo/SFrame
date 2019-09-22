@@ -7,8 +7,8 @@ import com.demon.app.R;
 
 import androidx.annotation.Nullable;
 import androidx.sframe.annotation.RunWithAsync;
-import androidx.sframe.compat.LogCompat;
 import androidx.sframe.ui.abs.AbsActivity;
+import androidx.sframe.utils.LoggerCompat;
 
 /**
  * Author create by ok on 2019-06-14
@@ -28,13 +28,12 @@ public class TestActivity extends AbsActivity {
 				.getToolbarMethod()
 				.setPopEnabled(true)
 				.setTitle("TestActivity");
-
 		this.setResult(Activity.RESULT_OK);
 	}
 
 	@RunWithAsync
 	@Override
 	public void onPageDataSourceChanged(@Nullable Object params) {
-		LogCompat.e("运行在 ：" + Thread.currentThread());
+		LoggerCompat.e("运行在 ：" + Thread.currentThread());
 	}
 }

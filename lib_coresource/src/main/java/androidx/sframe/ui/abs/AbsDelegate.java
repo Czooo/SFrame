@@ -1,6 +1,6 @@
 package androidx.sframe.ui.abs;
 
-import androidx.sframe.ui.controller.RecyclerAdapterController;
+import androidx.annotation.NonNull;
 import androidx.sframe.widget.adapter.RecyclerAdapter;
 
 /**
@@ -10,7 +10,7 @@ import androidx.sframe.widget.adapter.RecyclerAdapter;
 public abstract class AbsDelegate<DataSource> implements RecyclerAdapter.Delegate<DataSource> {
 
 	@Override
-	public int getItemViewType(RecyclerAdapterController<DataSource> adapterController, int position) {
+	public int getItemViewType(@NonNull RecyclerAdapter<DataSource> adapter, int position) {
 		return 0;
 	}
 }

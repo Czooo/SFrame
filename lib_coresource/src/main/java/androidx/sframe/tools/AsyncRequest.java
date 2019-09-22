@@ -2,8 +2,8 @@ package androidx.sframe.tools;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.sframe.compat.LogCompat;
-import androidx.sframe.compat.RxCompat;
+import androidx.sframe.utils.RxCompat;
+import androidx.sframe.utils.LoggerCompat;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
@@ -50,7 +50,7 @@ public final class AsyncRequest {
 				}, new Consumer<Throwable>() {
 					@Override
 					public void accept(Throwable throwable) throws Exception {
-						LogCompat.e(throwable);
+						LoggerCompat.e(throwable);
 					}
 				});
 	}

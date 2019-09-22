@@ -1,77 +1,74 @@
 package androidx.sframe.ui.controller;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
- * Author create by ok on 2019/2/9
- * Email : ok@163.com.
+ * @Author create by Zoran on 2019-09-12
+ * @Email : 171905184@qq.com
+ * @Description :
  */
-public interface DataSourceController<DataType> {
+public interface DataSourceController<DataSource> {
 
-	DataSourceController<DataType> setDataSource(DataType dataType);
+	DataSourceController<DataSource> setDataSource(@NonNull DataSource dataSource);
 
-	DataSourceController<DataType> setDataSource(DataType dataType, int index);
+	DataSourceController<DataSource> setDataSource(@NonNull Collection<? extends DataSource> dataSources);
 
-	DataSourceController<DataType> setDataSourceList(Collection<? extends DataType> dataTypeList);
+	DataSourceController<DataSource> addDataSource(@NonNull DataSource dataSource);
 
-	DataSourceController<DataType> setDataSourceList(Collection<? extends DataType> dataTypeList, int index);
+	DataSourceController<DataSource> addDataSource(@NonNull DataSource dataSource, int index);
 
-	DataSourceController<DataType> addDataSource(DataType dataType);
+	DataSourceController<DataSource> addDataSource(@NonNull Collection<? extends DataSource> dataSources);
 
-	DataSourceController<DataType> addDataSource(DataType dataType, int index);
+	DataSourceController<DataSource> addDataSource(@NonNull Collection<? extends DataSource> dataSources, int index);
 
-	DataSourceController<DataType> addDataSourceList(Collection<? extends DataType> dataTypeList);
+	DataSourceController<DataSource> removeAll();
 
-	DataSourceController<DataType> addDataSourceList(Collection<? extends DataType> dataTypeList, int index);
+	DataSourceController<DataSource> removeDataSource(int position);
 
-	DataSourceController<DataType> removeDataSource(int position);
+	DataSourceController<DataSource> removeDataSource(@Nullable DataSource dataSource);
 
-	DataSourceController<DataType> removeDataSource(DataType dataType);
+	DataSourceController<DataSource> moveDataSourceOf(int fromPosition, int toPosition);
 
-	DataSourceController<DataType> removeDataSource(Collection<? extends DataType> dataTypeList);
+	DataSourceController<DataSource> moveDataSourceToStart(int fromPosition);
 
-	DataSourceController<DataType> removeAll();
+	DataSourceController<DataSource> moveDataSourceToEnd(int fromPosition);
 
-	DataSourceController<DataType> moveDataSourceOf(int fromPosition, int toPosition);
+	@NonNull
+	ArrayList<DataSource> getDataSourceList();
 
-	DataSourceController<DataType> moveDataSourceToStart(int fromPosition);
+	@NonNull
+	ArrayList<DataSource> getSelectedDataSourceList();
 
-	DataSourceController<DataType> moveDataSourceToEnd(int fromPosition);
+	@NonNull
+	DataSource findDataSourceByPosition(int position);
 
-	DataSourceController<DataType> markerAll();
+	int getDataSourceCount();
 
-	DataSourceController<DataType> unmarkerAll();
+	int indexOf(@Nullable DataSource dataSource);
 
-	List<DataType> getAllMarkerDataSource();
+	int lastIndexOf(@Nullable DataSource dataSource);
 
-	List<DataType> getAllDataSource();
-
-	List<DataType> clone();
-
-	DataType findDataSourceByPosition(int position);
-
-	int size();
-
-	int indexOf(DataType dataType);
-
-	int lastIndexOf(DataType dataType);
+	boolean contains(@Nullable DataSource dataSource);
 
 	boolean isEmpty();
 
-	boolean contains(DataType dataType);
+	boolean switchedSelectStateByAll();
 
-	boolean containsList(Collection<? extends DataType> dataTypeList);
+	boolean switchedSelectStateOf(int position);
 
-	boolean marker(int position);
+	boolean switchedSelectStateOf(@NonNull DataSource dataSource);
 
-	boolean marker(DataType dataType);
+	boolean switchedSingleSelectStateOf(int position);
 
-	boolean singleMarker(int position);
+	boolean switchedSingleSelectStateOf(@NonNull DataSource dataSource);
 
-	boolean singleMarker(DataType dataType);
+	boolean isSelectedStateByAll();
 
-	boolean isMarker(int position);
+	boolean isSelectedState(int position);
 
-	boolean isMarker(DataType dataType);
+	boolean isSelectedState(@NonNull DataSource dataSource);
 }

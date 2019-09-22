@@ -2,192 +2,224 @@ package androidx.sframe.widget.adapter;
 
 import android.database.Observable;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.List;
 
+import androidx.annotation.CallSuper;
+import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.sframe.ui.controller.DataSourceNotifyController;
-import androidx.sframe.ui.controller.DataSourceNotifyController2;
-import androidx.sframe.ui.controller.RecyclerAdapterController;
-import androidx.sframe.ui.controller.impl.DataSourceNotifyControllerImpl2;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.sframe.ui.controller.DataSourceNotifyController2;
+import androidx.sframe.ui.controller.impl.DataSourceNotifyControllerImpl3;
 
 /**
- * Author create by ok on 2019/3/27
- * Email : ok@163.com.
+ * @Author create by Zoran on 2019-09-12
+ * @Email : 171905184@qq.com
+ * @Description :
  */
 public class RecyclerChildAdapter<DataSource, ParentDataSource> {
 
-	public static <DataSource, ParentDataSource> RecyclerChildAdapter<DataSource, ParentDataSource> create(RecyclerAdapterController.ChildDelegate<DataSource, ParentDataSource> dataSourceDelegate) {
-		return new RecyclerChildAdapter<>(dataSourceDelegate);
+	public static <DataSource, ParentDataSource> RecyclerChildAdapter<DataSource, ParentDataSource> create(@NonNull Delegate<DataSource, ParentDataSource> delegate) {
+		return new RecyclerChildAdapter<>(delegate);
 	}
 
-	private RecyclerAdapterController.OnChildItemClickListener<DataSource, ParentDataSource> mItemClickListener;
-	private RecyclerAdapterController.OnChildItemTouchListener<DataSource, ParentDataSource> mItemTouchListener;
-	private RecyclerAdapterController.OnChildItemLongClickListener<DataSource, ParentDataSource> mItemLongClickListener;
+	public static <DataSource, ParentDataSource> ViewHolder<DataSource, ParentDataSource> createViewHolder(@LayoutRes int layoutId, @NonNull ViewGroup parent) {
+		return RecyclerChildAdapter.createViewHolder(LayoutInflater.from(parent.getContext()).inflate(layoutId, parent, false));
+	}
 
-	private final RecyclerAdapterController.ChildDelegate<DataSource, ParentDataSource> mDataSourceDelegate;
+	public static <DataSource, ParentDataSource> ViewHolder<DataSource, ParentDataSource> createViewHolder(@NonNull View itemView) {
+		return new ViewHolder<>(itemView);
+	}
 
 	private final AdapterDataObservable mAdapterDataObservable = new AdapterDataObservable();
 
-	private final DataSourceNotifyController2<RecyclerChildAdapter<DataSource, ParentDataSource>, DataSource> mDataSourceNotifyController;
+	private RecyclerAdapter<ParentDataSource> mRecyclerAdapter;
+	private Delegate<DataSource, ParentDataSource> mDelegate;
+
+	private DataSourceNotifyController2<RecyclerChildAdapter<DataSource, ParentDataSource>, DataSource> mDataSourceController;
+	private OnItemClickListener<DataSource, ParentDataSource> mOnItemClickListener;
+	private OnItemLongClickListener<DataSource, ParentDataSource> mOnItemLongClickListener;
 
 	public RecyclerChildAdapter() {
 		this(null);
 	}
 
-	public RecyclerChildAdapter(RecyclerAdapterController.ChildDelegate<DataSource, ParentDataSource> dataSourceDelegate) {
-		this.mDataSourceDelegate = dataSourceDelegate;
-		this.mDataSourceNotifyController = new DataSourceNotifyControllerImpl2<>(this);
+	public RecyclerChildAdapter(@Nullable Delegate<DataSource, ParentDataSource> delegate) {
+		this.mDelegate = delegate;
 	}
 
 	public final void registerAdapterDataObserver(RecyclerView.AdapterDataObserver observer) {
-		mAdapterDataObservable.registerObserver(observer);
+		this.mAdapterDataObservable.registerObserver(observer);
 	}
 
 	public final void unregisterAdapterDataObserver(RecyclerView.AdapterDataObserver observer) {
-		mAdapterDataObservable.unregisterObserver(observer);
+		this.mAdapterDataObservable.unregisterObserver(observer);
 	}
 
 	public final void notifyDataSetChanged() {
-		mAdapterDataObservable.notifyChanged();
+		this.mAdapterDataObservable.notifyChanged();
 	}
 
 	public final void notifyItemRangeRemoved(int positionStart, int itemCount) {
-		mAdapterDataObservable.notifyItemRangeRemoved(positionStart, itemCount);
+		this.mAdapterDataObservable.notifyItemRangeRemoved(positionStart, itemCount);
 	}
 
 	public final void notifyItemRangeChanged(int positionStart, int itemCount, Object payload) {
-		mAdapterDataObservable.notifyItemRangeChanged(positionStart, itemCount, payload);
+		this.mAdapterDataObservable.notifyItemRangeChanged(positionStart, itemCount, payload);
 	}
 
 	public final void notifyItemRangeInserted(int positionStart, int itemCount) {
-		mAdapterDataObservable.notifyItemRangeInserted(positionStart, itemCount);
+		this.mAdapterDataObservable.notifyItemRangeInserted(positionStart, itemCount);
 	}
 
 	public final void notifyItemMoved(int fromPosition, int toPosition) {
-		mAdapterDataObservable.notifyItemMoved(fromPosition, toPosition);
+		this.mAdapterDataObservable.notifyItemMoved(fromPosition, toPosition);
 	}
 
-	public RecyclerChildAdapter<DataSource, ParentDataSource> setOnItemClickListener(RecyclerAdapterController.OnChildItemClickListener<DataSource, ParentDataSource> listener) {
-		this.mItemClickListener = listener;
-		return this;
+	@CallSuper
+	public void onAttachedToRecyclerAdapter(@NonNull RecyclerAdapter<ParentDataSource> adapter) {
+		this.mRecyclerAdapter = adapter;
 	}
 
-	public RecyclerChildAdapter<DataSource, ParentDataSource> setOnItemLongClickListener(RecyclerAdapterController.OnChildItemLongClickListener<DataSource, ParentDataSource> listener) {
-		this.mItemLongClickListener = listener;
-		return this;
+	@CallSuper
+	public void onDetachedToRecyclerAdapter(@NonNull RecyclerAdapter<ParentDataSource> adapter) {
+		this.mRecyclerAdapter = null;
 	}
 
-	public RecyclerChildAdapter<DataSource, ParentDataSource> setOnItemTouchListener(RecyclerAdapterController.OnChildItemTouchListener<DataSource, ParentDataSource> listener) {
-		this.mItemTouchListener = listener;
-		return this;
-	}
-
-	public final DataSourceNotifyController2<RecyclerChildAdapter<DataSource, ParentDataSource>, DataSource> getDataSourceController() {
-		return mDataSourceNotifyController;
-	}
-
-	public final DataSource findDataSourceByPosition(int position) {
-		return getDataSourceController().findDataSourceByPosition(position);
-	}
-
-	public final int getItemCount() {
-		return getDataSourceController().size();
-	}
-
-	public int getItemViewType(RecyclerAdapterController<ParentDataSource> recyclerAdapterController, int position) {
-		if (this.mDataSourceDelegate != null) {
-			return this.mDataSourceDelegate.getItemViewType(recyclerAdapterController, this, position);
-		}
-		return 0;
-	}
-
-	public ViewHolder<DataSource, ParentDataSource> onCreateViewHolder(RecyclerAdapterController<ParentDataSource> recyclerAdapterController, @NonNull ViewGroup viewGroup, int itemViewType) {
-		if (this.mDataSourceDelegate != null) {
-			final View itemView = this.mDataSourceDelegate.onCreateItemView(recyclerAdapterController, this, LayoutInflater.from(viewGroup.getContext()), viewGroup, itemViewType);
-			return new ViewHolder<>(recyclerAdapterController, this, viewGroup, itemView);
+	@CallSuper
+	public ViewHolder<DataSource, ParentDataSource> onCreateViewHolder(@NonNull ViewGroup parent, int itemViewType) {
+		if (this.mDelegate != null) {
+			return this.mDelegate.onCreateViewHolder(this, parent, itemViewType);
 		}
 		return null;
 	}
 
-	public void onBindViewHolder(RecyclerAdapterController<ParentDataSource> recyclerAdapterController, @NonNull ViewHolder<DataSource, ParentDataSource> dataSourceViewHolder, int position, @Nullable List<Object> payloads) {
-		if (this.mDataSourceDelegate != null) {
-			this.mDataSourceDelegate.onBindItemView(dataSourceViewHolder, position, payloads);
-		}
-		this.onBindViewHolder(recyclerAdapterController, dataSourceViewHolder, position);
-	}
-
-	public void onBindViewHolder(RecyclerAdapterController<ParentDataSource> recyclerAdapterController, @NonNull ViewHolder<DataSource, ParentDataSource> dataSourceViewHolder, int position) {
-		// not-op
-	}
-
-	public static final class ViewHolder<ChildDataSource, ParentDataSource> extends RecyclerAdapter.ViewHolder<ParentDataSource> {
-
-		private final RecyclerChildAdapter<ChildDataSource, ParentDataSource> mRecyclerChildAdapter;
-
-		public ViewHolder(@NonNull RecyclerAdapterController<ParentDataSource> recyclerAdapterController, RecyclerChildAdapter<ChildDataSource, ParentDataSource> recyclerChildAdapter, @NonNull ViewGroup parent, @NonNull View itemView) {
-			super(recyclerAdapterController, parent, itemView);
-			this.mRecyclerChildAdapter = recyclerChildAdapter;
-		}
-
-		public final ChildDataSource findChildDataSourceByPosition(int position) {
-			return getChildDataSourceNotifyController().findDataSourceByPosition(position);
-		}
-
-		public final DataSourceNotifyController<RecyclerChildAdapter<ChildDataSource, ParentDataSource>, ChildDataSource> getChildDataSourceNotifyController() {
-			return getRecyclerChildAdapter().getDataSourceController();
-		}
-
-		public final RecyclerChildAdapter<ChildDataSource, ParentDataSource> getRecyclerChildAdapter() {
-			return mRecyclerChildAdapter;
+	@CallSuper
+	public void onBindViewHolder(@NonNull ViewHolder<DataSource, ParentDataSource> holder, int position, @Nullable List<Object> payloads) {
+		if (this.mDelegate != null) {
+			this.mDelegate.onBindViewHolder(holder, position, payloads);
 		}
 	}
 
-	public void ensureLayoutListener(RecyclerChildAdapter.ViewHolder<DataSource, ParentDataSource> dataSourceViewHolder, final int position) {
-		final RecyclerChildAdapter.ViewHolder<DataSource, ParentDataSource> mViewHolder = dataSourceViewHolder;
-		final View itemView = mViewHolder.getItemView();
-
-		if (mItemClickListener != null) {
-			itemView.setOnClickListener(new View.OnClickListener() {
-
-				@Override
-				public void onClick(View view) {
-					mItemClickListener.onItemClick(view, mViewHolder, position);
-				}
-			});
+	@CallSuper
+	public int getItemViewType(int position) {
+		if (this.mDelegate != null) {
+			return this.mDelegate.getItemViewType(this, position);
 		}
+		return 0;
+	}
 
-		if (mItemTouchListener != null) {
-			itemView.setOnTouchListener(new View.OnTouchListener() {
+	@CallSuper
+	public int getItemCount() {
+		return this.getDataSourceController().getDataSourceCount();
+	}
 
-				@Override
-				public boolean onTouch(View view, MotionEvent event) {
-					return mItemTouchListener.onItemTouch(view, mViewHolder, position, event);
-				}
-			});
+	public void setOnItemClickListener(@Nullable OnItemClickListener<DataSource, ParentDataSource> listener) {
+		this.mOnItemClickListener = listener;
+	}
+
+	public void setOnItemLongClickListener(@Nullable OnItemLongClickListener<DataSource, ParentDataSource> listener) {
+		this.mOnItemLongClickListener = listener;
+	}
+
+	@NonNull
+	public DataSource findDataSourceByPosition(int position) {
+		final DataSource dataSourceByPosition = this.getDataSourceController().findDataSourceByPosition(position);
+		if (dataSourceByPosition == null) {
+			throw new IllegalStateException("Position : " + position + " not find dataSource");
 		}
+		return dataSourceByPosition;
+	}
 
-		if (mItemLongClickListener != null) {
-			itemView.setOnLongClickListener(new View.OnLongClickListener() {
+	@NonNull
+	public RecyclerAdapter<ParentDataSource> getRecyclerAdapter() {
+		if (this.mRecyclerAdapter == null) {
+			throw new IllegalStateException("RecyclerChildAdapter " + this + " not attached to RecyclerAdapter");
+		}
+		return this.mRecyclerAdapter;
+	}
 
-				@Override
-				public boolean onLongClick(View view) {
-					return mItemLongClickListener.onItemLongClick(view, mViewHolder, position);
-				}
-			});
+	@NonNull
+	public DataSourceNotifyController2<RecyclerChildAdapter<DataSource, ParentDataSource>, DataSource> getDataSourceController() {
+		if (this.mDataSourceController == null) {
+			this.mDataSourceController = new DataSourceNotifyControllerImpl3<>(this);
+		}
+		return this.mDataSourceController;
+	}
+
+	void tryBindViewHolder(@NonNull final ViewHolder<DataSource, ParentDataSource> holder, final int position, @Nullable List<Object> payloads) {
+		try {
+			holder.mRecyclerChildAdapter = RecyclerChildAdapter.this;
+			if (this.mOnItemClickListener != null) {
+				holder.getItemView().setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View view) {
+						RecyclerChildAdapter.this.mOnItemClickListener.onItemClick(holder, position);
+					}
+				});
+			}
+			if (this.mOnItemLongClickListener != null) {
+				holder.getItemView().setOnLongClickListener(new View.OnLongClickListener() {
+					@Override
+					public boolean onLongClick(View view) {
+						return RecyclerChildAdapter.this.mOnItemLongClickListener.onItemLongClick(holder, position);
+					}
+				});
+			}
+			this.onBindViewHolder(holder, position, payloads);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
-	static class AdapterDataObservable extends Observable<RecyclerView.AdapterDataObserver> {
+	public static class ViewHolder<DataSource, ParentDataSource> extends RecyclerAdapter.ViewHolder<ParentDataSource> {
 
-		AdapterDataObservable() {
+		private RecyclerChildAdapter<DataSource, ParentDataSource> mRecyclerChildAdapter;
 
+		public ViewHolder(@NonNull View itemView) {
+			super(itemView);
 		}
+
+		@NonNull
+		public DataSource findChildDataSourceByPosition(int position) {
+			return this.getRecyclerChildAdapter().findDataSourceByPosition(position);
+		}
+
+		@NonNull
+		public DataSourceNotifyController2<RecyclerChildAdapter<DataSource, ParentDataSource>, DataSource> getChildDataSourceController() {
+			return this.getRecyclerChildAdapter().getDataSourceController();
+		}
+
+		@NonNull
+		public RecyclerChildAdapter<DataSource, ParentDataSource> getRecyclerChildAdapter() {
+			return this.mRecyclerChildAdapter;
+		}
+	}
+
+	public interface OnItemClickListener<DataSource, ParentDataSource> {
+
+		void onItemClick(@NonNull ViewHolder<DataSource, ParentDataSource> holder, int position);
+	}
+
+	public interface OnItemLongClickListener<DataSource, ParentDataSource> {
+
+		boolean onItemLongClick(@NonNull ViewHolder<DataSource, ParentDataSource> holder, int position);
+	}
+
+	public interface Delegate<DataSource, ParentDataSource> {
+
+		@NonNull
+		ViewHolder<DataSource, ParentDataSource> onCreateViewHolder(@NonNull RecyclerChildAdapter<DataSource, ParentDataSource> adapter, @NonNull ViewGroup parent, int itemViewType);
+
+		void onBindViewHolder(@NonNull ViewHolder<DataSource, ParentDataSource> holder, int position, @Nullable List<Object> payloads);
+
+		int getItemViewType(@NonNull RecyclerChildAdapter<DataSource, ParentDataSource> adapter, int position);
+	}
+
+	/* package */ static final class AdapterDataObservable extends Observable<RecyclerView.AdapterDataObserver> {
 
 		public boolean hasObservers() {
 			return !this.mObservers.isEmpty();
@@ -200,7 +232,7 @@ public class RecyclerChildAdapter<DataSource, ParentDataSource> {
 		}
 
 		public void notifyItemRangeChanged(int positionStart, int itemCount) {
-			this.notifyItemRangeChanged(positionStart, itemCount, (Object) null);
+			this.notifyItemRangeChanged(positionStart, itemCount, null);
 		}
 
 		public void notifyItemRangeChanged(int positionStart, int itemCount, @Nullable Object payload) {

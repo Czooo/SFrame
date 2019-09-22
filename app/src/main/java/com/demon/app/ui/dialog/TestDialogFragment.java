@@ -9,10 +9,10 @@ import com.demon.app.ui.fragment.test.PublicFragment;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.sframe.compat.ToastCompat;
 import androidx.sframe.ui.abs.AbsDialogFragment;
 import androidx.sframe.ui.controller.AppNavigation;
 import androidx.sframe.ui.controller.AppPageController;
+import androidx.sframe.utils.ToastCompat;
 
 /**
  * Author create by ok on 2019-06-14

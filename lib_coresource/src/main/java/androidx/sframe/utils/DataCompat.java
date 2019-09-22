@@ -1,4 +1,4 @@
-package androidx.sframe.compat;
+package androidx.sframe.utils;
 
 import java.util.ArrayList;
 

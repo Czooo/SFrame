@@ -1,12 +1,12 @@
 package androidx.sframe.http;
 
 import androidx.annotation.NonNull;
-import androidx.sframe.compat.LogCompat;
 import androidx.sframe.listener.OnHttpProgressListener;
 import androidx.sframe.tools.HttpCacheInterceptor;
 import androidx.sframe.tools.HttpHeaderInterceptor;
 import androidx.sframe.tools.HttpLoggerInterceptor;
 import androidx.sframe.tools.HttpProgressInterceptor;
+import androidx.sframe.utils.LoggerCompat;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 
@@ -59,7 +59,7 @@ public class HttpServiceProviders {
 
 								@Override
 								public void onHttpProgress(String url, long contentLength, long readSoFar) {
-									LogCompat.e(url + " : " + contentLength + " = " + readSoFar);
+									LoggerCompat.e(url + " : " + contentLength + " = " + readSoFar);
 								}
 							}))
 							.build();

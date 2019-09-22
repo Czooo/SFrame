@@ -20,7 +20,7 @@ public abstract class PagerAdapterCompat<VH extends PagerAdapterCompat.ViewHolde
 
 	@Override
 	public int getItemCount() {
-		return this.getDataSourceController().size();
+		return this.getDataSourceController().getDataSourceCount();
 	}
 
 	@NonNull

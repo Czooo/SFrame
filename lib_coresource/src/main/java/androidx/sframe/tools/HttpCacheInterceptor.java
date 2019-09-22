@@ -3,8 +3,8 @@ package androidx.sframe.tools;
 import java.io.IOException;
 
 import androidx.annotation.NonNull;
-import androidx.sframe.compat.LogCompat;
-import androidx.sframe.compat.NetCompat;
+import androidx.sframe.utils.NetCompat;
+import androidx.sframe.utils.LoggerCompat;
 import okhttp3.CacheControl;
 import okhttp3.Interceptor;
 import okhttp3.Request;
@@ -33,7 +33,7 @@ public class HttpCacheInterceptor implements Interceptor {
 
 			// 有网的时候读接口上的@Headers里的配置，你可以在这里进行统一的设置
 			final String cacheControl = mRequest.cacheControl().toString();
-			LogCompat.e("RequestCacheInterceptor: " + cacheControl);
+			LoggerCompat.e("RequestCacheInterceptor: " + cacheControl);
 
 			return chain.proceed(mRequest).newBuilder()
 					.header("Cache-Control", cacheControl)

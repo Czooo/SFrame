@@ -1,6 +1,10 @@
 package com.demon.app;
 
+import androidx.sframe.BuildConfig;
 import androidx.sframe.SFrameApplication;
+import androidx.sframe.utils.FileCompat;
+import androidx.sframe.utils.SFrameManager;
+import androidx.sframe.utils.SFrameOptions;
 
 /**
  * Author create by ok on 2019-06-14
@@ -12,5 +16,12 @@ public class Application extends SFrameApplication {
 	public void onCreate() {
 		super.onCreate();
 
+		SFrameManager.init(this);
+		//  default options
+		SFrameManager.getInstance()
+				.setOptions(SFrameOptions.obtain()
+						.setLogger(BuildConfig.DEBUG)
+						.setCachePath(FileCompat.getLocatDir(this))
+						.build());
 	}
 }

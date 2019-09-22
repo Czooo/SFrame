@@ -2,6 +2,7 @@ package androidx.sframe.ui.controller.impl;
 
 import java.util.Collection;
 
+import androidx.annotation.NonNull;
 import androidx.sframe.ui.controller.DataSourceController;
 import androidx.sframe.ui.controller.DataSourceNotifyController;
 
@@ -9,71 +10,55 @@ import androidx.sframe.ui.controller.DataSourceNotifyController;
  * Author create by ok on 2019/2/9
  * Email : ok@163.com.
  */
-public abstract class DataSourceNotifyControllerImpl<Adapter, DataType> extends DataSourceControllerImpl<DataType> implements DataSourceNotifyController<Adapter, DataType> {
+public abstract class DataSourceNotifyControllerImpl<Adapter, DataSource> extends DataSourceControllerImpl<DataSource> implements DataSourceNotifyController<Adapter, DataSource> {
 
 	private final Adapter mAdapter;
 
-	public DataSourceNotifyControllerImpl(Adapter adapter) {
+	public DataSourceNotifyControllerImpl(@NonNull Adapter adapter) {
 		this.mAdapter = adapter;
 	}
 
 	@Override
-	public DataSourceController<DataType> addDataSourceList(Collection<? extends DataType> dataTypeList, int index) {
-		super.addDataSourceList(dataTypeList, index);
-		return notifyDataSetChanged();
+	public DataSourceController<DataSource> addDataSource(@NonNull Collection<? extends DataSource> dataSources, int index) {
+		super.addDataSource(dataSources, index);
+		return this.notifyDataSetChanged();
 	}
 
 	@Override
-	public DataSourceController<DataType> removeDataSource(int position) {
-		super.removeDataSource(position);
-		return notifyDataSetChanged();
-	}
-
-	@Override
-	public DataSourceController<DataType> removeDataSource(Collection<? extends DataType> dataTypeList) {
-		super.removeDataSource(dataTypeList);
-		return notifyDataSetChanged();
-	}
-
-	@Override
-	public DataSourceController<DataType> removeAll() {
+	public DataSourceController<DataSource> removeAll() {
 		super.removeAll();
-		return notifyDataSetChanged();
+		return this.notifyDataSetChanged();
 	}
 
 	@Override
-	public DataSourceController<DataType> moveDataSourceOf(int fromPosition, int toPosition) {
+	public DataSourceController<DataSource> removeDataSource(int position) {
+		super.removeDataSource(position);
+		return this.notifyDataSetChanged();
+	}
+
+	@Override
+	public DataSourceController<DataSource> moveDataSourceOf(int fromPosition, int toPosition) {
 		super.moveDataSourceOf(fromPosition, toPosition);
-		return notifyDataSetChanged();
+		return this.notifyDataSetChanged();
 	}
 
 	@Override
-	public DataSourceController<DataType> markerAll() {
-		super.markerAll();
-		return notifyDataSetChanged();
+	public boolean switchedSelectStateByAll() {
+		boolean state = super.switchedSelectStateByAll();
+		this.notifyDataSetChanged();
+		return state;
 	}
 
 	@Override
-	public DataSourceController<DataType> unmarkerAll() {
-		super.unmarkerAll();
-		return notifyDataSetChanged();
+	public boolean switchedSelectStateOf(@NonNull DataSource dataSource) {
+		boolean state = super.switchedSelectStateOf(dataSource);
+		this.notifyDataSetChanged();
+		return state;
 	}
 
+	@NonNull
 	@Override
-	public boolean marker(DataType dataType) {
-		boolean isMarker = super.marker(dataType);
-		notifyDataSetChanged();
-		return isMarker;
-	}
-
-	@Override
-	public boolean singleMarker(DataType dataType) {
-		boolean isMarker = super.singleMarker(dataType);
-		notifyDataSetChanged();
-		return isMarker;
-	}
-
-	public final Adapter getDataSourceAdapter() {
-		return mAdapter;
+	public Adapter getDataSourceAdapter() {
+		return this.mAdapter;
 	}
 }
