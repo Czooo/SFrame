@@ -84,7 +84,7 @@ public class AppPageDialogFragmentControllerImpl extends AppPageFragmentControll
 					try {
 						this.getToolbarController()
 								.getToolbarMethod()
-								.setStatusEnabled(true);
+								.setStateBarEnabled(true);
 					} catch (IllegalStateException e) {
 						e.printStackTrace();
 					}

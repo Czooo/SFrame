@@ -24,6 +24,6 @@ public class TempFragment extends AbsFragment {
 				.getToolbarController()
 				.getToolbarMethod()
 				.setPopEnabled(true)
-				.setTitle("TempFragment");
+				.setTitleText("TempFragment");
 	}
 }

@@ -9,6 +9,7 @@ import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDialogFragment;
+import androidx.sframe.ui.controller.AppNavController;
 import androidx.sframe.ui.controller.AppPageController;
 import androidx.sframe.ui.controller.DialogFragmentPageController;
 import androidx.sframe.ui.controller.UILayoutController;
@@ -74,6 +75,11 @@ public abstract class AbsDialogFragment extends AppCompatDialogFragment implemen
 	@NonNull
 	public final UIToolbarController getToolbarController() {
 		return this.getPageController().getToolbarController();
+	}
+
+	@NonNull
+	public final AppNavController<AppCompatDialogFragment> getAppNavController() {
+		return this.getPageController().getAppNavController();
 	}
 
 	@NonNull

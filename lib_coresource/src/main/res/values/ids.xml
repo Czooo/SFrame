@@ -8,22 +8,21 @@
     <item name="app_layout_error_id" type="id"/>
 
     <!-- Toolbar-->
-    <item name="app_toolbar_title_id" type="id"/>
-    <item name="app_toolbar_status_id" type="id"/>
-    <item name="app_toolbar_shadow_id" type="id"/>
-    <item name="app_toolbar_line_id" type="id"/>
-    <!-- TitleBar-->
+    <item name="app_container_state_id" type="id"/>
     <item name="app_container_pop_id" type="id"/>
     <item name="app_container_title_id" type="id"/>
     <item name="app_container_menu_id" type="id"/>
-    <item name="app_pop_text_id" type="id"/>
-    <item name="app_pop_icon_id" type="id"/>
-    <item name="app_title_text_id" type="id"/>
-    <item name="app_title_icon_id" type="id"/>
-    <item name="app_menu_List_id" type="id"/>
+    <item name="app_toolbar_pop_id" type="id"/>
+    <item name="app_toolbar_title_id" type="id"/>
+    <item name="app_toolbar_menu_id" type="id"/>
+    <item name="app_toolbar_line_id" type="id"/>
+    <item name="app_toolbar_shadow_id" type="id"/>
+
     <!-- ErrorBar-->
     <item name="app_error_icon_id" type="id"/>
     <item name="app_error_text_id" type="id"/>
+
     <!-- List-->
     <item name="listContainer" type="id"/>
+
 </resources>

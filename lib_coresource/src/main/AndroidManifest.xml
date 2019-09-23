@@ -17,7 +17,7 @@
         android:theme="@style/AppTheme.AppCompat">
 
         <activity
-            android:name=".ui.AppCompatNavAgentActivity"
+            android:name=".ui.NavAgentActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:exported="false"
             android:screenOrientation="portrait"

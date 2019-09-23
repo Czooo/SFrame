@@ -1,4 +1,4 @@
-package androidx.sframe.ui.abs;
+package androidx.sframe.adapter;
 
 import androidx.annotation.NonNull;
 import androidx.sframe.widget.adapter.RecyclerChildAdapter;

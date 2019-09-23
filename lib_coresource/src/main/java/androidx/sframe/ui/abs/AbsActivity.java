@@ -6,12 +6,14 @@ import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentActivity;
+import androidx.sframe.manager.PageCacheManager;
+import androidx.sframe.ui.controller.AppNavController;
 import androidx.sframe.ui.controller.AppPageController;
 import androidx.sframe.ui.controller.UILayoutController;
 import androidx.sframe.ui.controller.UIToolbarController;
 import androidx.sframe.ui.controller.UIViewController;
 import androidx.sframe.ui.controller.impl.AppPageActivityControllerImpl;
-import androidx.fragment.app.FragmentActivity;
 
 /**
  * Author create by ok on 2019-06-03
@@ -25,6 +27,9 @@ public abstract class AbsActivity extends AppCompatActivity implements AppPageCo
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		PageCacheManager.getInstance()
+				.getActivityPageCache()
+				.put(this);
 		this.getPageController().onCreate(savedInstanceState);
 	}
 
@@ -32,6 +37,14 @@ public abstract class AbsActivity extends AppCompatActivity implements AppPageCo
 	protected void onSaveInstanceState(@NonNull Bundle outState) {
 		super.onSaveInstanceState(outState);
 		this.getPageController().onViewCreated(outState);
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		PageCacheManager.getInstance()
+				.getActivityPageCache()
+				.remove(this);
 	}
 
 	@Override
@@ -52,6 +65,11 @@ public abstract class AbsActivity extends AppCompatActivity implements AppPageCo
 	@NonNull
 	public final UIToolbarController getToolbarController() {
 		return this.getPageController().getToolbarController();
+	}
+
+	@NonNull
+	public final AppNavController<FragmentActivity> getAppNavController() {
+		return this.getPageController().getAppNavController();
 	}
 
 	@NonNull

@@ -142,7 +142,7 @@ public interface UILayoutController extends ViewModelStoreOwner {
 
 	UILayoutController refreshed(@Nullable Object object, long delayMillis);
 
-	UILayoutController recycle();
+	UILayoutController recycled();
 
 	UILayoutController requestLayout();
 

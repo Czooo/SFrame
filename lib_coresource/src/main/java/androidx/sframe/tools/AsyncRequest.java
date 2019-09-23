@@ -3,7 +3,7 @@ package androidx.sframe.tools;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.sframe.utils.RxCompat;
-import androidx.sframe.utils.LoggerCompat;
+import androidx.sframe.utils.Logger;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
@@ -15,13 +15,13 @@ import io.reactivex.functions.Function;
  */
 public final class AsyncRequest {
 
-	public static AsyncRequest get() {
+	public static AsyncRequest obtain() {
 		return new AsyncRequest();
 	}
 
 	private Disposable mDisposable;
 
-	AsyncRequest() {
+	private AsyncRequest() {
 
 	}
 
@@ -50,7 +50,7 @@ public final class AsyncRequest {
 				}, new Consumer<Throwable>() {
 					@Override
 					public void accept(Throwable throwable) throws Exception {
-						LoggerCompat.e(throwable);
+						Logger.e(throwable);
 					}
 				});
 	}

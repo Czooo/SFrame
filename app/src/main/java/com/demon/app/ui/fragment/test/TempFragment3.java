@@ -23,6 +23,6 @@ public class TempFragment3 extends AbsFragment {
 		this.getPageController()
 				.getToolbarController()
 				.getToolbarMethod()
-				.setTitle("TempFragment3");
+				.setTitleText("TempFragment3");
 	}
 }

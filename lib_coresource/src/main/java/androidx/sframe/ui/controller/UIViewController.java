@@ -40,7 +40,7 @@ public interface UIViewController {
 
 	UIViewController gc(@Nullable View preView);
 
-	UIViewController recycle();
+	UIViewController recycled();
 
 	interface OnFindViewListener {
 

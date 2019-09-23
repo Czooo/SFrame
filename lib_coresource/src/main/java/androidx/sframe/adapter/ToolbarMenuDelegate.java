@@ -10,19 +10,18 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.sframe.R;
 import androidx.sframe.model.AppMenuModel;
-import androidx.sframe.ui.abs.AbsDelegate;
 import androidx.sframe.widget.adapter.RecyclerAdapter;
 
 /**
  * Author create by ok on 2019-06-15
  * Email : ok@163.com.
  */
-public class ToolbarMenuDelegate extends AbsDelegate<AppMenuModel> {
+public class ToolbarMenuDelegate extends AbsRecyclerDelegate<AppMenuModel> {
 
 	@NonNull
 	@Override
 	public RecyclerAdapter.ViewHolder<AppMenuModel> onCreateViewHolder(@NonNull RecyclerAdapter<AppMenuModel> adapter, @NonNull ViewGroup parent, int itemViewType) {
-		return RecyclerAdapter.createViewHolder(R.layout.item_menu_layout, parent);
+		return RecyclerAdapter.createViewHolder(R.layout.item_page_menu_layout, parent);
 	}
 
 	@Override

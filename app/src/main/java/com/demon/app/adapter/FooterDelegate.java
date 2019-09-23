@@ -10,7 +10,7 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.sframe.ui.abs.AbsChildDelegate;
+import androidx.sframe.adapter.AbsChildDelegate;
 import androidx.sframe.widget.adapter.RecyclerChildAdapter;
 
 /**

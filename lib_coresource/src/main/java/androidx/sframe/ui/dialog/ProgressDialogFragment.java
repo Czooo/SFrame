@@ -20,7 +20,7 @@ public class ProgressDialogFragment extends AbsDialogFragment implements AppPage
 
 	@Override
 	public int onPageLayoutId(@Nullable Bundle savedInstanceState) {
-		return R.layout.dialog_fragment_progress;
+		return R.layout.dialog_fragment_progress_layout;
 	}
 
 	@Override

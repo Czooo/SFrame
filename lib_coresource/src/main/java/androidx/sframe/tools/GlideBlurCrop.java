@@ -15,7 +15,7 @@ import java.security.MessageDigest;
 
 import androidx.annotation.FloatRange;
 import androidx.annotation.NonNull;
-import androidx.sframe.utils.SFrameManager;
+import androidx.sframe.manager.SFrameManager;
 
 /**
  * Author create by ok on 2018/3/1 0001

@@ -54,7 +54,7 @@ public class UIObjectListControllerImpl<Page, DataSource> implements UIObjectLis
 
 	@Override
 	public int onPageLayoutId(@Nullable Bundle savedInstanceState) {
-		return R.layout.layout_list_default;
+		return R.layout.fragment_list_layout;
 	}
 
 	@Override
@@ -90,9 +90,9 @@ public class UIObjectListControllerImpl<Page, DataSource> implements UIObjectLis
 		preRecyclerView.setLayoutManager(layoutManager);
 		preRecyclerView.setHasFixedSize(true);
 
-		this.setLoadingView(R.layout.layout_loading_default)
+		this.setLoadingView(R.layout.layout_page_loading_default)
 				.setLoadingEnabled(true);
-		this.setEmptyView(R.layout.layout_empty_default)
+		this.setEmptyView(R.layout.layout_page_empty_default)
 				.setEmptyEnabled(true);
 	}
 

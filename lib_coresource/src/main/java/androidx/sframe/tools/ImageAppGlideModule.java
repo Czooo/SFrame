@@ -28,7 +28,7 @@ import com.bumptech.glide.request.RequestOptions;
 import java.io.InputStream;
 
 import androidx.annotation.NonNull;
-import androidx.sframe.utils.SFrameManager;
+import androidx.sframe.manager.SFrameManager;
 
 /**
  * Author create by ok on 2019/2/5

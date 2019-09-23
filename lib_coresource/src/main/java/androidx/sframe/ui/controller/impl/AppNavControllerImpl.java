@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.sframe.R;
 import androidx.sframe.model.AgentNavModel;
-import androidx.sframe.ui.AppCompatNavAgentActivity;
+import androidx.sframe.ui.NavAgentActivity;
 import androidx.sframe.ui.abs.AbsDialogFragment;
 import androidx.sframe.ui.controller.AppCompatNavHostController;
 import androidx.sframe.ui.controller.AppNavController;
@@ -118,7 +118,7 @@ final class AppNavControllerImpl<Page> implements AppNavController<Page> {
 
 	@Override
 	public AppNavController<Page> startPage(@NonNull Class<? extends Fragment> pageClass, @Nullable Bundle args, @Nullable Bundle options) {
-		return this.startActivity(AppCompatNavAgentActivity.class, AppCompatNavAgentActivity.create(new AgentNavModel(pageClass, args)), options);
+		return this.startActivity(NavAgentActivity.class, NavAgentActivity.create(new AgentNavModel(pageClass, args)), options);
 	}
 
 	@Override
@@ -133,7 +133,7 @@ final class AppNavControllerImpl<Page> implements AppNavController<Page> {
 
 	@Override
 	public AppNavController<Page> startPageForResult(@NonNull Class<? extends Fragment> pageClass, @Nullable Bundle args, @Nullable Bundle options, int requestCode) {
-		return this.startActivityForResult(AppCompatNavAgentActivity.class, AppCompatNavAgentActivity.create(new AgentNavModel(pageClass, args)), options, requestCode);
+		return this.startActivityForResult(NavAgentActivity.class, NavAgentActivity.create(new AgentNavModel(pageClass, args)), options, requestCode);
 	}
 
 	@Override

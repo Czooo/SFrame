@@ -1,4 +1,4 @@
-package androidx.sframe.http;
+package androidx.sframe.helper;
 
 import androidx.annotation.NonNull;
 import androidx.sframe.listener.OnHttpProgressListener;
@@ -6,7 +6,7 @@ import androidx.sframe.tools.HttpCacheInterceptor;
 import androidx.sframe.tools.HttpHeaderInterceptor;
 import androidx.sframe.tools.HttpLoggerInterceptor;
 import androidx.sframe.tools.HttpProgressInterceptor;
-import androidx.sframe.utils.LoggerCompat;
+import androidx.sframe.utils.Logger;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 
@@ -59,7 +59,7 @@ public class HttpServiceProviders {
 
 								@Override
 								public void onHttpProgress(String url, long contentLength, long readSoFar) {
-									LoggerCompat.e(url + " : " + contentLength + " = " + readSoFar);
+									Logger.e(url + " : " + contentLength + " = " + readSoFar);
 								}
 							}))
 							.build();

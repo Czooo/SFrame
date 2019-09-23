@@ -1,4 +1,4 @@
-package androidx.sframe.utils;
+package androidx.sframe.manager;
 
 import android.text.TextUtils;
 
@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.Serializable;
 
 import androidx.annotation.NonNull;
+import androidx.sframe.BuildConfig;
+import androidx.sframe.utils.FileCompat;
 
 /**
  * @Author create by Zoran on 2019-09-22
@@ -56,11 +58,11 @@ public class SFrameOptions implements Serializable {
 
 	@NonNull
 	public final String getCachePath() {
-		if (TextUtils.isEmpty(this.mCachePath)) {
-			throw new IllegalStateException("not cache path set");
+		if (!TextUtils.isEmpty(this.mCachePath)) {
+			final File cacheFile = new File(this.mCachePath);
+			return FileCompat.getAbsolutePath(cacheFile);
 		}
-		final File cacheFile = new File(this.mCachePath);
-		return FileCompat.getAbsolutePath(cacheFile);
+		return "";
 	}
 
 	@NonNull
@@ -87,7 +89,7 @@ public class SFrameOptions implements Serializable {
 
 		private String mCachePath;
 		private String mLoggerTag = "androidx.sframe";
-		private boolean mIsLoggerEnabled;
+		private boolean mIsLoggerEnabled = BuildConfig.DEBUG;
 
 		public Builder() {
 

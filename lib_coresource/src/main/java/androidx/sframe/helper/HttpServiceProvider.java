@@ -1,4 +1,4 @@
-package androidx.sframe.http;
+package androidx.sframe.helper;
 
 import androidx.annotation.NonNull;
 import androidx.sframe.tools.StringConverterFactory;

@@ -1,10 +1,14 @@
-package androidx.sframe.utils;
+package androidx.sframe.manager;
 
 import android.content.Context;
+import android.text.TextUtils;
+
+import com.bumptech.glide.Glide;
 
 import java.lang.ref.WeakReference;
 
 import androidx.annotation.NonNull;
+import androidx.sframe.utils.FileCompat;
 
 /**
  * @Author create by Zoran on 2019-09-22
@@ -27,12 +31,10 @@ public final class SFrameManager {
 	}
 
 	private WeakReference<Context> mReference;
-	private SFrameOptions mSFrameOptions;
+	private SFrameOptions mOptions;
 
 	private SFrameManager() {
-		this.mSFrameOptions = new SFrameOptions.Builder()
-				.setLoggerTag("androidx.sframe")
-				.setLogger(false)
+		this.mOptions = new SFrameOptions.Builder()
 				.build();
 	}
 
@@ -41,10 +43,18 @@ public final class SFrameManager {
 			this.mReference.clear();
 		}
 		this.mReference = new WeakReference<>(context);
+		// init cache path
+		if (TextUtils.isEmpty(this.mOptions.getCachePath())) {
+			this.setOptions(this.mOptions.rebuild()
+					.setCachePath(FileCompat.getLocatDir(context))
+					.build());
+		}
+		// init glide
+		Glide.get(context);
 	}
 
 	public void setOptions(@NonNull SFrameOptions options) {
-		this.mSFrameOptions = options;
+		this.mOptions = options;
 	}
 
 	public Context getContext() {
@@ -54,7 +64,7 @@ public final class SFrameManager {
 
 	@NonNull
 	public SFrameOptions getOptions() {
-		return this.mSFrameOptions;
+		return this.mOptions;
 	}
 
 	private void assertShouldApplicationInit() {

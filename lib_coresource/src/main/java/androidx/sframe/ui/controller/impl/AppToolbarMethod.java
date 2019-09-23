@@ -36,9 +36,9 @@ public class AppToolbarMethod extends UIToolbarMethod implements UILayoutControl
 		super(layoutController);
 		layoutController
 				.setBackgroundColor(ResCompat.getColorAppBackground(this.getContext()))
-				.setToolbarLayout(R.layout.layout_toolbar_default)
-				.setLoadingLayout(R.layout.layout_loading_default)
-				.setErrorLayout(R.layout.layout_error_default)
+				.setToolbarLayout(R.layout.layout_page_toolbar_default)
+				.setLoadingLayout(R.layout.layout_page_loading_default)
+				.setErrorLayout(R.layout.layout_page_error_default)
 				.addOnLayoutListener(this);
 
 		final DrawerArrowDrawable arrowDrawable = new DrawerArrowDrawable(this.getContext());
@@ -48,14 +48,13 @@ public class AppToolbarMethod extends UIToolbarMethod implements UILayoutControl
 		// default options
 		this.setEnabled(true)
 				.setBackgroundColor(ResCompat.getColorAppToolbar(this.getContext()))
-				.setStatusBackgroundColor(ResCompat.getColorAppStatus(this.getContext()))
-				.setTitleBackgroundColor(ResCompat.getColorTransparent(this.getContext()))
-				.setLineColor(ResCompat.getColorAppLine(this.getContext()))
+				.setStateBarColor(ResCompat.getColorAppStatus(this.getContext()))
+				.setLineBarColor(ResCompat.getColorAppLine(this.getContext()))
 				.setPopImageDrawable(arrowDrawable)
+				.setStateBarEnabled(false)
+				.setTitleBarEnabled(true)
+				.setLineBarEnabled(false)
 				.setShadowEnabled(true)
-				.setStatusEnabled(false)
-				.setLineEnabled(false)
-				.setTitleEnabled(true)
 				.setPopEnabled(false);
 	}
 
@@ -78,42 +77,19 @@ public class AppToolbarMethod extends UIToolbarMethod implements UILayoutControl
 		return this.getToolbarView().getMeasuredHeight();
 	}
 
-	public int getTitleMeasuredWidth() {
-		return this.getTitleView().getMeasuredWidth();
-	}
-
-	public int getTitleMeasuredHeight() {
-		return this.getTitleView().getMeasuredHeight();
-	}
-
 	@NonNull
 	public View getToolbarView() {
 		return this.getLayoutController().requireLayoutAt(UILayoutController.LayoutType.Toolbar.key).getContentView();
 	}
 
-	@NonNull
-	public View getTitleView() {
-		return this.findViewById(R.id.app_toolbar_title_id);
+	@Nullable
+	public View getStateBarView() {
+		return this.findViewById(R.id.app_container_state_id);
 	}
 
-	@NonNull
-	public View getStatusView() {
-		return this.findViewById(R.id.app_toolbar_status_id);
-	}
-
-	@NonNull
-	private View getContainerPopView() {
-		return this.findViewById(R.id.app_container_pop_id);
-	}
-
-	@NonNull
-	private View getContainerTitleView() {
+	@Nullable
+	public View getTitleBarView() {
 		return this.findViewById(R.id.app_container_title_id);
-	}
-
-	@NonNull
-	private View getContainerMenuView() {
-		return this.findViewById(R.id.app_container_menu_id);
 	}
 
 	@NonNull
@@ -122,34 +98,35 @@ public class AppToolbarMethod extends UIToolbarMethod implements UILayoutControl
 	}
 
 	public AppToolbarMethod setEnabled(boolean flag) {
-		final View preView = this.getToolbarView();
-		if (flag) {
-			preView.setVisibility(View.VISIBLE);
-		} else {
-			preView.setVisibility(View.GONE);
-		}
+		this.getToolbarView().setVisibility(flag ? View.VISIBLE : View.GONE);
 		return this;
 	}
 
-	public AppToolbarMethod setTitleEnabled(boolean flag) {
-		final View preView = this.getTitleView();
+	public AppToolbarMethod setStateBarEnabled(boolean flag) {
+		final View preView = this.getStateBarView();
 		if (flag) {
-			preView.setVisibility(View.VISIBLE);
-		} else {
-			preView.setVisibility(View.GONE);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+				preView.setVisibility(View.VISIBLE);
+				preView.getLayoutParams().height = SystemCompat.getStatusBarHeight(this.getContext());
+				return this;
+			}
 		}
+		preView.setVisibility(View.GONE);
 		return this;
 	}
 
-	public AppToolbarMethod setStatusEnabled(boolean flag) {
-		final View preView = this.getStatusView();
-		if (flag) {
-			final int statusHeight = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ? SystemCompat.getStatusBarHeight(this.getContext()) : 0;
-			preView.setVisibility(View.VISIBLE);
-			preView.getLayoutParams().height = statusHeight;
-		} else {
-			preView.setVisibility(View.GONE);
-		}
+	public AppToolbarMethod setTitleBarEnabled(boolean flag) {
+		this.getTitleBarView().setVisibility(flag ? View.VISIBLE : View.GONE);
+		return this;
+	}
+
+	public AppToolbarMethod setLineBarEnabled(boolean flag) {
+		this.findViewById(R.id.app_toolbar_line_id).setVisibility(flag ? View.VISIBLE : View.GONE);
+		return this;
+	}
+
+	public AppToolbarMethod setPopEnabled(boolean flag) {
+		this.findViewById(R.id.app_container_pop_id).setVisibility(flag ? View.VISIBLE : View.GONE);
 		return this;
 	}
 
@@ -185,43 +162,8 @@ public class AppToolbarMethod extends UIToolbarMethod implements UILayoutControl
 		return this;
 	}
 
-	public AppToolbarMethod setLineEnabled(boolean flag) {
-		if (flag) {
-			this.findViewById(R.id.app_toolbar_line_id).setVisibility(View.VISIBLE);
-		} else {
-			this.findViewById(R.id.app_toolbar_line_id).setVisibility(View.GONE);
-		}
-		return this;
-	}
-
-	public AppToolbarMethod setPopEnabled(boolean flag) {
-		final View preView = this.getContainerPopView();
-		if (flag) {
-			preView.setVisibility(View.VISIBLE);
-		} else {
-			preView.setVisibility(View.GONE);
-		}
-		return this;
-	}
-
 	public AppToolbarMethod setAlpha(@FloatRange(from = 0, to = 1.f) float alpha) {
 		final Drawable mDrawable = this.getToolbarView().getBackground();
-		if (mDrawable != null) {
-			mDrawable.setAlpha((int) (alpha * 255));
-		}
-		return this;
-	}
-
-	public AppToolbarMethod setTitleAlpha(@FloatRange(from = 0, to = 1.f) float alpha) {
-		final Drawable mDrawable = this.getTitleView().getBackground();
-		if (mDrawable != null) {
-			mDrawable.setAlpha((int) (alpha * 255));
-		}
-		return this;
-	}
-
-	public AppToolbarMethod setStatusAlpha(@FloatRange(from = 0, to = 1.f) float alpha) {
-		final Drawable mDrawable = this.getStatusView().getBackground();
 		if (mDrawable != null) {
 			mDrawable.setAlpha((int) (alpha * 255));
 		}
@@ -243,109 +185,45 @@ public class AppToolbarMethod extends UIToolbarMethod implements UILayoutControl
 		return this;
 	}
 
-	public AppToolbarMethod setTitleBackground(Drawable background) {
-		this.getTitleView().setBackground(background);
+	public AppToolbarMethod setStateBarColor(@ColorInt int color) {
+		this.findViewById(R.id.app_container_state_id).setBackgroundColor(color);
 		return this;
 	}
 
-	public AppToolbarMethod setTitleBackgroundColor(@ColorInt int color) {
-		this.getTitleView().setBackgroundColor(color);
-		return this;
-	}
-
-	public AppToolbarMethod setTitleBackgroundResource(@DrawableRes int resId) {
-		this.getTitleView().setBackgroundResource(resId);
-		return this;
-	}
-
-	public AppToolbarMethod setStatusBackground(Drawable background) {
-		this.getStatusView().setBackground(background);
-		return this;
-	}
-
-	public AppToolbarMethod setStatusBackgroundColor(@ColorInt int color) {
-		this.getStatusView().setBackgroundColor(color);
-		return this;
-	}
-
-	public AppToolbarMethod setStatusBackgroundResource(@DrawableRes int resId) {
-		this.getStatusView().setBackgroundResource(resId);
-		return this;
-	}
-
-	public AppToolbarMethod setLineColor(@ColorInt int color) {
+	public AppToolbarMethod setLineBarColor(@ColorInt int color) {
 		this.findAt(R.id.app_toolbar_line_id).setBackgroundColor(color);
 		return this;
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public AppToolbarMethod setCustomTitleView(@LayoutRes int layoutId) {
-		return this.setCustomTitleView(this.inflate(this.getTitleView(), layoutId));
-	}
-
-	public AppToolbarMethod setCustomTitleView(@NonNull View preView) {
-		final ViewGroup preViewGroup = (ViewGroup) this.getTitleView();
-		preViewGroup.removeAllViews();
-		preViewGroup.addView(preView);
-		((RelativeLayout.LayoutParams) preView.getLayoutParams())
-				.addRule(RelativeLayout.BELOW, R.id.app_toolbar_status_id);
+	public AppToolbarMethod setPopResource(@DrawableRes int resId) {
+		this.findAt(R.id.app_container_pop_id).setVisibility(View.VISIBLE)
+				.findAt(R.id.app_toolbar_pop_id).methodAtImageView().setImageResource(resId);
 		return this;
 	}
 
-	public AppToolbarMethod setPopText(@NonNull CharSequence title) {
-		this.findAt(R.id.app_pop_icon_id).setVisibility(View.GONE)
-				.findAt(R.id.app_pop_text_id).setVisibility(View.VISIBLE).methodAtTextView().setText(title);
+	public AppToolbarMethod setPopImageDrawable(@NonNull Drawable drawable) {
+		this.findAt(R.id.app_container_pop_id).setVisibility(View.VISIBLE)
+				.findAt(R.id.app_toolbar_pop_id).methodAtImageView().setImageDrawable(drawable);
 		return this;
 	}
 
-	public AppToolbarMethod setPopTextColor(@ColorInt int color) {
-		this.findAt(R.id.app_pop_text_id).methodAtTextView().setTextColor(color);
-		return this;
-	}
-
-	public AppToolbarMethod setPopTextSize(float size) {
-		this.findAt(R.id.app_pop_text_id).methodAtTextView().setTextSize(size);
-		return this;
-	}
-
-	public AppToolbarMethod setPopImageResource(@DrawableRes int resId) {
-		this.findAt(R.id.app_pop_text_id).setVisibility(View.GONE)
-				.findAt(R.id.app_pop_icon_id).setVisibility(View.VISIBLE).methodAtImageView().setImageResource(resId);
-		return this;
-	}
-
-	public AppToolbarMethod setPopImageDrawable(Drawable drawable) {
-		this.findAt(R.id.app_pop_text_id).setVisibility(View.GONE)
-				.findAt(R.id.app_pop_icon_id).setVisibility(View.VISIBLE).methodAtImageView().setImageDrawable(drawable);
-		return this;
-	}
-
-	public AppToolbarMethod setTitle(@NonNull CharSequence title) {
-		this.findAt(R.id.app_title_icon_id).setVisibility(View.GONE)
-				.findAt(R.id.app_title_text_id).setVisibility(View.VISIBLE).methodAtTextView().setText(title);
+	public AppToolbarMethod setTitleText(@NonNull CharSequence title) {
+		this.findAt(R.id.app_container_title_id).setVisibility(View.VISIBLE)
+				.findAt(R.id.app_toolbar_title_id).methodAtTextView().setText(title);
 		return this;
 	}
 
 	public AppToolbarMethod setTitleTextColor(@ColorInt int color) {
-		this.findAt(R.id.app_title_text_id).methodAtTextView().setTextColor(color);
+		this.findAt(R.id.app_container_title_id).setVisibility(View.VISIBLE)
+				.findAt(R.id.app_toolbar_title_id).methodAtTextView().setTextColor(color);
 		return this;
 	}
 
 	public AppToolbarMethod setTitleTextSize(float size) {
-		this.findAt(R.id.app_title_text_id).methodAtTextView().setTextSize(size);
-		return this;
-	}
-
-	public AppToolbarMethod setTitleImageResource(@DrawableRes int resId) {
-		this.findAt(R.id.app_title_text_id).setVisibility(View.GONE)
-				.findAt(R.id.app_title_icon_id).setVisibility(View.VISIBLE).methodAtImageView().setImageResource(resId);
-		return this;
-	}
-
-	public AppToolbarMethod setTitleImageDrawable(Drawable drawable) {
-		this.findAt(R.id.app_title_text_id).setVisibility(View.GONE)
-				.findAt(R.id.app_title_icon_id).setVisibility(View.VISIBLE).methodAtImageView().setImageDrawable(drawable);
+		this.findAt(R.id.app_container_title_id).setVisibility(View.VISIBLE)
+				.findAt(R.id.app_toolbar_title_id).methodAtTextView().setTextSize(size);
 		return this;
 	}
 
@@ -358,7 +236,9 @@ public class AppToolbarMethod extends UIToolbarMethod implements UILayoutControl
 			this.mToolbarMenuAdapter.setOnItemClickListener(this);
 
 			this.getViewController()
-					.findAt(R.id.app_menu_List_id)
+					.findAt(R.id.app_container_menu_id)
+					.setVisibility(View.VISIBLE)
+					.findAt(R.id.app_toolbar_menu_id)
 					.methodAtRecyclerView()
 					.setLayoutManager(new LinearLayoutManager(this.getContext(), LinearLayoutManager.HORIZONTAL, false))
 					.setAdapter(this.mToolbarMenuAdapter);

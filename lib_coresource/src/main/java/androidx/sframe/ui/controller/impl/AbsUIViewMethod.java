@@ -138,7 +138,7 @@ abstract class AbsUIViewMethod<PreView extends View> implements UIViewMethodCont
 
 	@CallSuper
 	@Override
-	public UIViewMethodController<PreView> recycle() {
+	public UIViewMethodController<PreView> recycled() {
 		this.preView = null;
 		return this;
 	}

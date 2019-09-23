@@ -37,5 +37,5 @@ public interface UIViewMethodController<PreView extends View> {
 
 	<Method extends UIViewMethod<V>, V extends View> Method get(@NonNull Class<Method> methodClass);
 
-	UIViewMethodController<PreView> recycle();
+	UIViewMethodController<PreView> recycled();
 }

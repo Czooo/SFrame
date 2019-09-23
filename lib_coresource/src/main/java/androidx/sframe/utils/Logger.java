@@ -3,15 +3,16 @@ package androidx.sframe.utils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.sframe.manager.SFrameManager;
 
 /**
  * @Author create by Zoran on 2019-09-22
  * @Email : 171905184@qq.com
  * @Description :
  */
-public final class LoggerCompat {
+public final class Logger {
 
-	private LoggerCompat() {
+	private Logger() {
 
 	}
 
@@ -26,79 +27,79 @@ public final class LoggerCompat {
 	}
 
 	public static void println(@NonNull Object object) {
-		if (LoggerCompat.debug()) {
+		if (Logger.debug()) {
 			System.out.println(object);
 		}
 	}
 
 	public static void i(@NonNull String message) {
-		LoggerCompat.i(LoggerCompat.getTag(), message);
+		Logger.i(Logger.getTag(), message);
 	}
 
 	public static void i(@NonNull Throwable throwable) {
-		LoggerCompat.i(LoggerCompat.getTag(), throwable.getMessage(), throwable);
+		Logger.i(Logger.getTag(), throwable.getMessage(), throwable);
 	}
 
 	public static void i(@NonNull String message, @NonNull Throwable throwable) {
-		LoggerCompat.i(LoggerCompat.getTag(), message, throwable);
+		Logger.i(Logger.getTag(), message, throwable);
 	}
 
 	public static void i(@NonNull String tag, @NonNull String message) {
-		if (LoggerCompat.debug()) {
+		if (Logger.debug()) {
 			Log.i(tag, message);
 		}
 	}
 
 	public static void i(@NonNull String tag, @NonNull String message, @NonNull Throwable throwable) {
-		if (LoggerCompat.debug()) {
+		if (Logger.debug()) {
 			Log.i(tag, message, throwable);
 		}
 	}
 
 	public static void d(@NonNull String message) {
-		LoggerCompat.d(LoggerCompat.getTag(), message);
+		Logger.d(Logger.getTag(), message);
 	}
 
 	public static void d(@NonNull Throwable throwable) {
-		LoggerCompat.d(LoggerCompat.getTag(), throwable.getMessage(), throwable);
+		Logger.d(Logger.getTag(), throwable.getMessage(), throwable);
 	}
 
 	public static void d(@NonNull String message, @NonNull Throwable throwable) {
-		LoggerCompat.d(LoggerCompat.getTag(), message, throwable);
+		Logger.d(Logger.getTag(), message, throwable);
 	}
 
 	public static void d(@NonNull String tag, @NonNull String message) {
-		if (LoggerCompat.debug()) {
+		if (Logger.debug()) {
 			Log.d(tag, message);
 		}
 	}
 
 	public static void d(@NonNull String tag, @NonNull String message, @NonNull Throwable throwable) {
-		if (LoggerCompat.debug()) {
+		if (Logger.debug()) {
 			Log.d(tag, message, throwable);
 		}
 	}
 
 	public static void e(@NonNull String message) {
-		LoggerCompat.e(LoggerCompat.getTag(), message);
+		Logger.e(Logger.getTag(), message);
 	}
 
 	public static void e(@NonNull Throwable throwable) {
-		LoggerCompat.e(LoggerCompat.getTag(), throwable.getMessage(), throwable);
+		Logger.e(Logger.getTag(), throwable.getMessage(), throwable);
 	}
 
 	public static void e(@NonNull String message, @NonNull Throwable throwable) {
-		LoggerCompat.e(LoggerCompat.getTag(), message, throwable);
+		Logger.e(Logger.getTag(), message, throwable);
 	}
 
 	public static void e(@NonNull String tag, @NonNull String message) {
-		if (LoggerCompat.debug()) {
+		if (Logger.debug()) {
 			Log.e(tag, message);
 		}
 	}
 
 	public static void e(@NonNull String tag, @NonNull String message, @NonNull Throwable throwable) {
-		if (LoggerCompat.debug()) {
+		if (Logger.debug()) {
 			Log.e(tag, message, throwable);
 		}
 	}

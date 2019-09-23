@@ -82,7 +82,7 @@ public class UIViewControllerImpl implements UIViewController {
 	@Override
 	public UIViewMethod<View> findAt(@NonNull View preView) {
 		if (this.mViewMethod != null) {
-			this.mViewMethod.recycle();
+			this.mViewMethod.recycled();
 		}
 		this.mViewMethod = new UIViewMethod<>(this, preView);
 		return this.mViewMethod;
@@ -133,10 +133,10 @@ public class UIViewControllerImpl implements UIViewController {
 	}
 
 	@Override
-	public UIViewController recycle() {
+	public UIViewController recycled() {
 		this.mViewHandler.removeCallbacksAndMessages(null);
 		if (this.mViewMethod != null) {
-			this.mViewMethod.recycle();
+			this.mViewMethod.recycled();
 			this.mViewMethod = null;
 		}
 		this.gc();

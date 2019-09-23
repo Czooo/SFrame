@@ -8,13 +8,13 @@ import androidx.annotation.Nullable;
 import androidx.sframe.model.AgentNavModel;
 import androidx.sframe.ui.abs.AbsActivity;
 import androidx.sframe.ui.controller.AppPageController;
-import androidx.sframe.utils.LoggerCompat;
+import androidx.sframe.utils.Logger;
 
 /**
  * Author create by ok on 2019-06-04
  * Email : ok@163.com.
  */
-public class AppCompatNavAgentActivity extends AbsActivity implements AppPageController.ContentViewInterface {
+public class NavAgentActivity extends AbsActivity implements AppPageController.ContentViewInterface {
 
 	private static final String KEY_MODEL = "androidx-support-nav:agentActivity:model";
 	private static final String KEY_POP = "androidx-support-nav:popEnabled";
@@ -45,12 +45,12 @@ public class AppCompatNavAgentActivity extends AbsActivity implements AppPageCon
 		final Bundle args = intent.getExtras();
 		try {
 			if (args == null) {
-				throw new IllegalStateException("AppCompatNavAgentActivity " + this + " not set args");
+				throw new IllegalStateException("NavAgentActivity " + this + " not set args");
 			}
 			final AgentNavModel mAgentNavModel = (AgentNavModel) args.getSerializable(KEY_MODEL);
 
 			if (mAgentNavModel == null || mAgentNavModel.errorArgs()) {
-				throw new IllegalStateException("AppCompatNavAgentActivity " + this + " not set model");
+				throw new IllegalStateException("NavAgentActivity " + this + " not set model");
 			}
 
 			if (mAgentNavModel.getPageClass() == null) {
@@ -66,7 +66,7 @@ public class AppCompatNavAgentActivity extends AbsActivity implements AppPageCon
 						.addGraph(navResId);
 			}
 		} catch (Exception e) {
-			LoggerCompat.e(e.getMessage(), e);
+			Logger.e(e.getMessage(), e);
 		}
 	}
 }

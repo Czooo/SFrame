@@ -80,7 +80,7 @@ public class TestFragment extends AbsListFragment<TestModel> implements Recycler
 		super.onPageViewCreated(savedInstanceState);
 		this.getToolbarController()
 				.getToolbarMethod()
-				.setTitle("TestFragment")
+				.setTitleText("TestFragment")
 				.addMenu(new AppMenuModel(1, "Menu"))
 				.setOnMenuClickListener(new AppToolbarMethod.OnMenuClickListener() {
 					@Override

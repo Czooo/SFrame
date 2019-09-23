@@ -15,14 +15,14 @@ import androidx.lifecycle.LifecycleEventObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.sframe.annotation.RunWithAsync;
 import androidx.sframe.helper.AnnotationHelper;
-import androidx.sframe.ui.AppCompatNavAgentActivity;
+import androidx.sframe.ui.NavAgentActivity;
 import androidx.sframe.ui.controller.AppNavController;
 import androidx.sframe.ui.controller.AppNavigation;
 import androidx.sframe.ui.controller.AppPageController;
 import androidx.sframe.ui.controller.UILayoutController;
 import androidx.sframe.ui.controller.UIToolbarController;
 import androidx.sframe.ui.controller.UIViewController;
-import androidx.sframe.utils.LoggerCompat;
+import androidx.sframe.utils.Logger;
 import androidx.sframe.widget.SRelativeLayout;
 
 /**
@@ -125,7 +125,7 @@ abstract class AbsPageControllerImpl<Page> implements AppPageController<Page>, U
 					isShouldPagePopEnabled = true;
 					isShouldLayoutStableMode = true;
 				} else {
-					isShouldPagePopEnabled = AppCompatNavAgentActivity.isShouldPagePopEnabled(arguments);
+					isShouldPagePopEnabled = NavAgentActivity.isShouldPagePopEnabled(arguments);
 					isShouldLayoutStableMode = false;
 				}
 
@@ -135,7 +135,7 @@ abstract class AbsPageControllerImpl<Page> implements AppPageController<Page>, U
 						.getToolbarMethod()
 						.setPopEnabled(isShouldPagePopEnabled);
 			} catch (IllegalStateException e) {
-				LoggerCompat.i(TAG, e);
+				Logger.i(TAG, e);
 			} finally {
 				prePageProvider.onPageViewCreated(savedInstanceState);
 				this.mIsViewCreated = false;
@@ -149,7 +149,7 @@ abstract class AbsPageControllerImpl<Page> implements AppPageController<Page>, U
 				layoutController.refreshed(savedInstanceState);
 			}
 		} catch (IllegalStateException e) {
-			LoggerCompat.i(TAG, e);
+			Logger.i(TAG, e);
 		}
 	}
 
@@ -242,31 +242,31 @@ abstract class AbsPageControllerImpl<Page> implements AppPageController<Page>, U
 	public void onStateChanged(@NonNull LifecycleOwner source, @NonNull Lifecycle.Event event) {
 		final String TAG = this.getPageOwner().getClass().getName();
 		if (Lifecycle.Event.ON_CREATE == event) {
-			LoggerCompat.i(TAG, "onCreate");
+			Logger.i(TAG, "onCreate");
 		} else if (Lifecycle.Event.ON_START == event) {
-			LoggerCompat.i(TAG, "onStart");
+			Logger.i(TAG, "onStart");
 		} else if (Lifecycle.Event.ON_RESUME == event) {
-			LoggerCompat.i(TAG, "onResume");
+			Logger.i(TAG, "onResume");
 		} else if (Lifecycle.Event.ON_PAUSE == event) {
-			LoggerCompat.i(TAG, "onPause");
+			Logger.i(TAG, "onPause");
 		} else if (Lifecycle.Event.ON_STOP == event) {
-			LoggerCompat.i(TAG, "onStop");
+			Logger.i(TAG, "onStop");
 		} else if (Lifecycle.Event.ON_DESTROY == event) {
-			LoggerCompat.i(TAG, "onDestory");
-			this.recycle();
+			Logger.i(TAG, "onDestory");
+			this.recycled();
 		}
 	}
 
 	@CallSuper
-	protected void recycle() {
+	protected void recycled() {
 		final String TAG = this.getPageOwner().getClass().getName();
 		try {
-			this.getLayoutController().recycle();
+			this.getLayoutController().recycled();
 		} catch (IllegalStateException e) {
-			LoggerCompat.i(TAG, e);
+			Logger.i(TAG, e);
 		} finally {
 			if (this.mViewController != null) {
-				this.mViewController.recycle();
+				this.mViewController.recycled();
 				this.mViewController = null;
 			}
 		}

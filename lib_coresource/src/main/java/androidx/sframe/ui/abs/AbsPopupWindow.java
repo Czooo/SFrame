@@ -5,6 +5,7 @@ import android.os.Bundle;
 import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.sframe.ui.controller.AppNavController;
 import androidx.sframe.ui.controller.AppPageController;
 import androidx.sframe.ui.controller.PopupWindowPageController;
 import androidx.sframe.ui.controller.UILayoutController;
@@ -73,6 +74,11 @@ public abstract class AbsPopupWindow extends AppCompatPopupWindow implements App
 	@NonNull
 	public final UIToolbarController getToolbarController() {
 		return this.getPageController().getToolbarController();
+	}
+
+	@NonNull
+	public final AppNavController<AppCompatPopupWindow> getAppNavController() {
+		return this.getPageController().getAppNavController();
 	}
 
 	@NonNull

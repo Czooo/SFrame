@@ -56,7 +56,7 @@ public class TestListPopupWindow extends AbsListPopupWindow<String> {
 		this.getPageController()
 				.getToolbarController()
 				.getToolbarMethod()
-				.setTitle("ListPopupWindow");
+				.setTitleText("ListPopupWindow");
 
 		this.getObjectListController()
 				// 避免滑动发生冲突

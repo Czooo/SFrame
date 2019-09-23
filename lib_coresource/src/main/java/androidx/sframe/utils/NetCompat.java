@@ -22,6 +22,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import androidx.annotation.NonNull;
+import androidx.sframe.manager.SFrameManager;
 
 /**
  * Author create by ok on 2018/6/6 0006

@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.core.content.ContextCompat;
 import androidx.sframe.R;
+import androidx.sframe.manager.SFrameManager;
 
 /**
  * 作者：Administrator on 2016/9/23 15:11

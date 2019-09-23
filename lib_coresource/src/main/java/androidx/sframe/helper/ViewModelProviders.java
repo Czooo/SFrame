@@ -1,5 +1,6 @@
 package androidx.sframe.helper;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import androidx.annotation.MainThread;
@@ -52,7 +53,9 @@ public class ViewModelProviders extends androidx.lifecycle.ViewModelProviders {
 			if (UIToolbarMethod.class.isAssignableFrom(modelClass)) {
 				//noinspection TryWithIdenticalCatches
 				try {
-					return modelClass.getConstructor(UILayoutController.class).newInstance(this.mLayoutController);
+					Constructor<Model> constructor = modelClass.getConstructor(UILayoutController.class);
+					constructor.setAccessible(true);
+					return constructor.newInstance(this.mLayoutController);
 				} catch (NoSuchMethodException e) {
 					throw new RuntimeException("Cannot create an instance of " + modelClass, e);
 				} catch (IllegalAccessException e) {

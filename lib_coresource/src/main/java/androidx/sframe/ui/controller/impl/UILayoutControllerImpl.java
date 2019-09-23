@@ -63,7 +63,7 @@ public class UILayoutControllerImpl implements UILayoutController, UILayoutState
 
 	public UILayoutControllerImpl(@NonNull SRelativeLayout parentView) {
 		this.mParentView = parentView;
-		this.mAsyncRequest = AsyncRequest.get();
+		this.mAsyncRequest = AsyncRequest.obtain();
 		this.mViewController = new UIViewControllerImpl(parentView);
 		this.mViewController.addOnFindViewListener(this);
 		this.mLayoutStateHandler = new UILayoutStateHandler(this);
@@ -591,7 +591,7 @@ public class UILayoutControllerImpl implements UILayoutController, UILayoutState
 	}
 
 	@Override
-	public UILayoutController recycle() {
+	public UILayoutController recycled() {
 		this.mAsyncRequest.cancel();
 		this.mViewModelStore.clear();
 		this.mOnLayoutListeners.clear();

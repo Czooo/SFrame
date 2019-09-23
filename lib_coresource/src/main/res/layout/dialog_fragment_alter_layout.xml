@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:background="@drawable/sha_sol_rou_rec_white"
+    android:orientation="vertical">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/dimen44PX"
+        android:layout_weight="1"
+        android:minHeight="@dimen/dimen120PX"
+        android:orientation="vertical">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/contentTextView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_gravity="center"
+            android:textStyle="bold"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="这个是Alter提示内容"
+            android:textColor="@color/_FFA2A5B3"
+            android:textSize="@dimen/textSize16sp"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/titleTextView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="这个是Alter标题"
+            android:textSize="@dimen/textSize14sp"/>
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+    <View style="@style/LineTheme.Vertical"/>
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="@dimen/dimen470PX"
+        android:layout_height="@dimen/dimen85PX"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/cancel"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:background="@drawable/sel_click_rou_rec_bottom_left_white"
+            android:gravity="center"
+            android:text="Cancel"
+            android:textColor="@color/_FFFF0000"
+            android:textStyle="bold"/>
+
+        <View
+            android:id="@+id/lineView"
+            style="@style/LineTheme.Horizontal"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/ok"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:background="@drawable/sel_click_rou_rec_bottom_right_white"
+            android:gravity="center"
+            android:text="Ok"
+            android:textColor="@color/_FF1AC3BE"
+            android:textStyle="bold"/>
+    </androidx.appcompat.widget.LinearLayoutCompat>
+</androidx.appcompat.widget.LinearLayoutCompat>

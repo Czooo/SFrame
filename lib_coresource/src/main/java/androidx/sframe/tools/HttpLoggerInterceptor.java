@@ -3,7 +3,7 @@ package androidx.sframe.tools;
 import java.io.IOException;
 
 import androidx.annotation.NonNull;
-import androidx.sframe.utils.LoggerCompat;
+import androidx.sframe.utils.Logger;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -29,7 +29,7 @@ public class HttpLoggerInterceptor implements Interceptor {
 				.append("Request Method : " + request.method() + "\n")
 				.append("Request : " + request.toString() + "\n")
 				.append("Http Request End ========================================\n");
-		LoggerCompat.e(builder.toString());
+		Logger.e(builder.toString());
 		return chain.proceed(request);
 	}
 }

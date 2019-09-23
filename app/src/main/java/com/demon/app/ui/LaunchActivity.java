@@ -2,28 +2,22 @@ package com.demon.app.ui;
 
 import android.os.Bundle;
 
-import com.demon.app.R;
-
 import androidx.annotation.Nullable;
 import androidx.sframe.ui.abs.AbsActivity;
 
 /**
- * Author create by ok on 2019-06-18
- * Email : ok@163.com.
+ * @Author create by Zoran on 2019-09-23
+ * @Email : 171905184@qq.com
+ * @Description :
  */
-public class TempActivity extends AbsActivity {
+public class LaunchActivity extends AbsActivity  {
 
 	@Override
 	public int onPageLayoutId(@Nullable Bundle savedInstanceState) {
-		return R.layout.activity_temp;
+		return 0;
 	}
 
 	@Override
 	public void onPageViewCreated(@Nullable Bundle savedInstanceState) {
-		this.getPageController()
-				.getToolbarController()
-				.getToolbarMethod()
-				.setPopEnabled(true)
-				.setTitleText("TempActivity");
 	}
 }

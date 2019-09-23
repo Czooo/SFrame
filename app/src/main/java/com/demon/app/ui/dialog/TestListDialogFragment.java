@@ -52,7 +52,7 @@ public class TestListDialogFragment extends AbsListDialogFragment<String> {
 		this.getPageController()
 				.getToolbarController()
 				.getToolbarMethod()
-				.setTitle("ListDialogFragment");
+				.setTitleText("ListDialogFragment");
 	}
 
 	@Override

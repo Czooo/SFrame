@@ -32,8 +32,8 @@ public class StickyFragment extends AbsListFragment<ContactGroup> {
 	public void onPageViewCreated(@Nullable Bundle savedInstanceState) {
 		super.onPageViewCreated(savedInstanceState);
 
-		View loadingView = LayoutInflater.from(this.getContext()).inflate(R.layout.layout_loading_default, this.getObjectListController().getRecyclerView(), false);
-		View emptyView = LayoutInflater.from(this.getContext()).inflate(R.layout.layout_empty_default, this.getObjectListController().getRecyclerView(), false);
+		View loadingView = LayoutInflater.from(this.getContext()).inflate(R.layout.layout_page_loading_default, this.getObjectListController().getRecyclerView(), false);
+		View emptyView = LayoutInflater.from(this.getContext()).inflate(R.layout.layout_page_empty_default, this.getObjectListController().getRecyclerView(), false);
 
 		final StickExpandableRecyclerAdapter expandableRecyclerAdapter = new StickExpandableRecyclerAdapter();
 		expandableRecyclerAdapter.setLoadingView(loadingView);
@@ -57,7 +57,7 @@ public class StickyFragment extends AbsListFragment<ContactGroup> {
 				holder.getDataSourceController().notifyChildItemRemoved(groupPosition, position);
 				holder.getDataSourceController().notifyChildItemRangeChanged(groupPosition, position, contactGroup.size() - position);
 
-//				contactGroup.getContacts().get(position)
+//				contactGroup.getContacts().obtain(position)
 //						.setPhoneNo("1380013800 - " + position);
 //				holder.getDataSourceController().notifyChildItemChanged(groupPosition, position);
 
