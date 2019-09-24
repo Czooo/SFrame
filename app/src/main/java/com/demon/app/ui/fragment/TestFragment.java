@@ -234,7 +234,10 @@ public class TestFragment extends AbsListFragment<TestModel> implements Recycler
 				listPageController2.show();
 				break;
 			case 10:
+				Bundle args = new Bundle();
+				args.putString("Test", "Args");
 				TestPopupWindow2 popupWindow2 = new TestPopupWindow2(this.getPageController());
+				popupWindow2.setArguments(args);
 				popupWindow2.showAsDropDown(this.getToolbarController().getToolbarMethod().getToolbarView());
 				break;
 			case 11:

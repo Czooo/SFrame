@@ -286,7 +286,7 @@ final class AppNavControllerImpl<Page> implements AppNavController<Page> {
 			if (preDialogFragment instanceof AbsDialogFragment) {
 				((AbsDialogFragment) preDialogFragment).getPageController().show();
 			} else {
-				preDialogFragment.show(AppPageControllerHelper.requireFragmentManager(this.getPageController()), pageClass.getName());
+				preDialogFragment.show(AppPageControllerHelper.requireChildFragmentManager(this.getPageController()), pageClass.getName());
 			}
 		} catch (IllegalAccessException e) {
 			throw new Fragment.InstantiationException("Unable to instantiate fragment " + pageClass
@@ -308,6 +308,6 @@ final class AppNavControllerImpl<Page> implements AppNavController<Page> {
 
 	@NonNull
 	private AppCompatNavHostController getNavHostController() {
-		return AppNavigation.findNavHostController(AppPageControllerHelper.requireActivity(this.getPageController()));
+		return AppNavigation.findNavHostController(AppPageControllerHelper.requireFragmentActivity(this.getPageController()));
 	}
 }

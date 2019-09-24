@@ -21,14 +21,12 @@ import androidx.sframe.ui.controller.impl.AppPageDialogFragmentControllerImpl;
  * Author create by ok on 2019-06-03
  * Email : ok@163.com.
  */
-public abstract class AbsDialogFragment extends AppCompatDialogFragment implements AppPageController.WindowPageProvider {
+public abstract class AbsDialogFragment extends AppCompatDialogFragment implements AppPageController.PageProvider {
 
-	private AppPageController<?> mHostPageController;
-
-	private DialogFragmentPageController<AppCompatDialogFragment> mPageController;
+	private final DialogFragmentPageController<AppCompatDialogFragment> mPageController;
 
 	public AbsDialogFragment(@NonNull AppPageController<?> hostPageController) {
-		this.mHostPageController = hostPageController;
+		this.mPageController = new AppPageDialogFragmentControllerImpl(this, hostPageController);
 	}
 
 	@CallSuper
@@ -83,20 +81,13 @@ public abstract class AbsDialogFragment extends AppCompatDialogFragment implemen
 	}
 
 	@NonNull
-	public DialogFragmentPageController<AppCompatDialogFragment> getPageController() {
-		if (this.mPageController == null) {
-			this.mPageController = new AppPageDialogFragmentControllerImpl(this);
-		}
-		return this.mPageController;
+	public final AppPageController<?> getHostPageController() {
+		return this.getPageController().getHostPageController();
 	}
 
 	@NonNull
-	@Override
-	public final AppPageController<?> getHostPageController() {
-		if (this.mHostPageController == null) {
-			throw new IllegalStateException("Your page " + this + " is not yet attached to the HostPage instance. ");
-		}
-		return this.mHostPageController;
+	public DialogFragmentPageController<AppCompatDialogFragment> getPageController() {
+		return this.mPageController;
 	}
 
 	public void setOnDismissListener(@NonNull DialogFragmentPageController.OnDismissListener listener) {

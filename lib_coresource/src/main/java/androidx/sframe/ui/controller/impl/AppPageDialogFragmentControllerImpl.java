@@ -1,5 +1,6 @@
 package androidx.sframe.ui.controller.impl;
 
+import android.app.Dialog;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
@@ -11,12 +12,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StyleRes;
 import androidx.appcompat.app.AppCompatDialogFragment;
+import androidx.fragment.app.DialogFragment;
 import androidx.sframe.R;
+import androidx.sframe.ui.controller.AppPageController;
 import androidx.sframe.ui.controller.DialogFragmentPageController;
 import androidx.sframe.ui.controller.UILayoutController;
-import androidx.fragment.app.DialogFragment;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleOwner;
 
 /**
  * Author create by ok on 2019-06-18
@@ -24,16 +24,19 @@ import androidx.lifecycle.LifecycleOwner;
  */
 public class AppPageDialogFragmentControllerImpl extends AppPageFragmentControllerImpl<AppCompatDialogFragment> implements DialogFragmentPageController<AppCompatDialogFragment> {
 
+	private final AppPageController<?> mHostPageController;
+
 	private int mLayoutWidth;
 	private int mLayoutHeight;
 	private int mLayoutGravity = Gravity.CENTER;
 	private int mLayoutAnimStyle = R.style.DialogAnimation;
 	private float mLayoutBackgroundAlpha = 0.22f;
 
-	private OnDismissListener mDismissListener;
+	private OnDismissListener mOnDismissListener;
 
-	public AppPageDialogFragmentControllerImpl(@NonNull PageProvider pageProvider) {
+	public AppPageDialogFragmentControllerImpl(@NonNull PageProvider pageProvider, @NonNull AppPageController<?> hostPageController) {
 		super(pageProvider);
+		this.mHostPageController = hostPageController;
 	}
 
 	@Override
@@ -43,64 +46,84 @@ public class AppPageDialogFragmentControllerImpl extends AppPageFragmentControll
 	}
 
 	@Override
-	public void onPopClick(@NonNull View view) {
-		this.getPageOwner().dismiss();
-	}
-
-	@Override
-	public void onStateChanged(@NonNull LifecycleOwner source, @NonNull Lifecycle.Event event) {
-		super.onStateChanged(source, event);
-		if (Lifecycle.Event.ON_START == event) {
-			int preWidth = -2;
-			int preHeight = -2;
-			View preView = null;
-			try {
-				preView = this.getLayoutController().getLayoutAt(UILayoutController.LayoutType.Content.key).getContentView();
-			} catch (IllegalStateException e) {
-				preView = this.getPageView();
-			} finally {
-				if (preView != null) {
-					final ViewGroup.LayoutParams preLayoutParams = preView.getLayoutParams();
-					preWidth = preLayoutParams.width;
-					preHeight = preLayoutParams.height;
-				}
-
-				if (this.mLayoutWidth != 0) {
-					preWidth = this.mLayoutWidth;
-				}
-
-				if (this.mLayoutHeight != 0) {
-					preHeight = this.mLayoutHeight;
-				}
-
-				final Window preWindow = this.getPageOwner().requireDialog().getWindow();
-				if (preWindow != null) {
-					preWindow.setWindowAnimations(this.mLayoutAnimStyle);
-					preWindow.setDimAmount(this.mLayoutBackgroundAlpha);
-					preWindow.setLayout(preWidth, preHeight);
-					preWindow.setGravity(this.mLayoutGravity);
-				}
-				if (ViewGroup.LayoutParams.MATCH_PARENT == preHeight) {
-					try {
-						this.getToolbarController()
-								.getToolbarMethod()
-								.setStateBarEnabled(true);
-					} catch (IllegalStateException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		} else if (Lifecycle.Event.ON_DESTROY == event) {
-			if (this.mDismissListener != null) {
-				this.mDismissListener.onDismiss();
-			}
-		}
+	protected void onPreViewCreated(@Nullable Bundle savedInstanceState) throws Exception {
+		super.onPreViewCreated(savedInstanceState);
+		this.getLayoutController()
+				.setToolbarLayoutStableMode(true)
+				.getToolbarController()
+				.getToolbarMethod()
+				.setPopEnabled(true);
 	}
 
 	@NonNull
 	@Override
 	public final AppCompatDialogFragment getPageOwner() {
 		return (AppCompatDialogFragment) this.getPageProvider();
+	}
+
+	@Override
+	public final AppPageController<?> getHostPageController() {
+		if (this.mHostPageController == null) {
+			throw new IllegalStateException("Your page " + this + " is not yet attached to the HostPage instance. ");
+		}
+		return this.mHostPageController;
+	}
+
+	@Override
+	public void onPopClick(@NonNull View view) {
+		this.getPageOwner().dismiss();
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		View contentView = null;
+		try {
+			contentView = this.getLayoutController().requireLayoutAt(UILayoutController.LayoutType.Content.key).getContentView();
+		} catch (IllegalStateException e) {
+			contentView = this.getPageView();
+		} finally {
+			if (contentView == null) {
+				return;
+			}
+			final ViewGroup.LayoutParams layoutParams = contentView.getLayoutParams();
+			int width = layoutParams.width;
+			int height = layoutParams.height;
+
+			if (this.mLayoutWidth != 0 && this.mLayoutHeight != 0) {
+				width = this.mLayoutWidth;
+				height = this.mLayoutHeight;
+			}
+
+			final AppCompatDialogFragment pageOwner = this.getPageOwner();
+			final Dialog requireDialog = pageOwner.requireDialog();
+			final Window window = requireDialog.getWindow();
+			if (window == null) {
+				return;
+			}
+			window.setWindowAnimations(this.mLayoutAnimStyle);
+			window.setDimAmount(this.mLayoutBackgroundAlpha);
+			window.setGravity(this.mLayoutGravity);
+			window.setLayout(width, height);
+
+			if (ViewGroup.LayoutParams.MATCH_PARENT == height) {
+				try {
+					this.getToolbarController()
+							.getToolbarMethod()
+							.setStateBarEnabled(true);
+				} catch (IllegalStateException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		if (this.mOnDismissListener != null) {
+			this.mOnDismissListener.onDismiss();
+		}
 	}
 
 	@Override
@@ -135,34 +158,34 @@ public class AppPageDialogFragmentControllerImpl extends AppPageFragmentControll
 
 	@Override
 	public final DialogFragmentPageController<AppCompatDialogFragment> setOnDismissListener(@NonNull OnDismissListener listener) {
-		this.mDismissListener = listener;
+		this.mOnDismissListener = listener;
 		return this;
 	}
 
 	@Override
 	public final DialogFragmentPageController<AppCompatDialogFragment> show() {
-		this.getPageOwner().show(AppPageControllerHelper.requireFragmentManager(this), this.getClass().getName());
+		this.getPageOwner().show(AppPageControllerHelper.requireSupportFragmentManager(this), this.getClass().getName());
 		return this;
 	}
 
 	@Override
 	public final DialogFragmentPageController<AppCompatDialogFragment> show(@NonNull View anchor) {
 		this.setGravity(Gravity.BOTTOM);
-		this.setWidth(-1);
+		this.setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
 		this.setHeight(this.calculatAnchorViewHeight(anchor));
 		return this.show();
 	}
 
 	@Override
 	public final DialogFragmentPageController<AppCompatDialogFragment> showNow() {
-		this.getPageOwner().showNow(AppPageControllerHelper.requireFragmentManager(this), this.getClass().getName());
+		this.getPageOwner().showNow(AppPageControllerHelper.requireSupportFragmentManager(this), this.getClass().getName());
 		return this;
 	}
 
 	@Override
 	public final DialogFragmentPageController<AppCompatDialogFragment> showNow(@NonNull View anchor) {
 		this.setGravity(Gravity.BOTTOM);
-		this.setWidth(-1);
+		this.setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
 		this.setHeight(this.calculatAnchorViewHeight(anchor));
 		return this.showNow();
 	}

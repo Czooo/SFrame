@@ -44,11 +44,10 @@ public class ToolbarMenuDelegate extends AbsRecyclerDelegate<AppMenuModel> {
 		}
 
 		final int count = holder.getDataSourceController().getDataSourceCount();
-		final int sizeOf12 = 12;
+		final int sizeOf12 = 10;
 		final RecyclerView.LayoutParams mLayoutParams = (RecyclerView.LayoutParams) holder.itemView.getLayoutParams();
 
 		if (count > 1) {
-
 			if (position == 0) {
 				// first position
 				mLayoutParams.leftMargin = sizeOf12 * 2;

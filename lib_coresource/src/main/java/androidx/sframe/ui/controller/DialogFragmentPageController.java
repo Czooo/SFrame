@@ -12,6 +12,8 @@ import androidx.annotation.StyleRes;
  */
 public interface DialogFragmentPageController<Page> extends AppPageController<Page> {
 
+	AppPageController<?> getHostPageController();
+
 	DialogFragmentPageController<Page> setWidth(int width);
 
 	DialogFragmentPageController<Page> setHeight(int height);

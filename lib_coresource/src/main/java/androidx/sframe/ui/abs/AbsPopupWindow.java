@@ -1,8 +1,12 @@
 package androidx.sframe.ui.abs;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.CallSuper;
+import androidx.annotation.FloatRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.sframe.ui.controller.AppNavController;
@@ -18,17 +22,18 @@ import androidx.sframe.widget.AppCompatPopupWindow;
  * Author create by ok on 2019-06-03
  * Email : ok@163.com.
  */
-public abstract class AbsPopupWindow extends AppCompatPopupWindow implements AppPageController.WindowPageProvider {
+public abstract class AbsPopupWindow extends AppCompatPopupWindow implements AppPageController.PageProvider {
 
-	// host pageController
-	private AppPageController<?> mHostPageController;
-	// this pageController
+	private final AppPageController<?> mHostPageController;
 	private PopupWindowPageController<AppCompatPopupWindow> mPageController;
 
 	public AbsPopupWindow(@NonNull AppPageController<?> hostPageController) {
-		super(false);
+		this(hostPageController, null);
+	}
+
+	public AbsPopupWindow(@NonNull AppPageController<?> hostPageController, @Nullable Bundle savedInstanceState) {
+		super(hostPageController.requireContext(), savedInstanceState);
 		this.mHostPageController = hostPageController;
-		this.performOnCreate();
 	}
 
 	@CallSuper
@@ -38,22 +43,22 @@ public abstract class AbsPopupWindow extends AppCompatPopupWindow implements App
 		this.getPageController().onCreate(savedInstanceState);
 	}
 
-	@CallSuper
+	@NonNull
 	@Override
-	public void onSaveInstanceState(@NonNull Bundle savedInstanceState) {
-		super.onSaveInstanceState(savedInstanceState);
-		this.getPageController().onSaveInstanceState(savedInstanceState);
+	protected View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+		return this.getPageController().onCreateView(inflater, container, savedInstanceState);
 	}
 
 	@Override
-	public void dismiss() {
-		final PopupWindowPageController<AppCompatPopupWindow> pageController = this.getPageController();
-		if (pageController instanceof AppPagePopupWindowControllerImpl) {
-			if (((AppPagePopupWindowControllerImpl) this.getPageController()).performDismiss()) {
-				return;
-			}
-		}
-		super.dismiss();
+	protected void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+		super.onViewCreated(view, savedInstanceState);
+		this.getPageController().onViewCreated(savedInstanceState);
+	}
+
+	@Override
+	public void onSaveInstanceState(@NonNull Bundle outState) {
+		super.onSaveInstanceState(outState);
+		this.getPageController().onSaveInstanceState(outState);
 	}
 
 	@Override
@@ -82,6 +87,14 @@ public abstract class AbsPopupWindow extends AppCompatPopupWindow implements App
 	}
 
 	@NonNull
+	public final AppPageController<?> getHostPageController() {
+		if (this.mHostPageController == null) {
+			throw new IllegalStateException("Your page " + this + " is not yet attached to the HostPage instance. ");
+		}
+		return this.mHostPageController;
+	}
+
+	@NonNull
 	public PopupWindowPageController<AppCompatPopupWindow> getPageController() {
 		if (this.mPageController == null) {
 			this.mPageController = new AppPagePopupWindowControllerImpl(this);
@@ -89,12 +102,8 @@ public abstract class AbsPopupWindow extends AppCompatPopupWindow implements App
 		return this.mPageController;
 	}
 
-	@NonNull
-	@Override
-	public final AppPageController<?> getHostPageController() {
-		if (this.mHostPageController == null) {
-			throw new IllegalStateException("Your page " + this + " is not yet attached to the HostPage instance. ");
-		}
-		return this.mHostPageController;
+	// 全屏透明度
+	public final void setWindowBackgroundAlpha(@FloatRange(from = 0, to = 1.f) float alpha) {
+		this.getPageController().setWindowBackgroundAlpha(alpha);
 	}
 }

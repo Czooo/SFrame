@@ -12,6 +12,7 @@ import androidx.sframe.helper.PageDragHelper;
 import androidx.sframe.ui.abs.AbsPopupWindow;
 import androidx.sframe.ui.controller.AppNavigation;
 import androidx.sframe.ui.controller.AppPageController;
+import androidx.sframe.utils.ToastCompat;
 
 /**
  * Author create by ok on 2019-06-19
@@ -30,6 +31,9 @@ public class TestPopupWindow2 extends AbsPopupWindow {
 
 	@Override
 	public void onPageViewCreated(@Nullable Bundle savedInstanceState) {
+		Bundle args = this.requireArguments();
+		ToastCompat.toastDebug(args.getString("Test",""));
+
 		this.getViewController()
 				.findAt(R.id.text1)
 				.setOnClickListener(new View.OnClickListener() {
@@ -58,10 +62,9 @@ public class TestPopupWindow2 extends AbsPopupWindow {
 				.setDragCloseDirection(PageDragHelper.DRAG_DIRECTION_TOP)
 				.setDragCloseEnabled(true);
 
-		// animation
-		this.getPageController()
-				.setMarginBottom(250)
-				.setBackgroundViewAlpha(0.55f)
-				.setCustomAnimation(R.anim.slide_in_from_top, R.anim.slide_out_to_top);
+		this.setBackgroundAlpha(0.55F);
+		this.setBackgroundMarginBottom(250);
+		this.setLayoutEnterAnimation(R.anim.slide_in_from_top);
+		this.setLayoutExitAnimation(R.anim.slide_out_to_top);
 	}
 }

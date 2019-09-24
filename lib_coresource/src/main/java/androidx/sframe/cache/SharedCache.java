@@ -13,58 +13,58 @@ import androidx.sframe.manager.SFrameManager;
  * Author create by ok on 2019/2/13
  * Email : ok@163.com.
  */
-public class SharedACache {
+public class SharedCache {
 
-	private static class SharedACacheHelper {
-		private static final SharedACache INSTANCE = new SharedACache("SingleInstance.Shared");
+	private static class Helper {
+		private static final SharedCache INSTANCE = new SharedCache("SingleInstance.Shared");
 	}
 
-	public static SharedACache getInstance() {
-		return SharedACacheHelper.INSTANCE;
+	public static SharedCache getInstance() {
+		return Helper.INSTANCE;
 	}
 
 	private final SharedPreferences mSharedPreferences;
 
 	private SharedPreferences.Editor mEditor;
 
-	public SharedACache() {
-		this("SharedACache.Shared");
+	public SharedCache() {
+		this("SharedCache.Shared");
 	}
 
-	public SharedACache(String fileName) {
+	public SharedCache(String fileName) {
 		mSharedPreferences = SFrameManager.getInstance().getContext().getSharedPreferences(fileName, 0);
 	}
 
-	public SharedACache put(String key, String value) {
+	public SharedCache put(String key, String value) {
 		editor().putString(key, value);
 		return this;
 	}
 
-	public SharedACache put(String key, long value) {
+	public SharedCache put(String key, long value) {
 		editor().putLong(key, value);
 		return this;
 	}
 
-	public SharedACache put(String key, int value) {
+	public SharedCache put(String key, int value) {
 		editor().putInt(key, value);
 		return this;
 	}
 
-	public SharedACache put(String key, float value) {
+	public SharedCache put(String key, float value) {
 		editor().putFloat(key, value);
 		return this;
 	}
 
-	public SharedACache put(String key, boolean value) {
+	public SharedCache put(String key, boolean value) {
 		editor().putBoolean(key, value);
 		return this;
 	}
 
-	public <T> SharedACache putObjectModel(T model) {
+	public <T> SharedCache putObjectModel(T model) {
 		return putObjectModel(model.getClass().getName(), model);
 	}
 
-	public <T> SharedACache putObjectModel(String key, T model) {
+	public <T> SharedCache putObjectModel(String key, T model) {
 		put(key, new Gson().toJson(model));
 		return this;
 	}
@@ -105,15 +105,15 @@ public class SharedACache {
 		return mSharedPreferences.contains(key);
 	}
 
-	public SharedACache remove(String key) {
+	public SharedCache remove(String key) {
 		editor().remove(key);
 		return this;
 	}
 
 	public boolean commit() {
-		boolean commot = editor().commit();
+		boolean commit = editor().commit();
 		mEditor = null;
-		return commot;
+		return commit;
 	}
 
 	public boolean clear() {
@@ -123,9 +123,7 @@ public class SharedACache {
 
 	private SharedPreferences.Editor editor() {
 		if (mEditor == null) {
-			synchronized (this) {
-				mEditor = mSharedPreferences.edit();
-			}
+			mEditor = mSharedPreferences.edit();
 		}
 		return mEditor;
 	}

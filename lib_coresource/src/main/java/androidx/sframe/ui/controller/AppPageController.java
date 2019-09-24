@@ -1,5 +1,6 @@
 package androidx.sframe.ui.controller;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,6 +8,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelStoreOwner;
 
@@ -18,12 +20,23 @@ public interface AppPageController<Page> extends LifecycleOwner, ViewModelStoreO
 
 	void onCreate(@Nullable Bundle savedInstanceState);
 
-	@Nullable
 	View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState);
 
 	void onViewCreated(@Nullable Bundle savedInstanceState);
 
 	void onSaveInstanceState(@NonNull Bundle savedInstanceState);
+
+	@Nullable
+	Context getContext();
+
+	@NonNull
+	Context requireContext();
+
+	@Nullable
+	FragmentActivity getFragmentActivity();
+
+	@NonNull
+	FragmentActivity requireFragmentActivity();
 
 	@NonNull
 	Page getPageOwner();
@@ -53,12 +66,6 @@ public interface AppPageController<Page> extends LifecycleOwner, ViewModelStoreO
 		void onPageViewCreated(@Nullable Bundle savedInstanceState);
 
 		void onPageDataSourceChanged(@Nullable Object params);
-	}
-
-	interface WindowPageProvider extends PageProvider {
-
-		@NonNull
-		AppPageController<?> getHostPageController();
 	}
 
 	interface PageViewInterface {

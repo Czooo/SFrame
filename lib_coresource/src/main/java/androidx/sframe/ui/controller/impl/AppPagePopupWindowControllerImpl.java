@@ -1,28 +1,19 @@
 package androidx.sframe.ui.controller.impl;
 
-import android.graphics.Color;
-import android.graphics.Rect;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.PopupWindow;
 
-import androidx.annotation.AnimRes;
-import androidx.annotation.CallSuper;
 import androidx.annotation.FloatRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleEventObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelStore;
 import androidx.sframe.R;
-import androidx.sframe.listener.OnAnimationListener;
 import androidx.sframe.ui.controller.PopupWindowPageController;
 import androidx.sframe.ui.controller.UILayoutController;
 import androidx.sframe.widget.AppCompatPopupWindow;
@@ -33,70 +24,27 @@ import androidx.sframe.widget.AppCompatPopupWindow;
  */
 public class AppPagePopupWindowControllerImpl extends AbsPageControllerImpl<AppCompatPopupWindow> implements PopupWindowPageController<AppCompatPopupWindow> {
 
-	private final Rect mRect = new Rect();
-	private float mLayoutBackgroundViewAlpha = 0.F;
-	private int mLayoutEnterAnimationResId;
-	private int mLayoutExitAnimationResId;
+	private float mWindowBackgroundAlpha = -1.F;
 
 	public AppPagePopupWindowControllerImpl(@NonNull PageProvider pageProvider) {
 		super(pageProvider);
 	}
 
-	@CallSuper
 	@Override
 	public void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		final AppCompatPopupWindow prePopupWindow = this.getPageOwner();
+		AppCompatPopupWindow popupWindow = this.getPageOwner();
+		popupWindow.setAnimationStyle(R.style.PopupWindowAnimation);
+	}
 
-		int preWidth = -2;
-		int preHeight = -2;
-		View preContentView = null;
-
-		try {
-			if (savedInstanceState == null) {
-				final View contentView = this.onCreateView(LayoutInflater.from(AppPageControllerHelper.requireContext(this)), null, savedInstanceState);
-				if (contentView != null) {
-					contentView.setClickable(true);
-					contentView.setFocusable(true);
-					contentView.setFocusableInTouchMode(true);
-					prePopupWindow.setContentView(contentView);
-				}
-			}
-			preContentView = this.getLayoutController().getLayoutAt(UILayoutController.LayoutType.Content.key).getContentView();
-		} catch (IllegalStateException e) {
-			preContentView = this.getPageView();
-		} finally {
-			prePopupWindow.setFocusable(true);
-			prePopupWindow.setTouchable(true);
-			prePopupWindow.setOutsideTouchable(true);
-			prePopupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-			prePopupWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
-			prePopupWindow.setAnimationStyle(R.style.PopupWindowAnimation);
-			this.onViewCreated(savedInstanceState);
-			// 生成BackgroundView
-			final ColorDrawable preBackgroundDrawable = new ColorDrawable(Color.BLACK);
-			preBackgroundDrawable.setAlpha((int) (this.mLayoutBackgroundViewAlpha * 255));
-			prePopupWindow.setBackgroundDrawable(preBackgroundDrawable);
-			// 设置Width／Height
-			if (preContentView != null) {
-				final ViewGroup.LayoutParams preLayoutParams = preContentView.getLayoutParams();
-				preWidth = preLayoutParams.width;
-				preHeight = preLayoutParams.height;
-			}
-			prePopupWindow.setWidth(preWidth);
-			prePopupWindow.setHeight(preHeight);
-
-			if (this.mLayoutEnterAnimationResId != 0) {
-				final View mContentView = prePopupWindow.getContentView();
-				prePopupWindow.setAnimationStyle(0);
-				final Animation preAnimation = AnimationUtils.loadAnimation(mContentView.getContext(), this.mLayoutEnterAnimationResId);
-				preAnimation.setFillEnabled(true);
-				preAnimation.setFillAfter(true);
-				mContentView.clearAnimation();
-				mContentView.startAnimation(preAnimation);
-			}
-			prePopupWindow.update();
-		}
+	@Override
+	protected void onPreViewCreated(@Nullable Bundle savedInstanceState) throws Exception {
+		super.onPreViewCreated(savedInstanceState);
+		this.getLayoutController()
+				.setToolbarLayoutStableMode(true)
+				.getToolbarController()
+				.getToolbarMethod()
+				.setPopEnabled(true);
 	}
 
 	@NonNull
@@ -133,109 +81,74 @@ public class AppPagePopupWindowControllerImpl extends AbsPageControllerImpl<AppC
 	}
 
 	@Override
-	public void onStateChanged(@NonNull LifecycleOwner source, @NonNull Lifecycle.Event event) {
-		super.onStateChanged(source, event);
-		if (Lifecycle.Event.ON_RESUME == event) {
-			this.performOnResume();
-		} else if (Lifecycle.Event.ON_DESTROY == event) {
-			this.performOnDestroy();
+	protected void onStart() {
+		super.onStart();
+		View contentView = null;
+		try {
+			contentView = this.getLayoutController().requireLayoutAt(UILayoutController.LayoutType.Content.key).getContentView();
+		} catch (Exception e) {
+			contentView = this.getPageView();
+		} finally {
+			if (contentView != null) {
+				final AppCompatPopupWindow popupWindow = this.getPageOwner();
+				final ViewGroup.LayoutParams layoutParams = contentView.getLayoutParams();
+				if (layoutParams == null) {
+					popupWindow.setWidth(-2);
+					popupWindow.setHeight(-2);
+				} else {
+					popupWindow.setWidth(layoutParams.width);
+					popupWindow.setHeight(layoutParams.height);
+				}
+			}
+			if (this.mWindowBackgroundAlpha >= 0.F) {
+				this.requestWindowBackgroundAlpha(this.mWindowBackgroundAlpha);
+			}
 		}
 	}
 
 	@Override
-	public PopupWindowPageController<AppCompatPopupWindow> setAnimationStyle(int animationStyle) {
-		this.getPageOwner().setAnimationStyle(animationStyle);
-		return this;
+	protected void onResume() {
+		super.onResume();
+		this.requireFragmentActivity().getLifecycle()
+				.addObserver(new HostLifecycleEventObserver());
 	}
 
 	@Override
-	public PopupWindowPageController<AppCompatPopupWindow> setCustomAnimation(@AnimRes int enterAnimResId, @AnimRes int exitAnimResId) {
-		this.mLayoutEnterAnimationResId = enterAnimResId;
-		this.mLayoutExitAnimationResId = exitAnimResId;
-		return this;
-	}
-
-	@Override
-	public PopupWindowPageController<AppCompatPopupWindow> setBackgroundViewAlpha(@FloatRange(from = 0, to = 1.f) float alpha) {
-		this.mLayoutBackgroundViewAlpha = alpha;
-		return this;
+	protected void onDestroy() {
+		super.onDestroy();
+		this.requestWindowBackgroundAlpha(1.F);
 	}
 
 	@Override
 	public PopupWindowPageController<AppCompatPopupWindow> setWindowBackgroundAlpha(@FloatRange(from = 0.F, to = 1.F) float alpha) {
-		final Window preWindow = AppPageControllerHelper.requireActivity(this).getWindow();
-		if (preWindow != null) {
-			WindowManager.LayoutParams preLayoutParams = preWindow.getAttributes();
-			preLayoutParams.alpha = alpha;
-			preWindow.setAttributes(preLayoutParams);
+		this.mWindowBackgroundAlpha = alpha;
+		return this;
+	}
+
+	private void requestWindowBackgroundAlpha(@FloatRange(from = 0.F, to = 1.F) float alpha) {
+		final Window window = this.requireFragmentActivity().getWindow();
+		if (window == null) {
+			return;
 		}
-		return this;
+		WindowManager.LayoutParams layoutParams = window.getAttributes();
+		layoutParams.alpha = alpha;
+		window.setAttributes(layoutParams);
+		this.getPageOwner().update();
 	}
 
-	@Override
-	public PopupWindowPageController<AppCompatPopupWindow> setMarginLeft(int marginLeft) {
-		this.mRect.left = marginLeft;
-		return this;
-	}
+	final class HostLifecycleEventObserver implements LifecycleEventObserver {
 
-	@Override
-	public PopupWindowPageController<AppCompatPopupWindow> setMarginTop(int marginTop) {
-		this.mRect.top = marginTop;
-		return this;
-	}
-
-	@Override
-	public PopupWindowPageController<AppCompatPopupWindow> setMarginRight(int marginRight) {
-		this.mRect.right = marginRight;
-		return this;
-	}
-
-	@Override
-	public PopupWindowPageController<AppCompatPopupWindow> setMarginBottom(int marginBottom) {
-		this.mRect.bottom = marginBottom;
-		return this;
-	}
-
-	private Animation mExitAnimation;
-
-	public boolean performDismiss() {
-		final AppCompatPopupWindow prePopupWindow = this.getPageOwner();
-		if (this.mLayoutExitAnimationResId == 0) {
-			return false;
-		}
-		if (this.mExitAnimation != null && this.mExitAnimation.hasStarted() && !this.mExitAnimation.hasEnded()) {
-			return true;
-		}
-		final View preContentView = prePopupWindow.getContentView();
-		this.mExitAnimation = AnimationUtils.loadAnimation(preContentView.getContext(), this.mLayoutExitAnimationResId);
-		this.mExitAnimation.setFillEnabled(true);
-		this.mExitAnimation.setFillAfter(true);
-		this.mExitAnimation.setAnimationListener(new OnAnimationListener() {
-			@Override
-			public void onAnimationEnd(Animation animation) {
-				prePopupWindow.performDismiss();
+		/**
+		 * Called when a state transition event happens.
+		 *
+		 * @param source The source of the event
+		 * @param event  The event
+		 */
+		@Override
+		public void onStateChanged(@NonNull LifecycleOwner source, @NonNull Lifecycle.Event event) {
+			if (Lifecycle.Event.ON_STOP == event) {
+				AppPagePopupWindowControllerImpl.this.getPageOwner().dismiss();
 			}
-		});
-		preContentView.clearAnimation();
-		preContentView.startAnimation(this.mExitAnimation);
-		return true;
-	}
-
-	private void performOnResume() {
-		final AppCompatPopupWindow prePopupWindow = this.getPageOwner();
-		final View preContentView = prePopupWindow.getContentView();
-		final View preBackgroundView = (View) preContentView.getParent();
-		preBackgroundView.setPadding(this.mRect.left, this.mRect.top, this.mRect.right, this.mRect.bottom);
-		preBackgroundView.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				prePopupWindow.dismiss();
-			}
-		});
-		prePopupWindow.update();
-	}
-
-	private void performOnDestroy() {
-		this.setWindowBackgroundAlpha(1.F);
+		}
 	}
 }

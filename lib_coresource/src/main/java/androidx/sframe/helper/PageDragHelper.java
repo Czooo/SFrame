@@ -291,7 +291,7 @@ public class PageDragHelper<Page> extends DragRelativeLayout.DragManager {
 
 	public static final class SimpleChildScrollCallback implements DragRelativeLayout.OnChildScrollCallback {
 
-		private DragRelativeLayout mDragRelativeLayout;
+		private final DragRelativeLayout mDragRelativeLayout;
 
 		public SimpleChildScrollCallback(@NonNull DragRelativeLayout dragRelativeLayout) {
 			this.mDragRelativeLayout = dragRelativeLayout;
@@ -300,9 +300,6 @@ public class PageDragHelper<Page> extends DragRelativeLayout.DragManager {
 		@Override
 		public boolean canChildScroll(@NonNull ViewGroup container, int direction) {
 			final DragRelativeLayout mDragRelativeLayout = (DragRelativeLayout) container;
-			if (mDragRelativeLayout == this.mDragRelativeLayout) {
-				return false;
-			}
 			if ((this.mDragRelativeLayout.isDraggingToStart() && direction < 0)
 					|| (this.mDragRelativeLayout.isDraggingToEnd() && direction > 0)) {
 				return true;

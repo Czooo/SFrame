@@ -59,8 +59,7 @@ public class TestPopupWindow3 extends AbsPopupWindow {
 				.setDragCloseEnabled(true);
 
 		// anim
-		this.getPageController()
-//				.setBackgroundAlpha(0.55f)
-				.setAnimationStyle(R.style.PopupWindowAnimation_SlideInFromBottomOutToBottom);
+		this.setAnimationStyle(R.style.PopupWindowAnimation_SlideInFromBottomOutToBottom);
+		this.setWindowBackgroundAlpha(0.55F);
 	}
 }
