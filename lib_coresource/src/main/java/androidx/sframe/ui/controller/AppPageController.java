@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
@@ -57,10 +58,11 @@ public interface AppPageController<Page> extends LifecycleOwner, ViewModelStoreO
 	UIToolbarController getToolbarController();
 
 	@NonNull
-	AppNavController<Page> getAppNavController();
+	AppNavController<Page> getNavController();
 
 	interface PageProvider {
 
+		@LayoutRes
 		int onPageLayoutId(@Nullable Bundle savedInstanceState);
 
 		void onPageViewCreated(@Nullable Bundle savedInstanceState);
@@ -68,13 +70,9 @@ public interface AppPageController<Page> extends LifecycleOwner, ViewModelStoreO
 		void onPageDataSourceChanged(@Nullable Object params);
 	}
 
-	interface PageViewInterface {
+	interface PageViewProvider {
 
 		@Nullable
 		View onPageCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState);
-	}
-
-	interface ContentViewInterface {
-
 	}
 }

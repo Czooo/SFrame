@@ -23,15 +23,17 @@ public class MainActivity extends AbsActivity {
 	@Override
 	public void onPageViewCreated(@Nullable Bundle savedInstanceState) {
 		this.getPageController()
-				.getAppNavController()
-				.pushPage(TestFragment.class);
+				.getNavController()
+				.pushFragment(android.R.id.content, TestFragment.class);
 	}
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if(KeyEvent.KEYCODE_BACK == keyCode) {
-			PageCacheManager.getInstance().quit();
-			return true;
+		if (KeyEvent.KEYCODE_BACK == keyCode) {
+			if (this.getSupportFragmentManager().getBackStackEntryCount() <= 0) {
+				PageCacheManager.getInstance().quit();
+				return true;
+			}
 		}
 		return super.onKeyDown(keyCode, event);
 	}

@@ -60,7 +60,7 @@ public class PageCacheManager {
 		@Override
 		public void finishLast() {
 			AbsFragment fragment = this.mPageStack.peekLast();
-			if (!fragment.getAppNavController().navigateUp()) {
+			if (!fragment.getNavController().popBackStack()) {
 				ActivityCompat.finishAfterTransition(fragment.requireActivity());
 			}
 		}

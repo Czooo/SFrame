@@ -14,6 +14,7 @@ import androidx.lifecycle.LifecycleEventObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelStore;
 import androidx.sframe.R;
+import androidx.sframe.ui.controller.AppNavController;
 import androidx.sframe.ui.controller.PopupWindowPageController;
 import androidx.sframe.ui.controller.UILayoutController;
 import androidx.sframe.widget.AppCompatPopupWindow;
@@ -23,6 +24,8 @@ import androidx.sframe.widget.AppCompatPopupWindow;
  * Email : ok@163.com.
  */
 public class AppPagePopupWindowControllerImpl extends AbsPageControllerImpl<AppCompatPopupWindow> implements PopupWindowPageController<AppCompatPopupWindow> {
+
+	private AppNavController<AppCompatPopupWindow> mAppNavController;
 
 	private float mWindowBackgroundAlpha = -1.F;
 
@@ -38,19 +41,43 @@ public class AppPagePopupWindowControllerImpl extends AbsPageControllerImpl<AppC
 	}
 
 	@Override
+	public void onViewCreated(@Nullable Bundle savedInstanceState) {
+		this.mAppNavController = new AppNavControllerImpl<>(this);
+		this.mAppNavController.onRestoreInstanceState(savedInstanceState);
+		super.onViewCreated(savedInstanceState);
+	}
+
+	@Override
 	protected void onPreViewCreated(@Nullable Bundle savedInstanceState) throws Exception {
 		super.onPreViewCreated(savedInstanceState);
-		this.getLayoutController()
-				.setToolbarLayoutStableMode(true)
-				.getToolbarController()
-				.getToolbarMethod()
-				.setPopEnabled(true);
+		final UILayoutController layoutController = this.getPreLayoutController();
+		if (layoutController != null) {
+			layoutController
+					.setToolbarLayoutStableMode(true)
+					.getToolbarController()
+					.getToolbarMethod()
+					.setPopEnabled(true);
+		}
+	}
+
+	@Override
+	public void onSaveInstanceState(@NonNull Bundle savedInstanceState) {
+		super.onSaveInstanceState(savedInstanceState);
+		if (this.mAppNavController != null) {
+			this.mAppNavController.onSaveInstanceState(savedInstanceState);
+		}
 	}
 
 	@NonNull
 	@Override
 	public final AppCompatPopupWindow getPageOwner() {
 		return (AppCompatPopupWindow) this.getPageProvider();
+	}
+
+	@NonNull
+	@Override
+	public AppNavController<AppCompatPopupWindow> getNavController() {
+		return this.mAppNavController;
 	}
 
 	/**
@@ -93,8 +120,8 @@ public class AppPagePopupWindowControllerImpl extends AbsPageControllerImpl<AppC
 				final AppCompatPopupWindow popupWindow = this.getPageOwner();
 				final ViewGroup.LayoutParams layoutParams = contentView.getLayoutParams();
 				if (layoutParams == null) {
-					popupWindow.setWidth(-2);
-					popupWindow.setHeight(-2);
+					popupWindow.setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
+					popupWindow.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
 				} else {
 					popupWindow.setWidth(layoutParams.width);
 					popupWindow.setHeight(layoutParams.height);
@@ -138,15 +165,9 @@ public class AppPagePopupWindowControllerImpl extends AbsPageControllerImpl<AppC
 
 	final class HostLifecycleEventObserver implements LifecycleEventObserver {
 
-		/**
-		 * Called when a state transition event happens.
-		 *
-		 * @param source The source of the event
-		 * @param event  The event
-		 */
 		@Override
 		public void onStateChanged(@NonNull LifecycleOwner source, @NonNull Lifecycle.Event event) {
-			if (Lifecycle.Event.ON_STOP == event) {
+			if (Lifecycle.Event.ON_DESTROY == event) {
 				AppPagePopupWindowControllerImpl.this.getPageOwner().dismiss();
 			}
 		}

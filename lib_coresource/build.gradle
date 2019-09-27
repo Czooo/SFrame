@@ -16,7 +16,8 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
-    api 'androidx.appcompat:appcompat:1.0.2'
+    api 'com.google.android.material:material:1.0.0'
+    api 'androidx.appcompat:appcompat:1.1.0'
     api 'androidx.constraintlayout:constraintlayout:1.1.3'
     api "androidx.multidex:multidex:2.0.1"
     // Rx系列
@@ -35,11 +36,11 @@ dependencies {
     api 'com.android.support:support-annotations:28.0.0'
     annotationProcessor 'com.android.support:support-annotations:28.0.0'
 
-    def lifecycle_version = "2.0.0"
+    def lifecycle_version = "2.1.0"
     api "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
-    def nav_version = "2.2.0-alpha01"
-    api "androidx.navigation:navigation-fragment:$nav_version"
-    api "androidx.navigation:navigation-ui:$nav_version"
+//    def nav_version = "2.2.0-alpha03"
+//    api "androidx.navigation:navigation-fragment:$nav_version"
+//    api "androidx.navigation:navigation-ui:$nav_version"
 
-    api 'com.github.czooo:widgets:1.0.8'
+    api 'com.github.czooo:widgets:1.0.9'
 }

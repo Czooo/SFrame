@@ -24,7 +24,6 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelStore;
 import androidx.sframe.R;
 import androidx.sframe.helper.ViewModelProviders;
-import androidx.sframe.helper.AnnotationHelper;
 import androidx.sframe.listener.OnAnimationListener;
 import androidx.sframe.tools.AsyncRequest;
 import androidx.sframe.ui.controller.UILayoutController;
@@ -135,8 +134,7 @@ public class UILayoutControllerImpl implements UILayoutController, UILayoutState
 			this.mIsFirstLayoutCompletedFlag = true;
 		}
 		if (this.hasAsyncLoadDataSourceFlag(key)) {
-			if (this.mIsShouldRunWithAsync
-					|| AnnotationHelper.isShouldRunInAsyncAnn(this.mOnDataSourceListener)) {
+			if (this.mIsShouldRunWithAsync) {
 				this.mAsyncRequest.execute(params, this);
 			} else {
 				this.performOnDataSourceChanged(params);

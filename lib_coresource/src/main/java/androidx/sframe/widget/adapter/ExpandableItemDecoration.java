@@ -30,8 +30,11 @@ public class ExpandableItemDecoration extends RecyclerView.ItemDecoration {
 	@Override
 	@SuppressLint("ClickableViewAccessibility")
 	public void onDrawOver(@NonNull Canvas canvas, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.State state) {
-		final ExpandableRecyclerAdapter<Object> recyclerAdapter = (ExpandableRecyclerAdapter<Object>) recyclerView.getAdapter();
-		if (recyclerAdapter == null) {
+		final RecyclerView.Adapter adapter = recyclerView.getAdapter();
+		if (adapter == null) {
+			return;
+		}
+		if (!(adapter instanceof ExpandableRecyclerAdapter)) {
 			return;
 		}
 
@@ -39,7 +42,6 @@ public class ExpandableItemDecoration extends RecyclerView.ItemDecoration {
 		if (layoutManager == null) {
 			return;
 		}
-
 		final int position;
 		if (layoutManager instanceof LinearLayoutManager) {
 			position = ((LinearLayoutManager) layoutManager).findFirstVisibleItemPosition();
@@ -49,6 +51,7 @@ public class ExpandableItemDecoration extends RecyclerView.ItemDecoration {
 			position = -1;
 		}
 
+		final ExpandableRecyclerAdapter<Object> recyclerAdapter = (ExpandableRecyclerAdapter<Object>) adapter;
 		final int groupPosition = recyclerAdapter.getRealGroupPosition(position);
 		if (this.mIsShouldEnabled && recyclerAdapter.hasGroupEnabled(groupPosition)) {
 			if (this.mOnItemTouchListener == null) {

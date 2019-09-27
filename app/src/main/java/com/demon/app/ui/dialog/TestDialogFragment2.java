@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.sframe.model.AppMenuModel;
 import androidx.sframe.ui.abs.AbsDialogFragment;
-import androidx.sframe.ui.controller.AppNavigation;
+import androidx.sframe.utils.AppNavigator;
 import androidx.sframe.ui.controller.AppPageController;
 import androidx.sframe.ui.controller.impl.AppToolbarMethod;
 import androidx.sframe.widget.adapter.RecyclerAdapter;
@@ -38,8 +38,8 @@ public class TestDialogFragment2 extends AbsDialogFragment {
 
 					@Override
 					public void onMenuClick(@NonNull View view, @NonNull RecyclerAdapter.ViewHolder<AppMenuModel> holder, int position) {
-						AppNavigation.findPageController(view).getAppNavController()
-								.showPage(TestDialogFragment3.class);
+						AppNavigator.findNavController(view)
+								.showFragment(TestDialogFragment3.class);
 					}
 				});
 	}

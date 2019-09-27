@@ -9,6 +9,7 @@ import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.sframe.manager.PageCacheManager;
 import androidx.sframe.ui.controller.AppNavController;
 import androidx.sframe.ui.controller.AppPageController;
@@ -16,6 +17,7 @@ import androidx.sframe.ui.controller.UILayoutController;
 import androidx.sframe.ui.controller.UIToolbarController;
 import androidx.sframe.ui.controller.UIViewController;
 import androidx.sframe.ui.controller.impl.AppPageFragmentControllerImpl2;
+import androidx.sframe.utils.AppNavigator;
 
 /**
  * Author create by ok on 2019-06-03
@@ -83,8 +85,13 @@ public abstract class AbsFragment extends Fragment implements AppPageController.
 	}
 
 	@NonNull
-	public final AppNavController<Fragment> getAppNavController() {
-		return this.getPageController().getAppNavController();
+	public final AppNavController<Fragment> getNavController() {
+		return this.getPageController().getNavController();
+	}
+
+	@NonNull
+	public final AppNavController<FragmentActivity> getSupportNavController() {
+		return AppNavigator.findSupportNavController(this.getPageController());
 	}
 
 	@NonNull

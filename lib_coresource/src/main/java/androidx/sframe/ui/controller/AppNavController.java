@@ -1,94 +1,81 @@
 package androidx.sframe.ui.controller;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.IdRes;
-import androidx.annotation.NavigationRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.navigation.NavOptions;
-import androidx.navigation.Navigator;
-import androidx.navigation.fragment.FragmentNavigator;
+import androidx.sframe.navigator.Navigator;
 
 /**
- * Author create by ok on 2019-06-18
- * Email : ok@163.com.
+ * @Author create by Zoran on 2019-09-25
+ * @Email : 171905184@qq.com
+ * @Description :
  */
 public interface AppNavController<Page> {
 
-	AppPageController<Page> getPageController();
+	AppNavController<Page> onSaveInstanceState(@NonNull Bundle saveInstanceState);
 
-	AppNavController<Page> showProgressPage();
+	AppNavController<Page> onRestoreInstanceState(@Nullable Bundle saveInstanceState);
 
-	AppNavController<Page> dismissProgressPage();
+	AppNavController<Page> showProgressFragment();
 
-	AppNavController<Page> showPage(@NonNull Class<? extends DialogFragment> pageClass);
+	AppNavController<Page> hideProgressFragment();
 
-	AppNavController<Page> showPage(@NonNull Class<? extends DialogFragment> pageClass, @Nullable Bundle args);
+	AppNavController<Page> startActivity(@SuppressLint("UnknownNullness") Intent intent);
 
-	AppNavController<Page> pushPage(@NonNull Class<? extends Fragment> pageClass);
+	AppNavController<Page> startActivity(@SuppressLint("UnknownNullness") Intent intent, @Nullable Bundle options);
 
-	AppNavController<Page> pushPage(@NonNull Class<? extends Fragment> pageClass, @Nullable Bundle args);
+	AppNavController<Page> startActivityForResult(@SuppressLint("UnknownNullness") Intent intent, int requestCode);
 
-	AppNavController<Page> pushPage(@NonNull Class<? extends Fragment> pageClass, @Nullable Bundle args, @Nullable NavOptions navOptions);
+	AppNavController<Page> startActivityForResult(@SuppressLint("UnknownNullness") Intent intent, int requestCode, @Nullable Bundle options);
 
-	AppNavController<Page> pushPage(@NonNull Class<? extends Fragment> pageClass, @Nullable Bundle args, @Nullable NavOptions navOptions, @Nullable FragmentNavigator.Extras navigatorExtras);
+	AppNavController<Page> startActivity(@NonNull Class<? extends FragmentActivity> activity);
 
-	AppNavController<Page> startPage(@NonNull Class<? extends Fragment> pageClass);
+	AppNavController<Page> startActivity(@NonNull Class<? extends FragmentActivity> activity, @Nullable Bundle args);
 
-	AppNavController<Page> startPage(@NonNull Class<? extends Fragment> pageClass, @Nullable Bundle args);
+	AppNavController<Page> startActivity(@NonNull Class<? extends FragmentActivity> activity, @Nullable Bundle args, @Nullable Bundle options);
 
-	AppNavController<Page> startPage(@NonNull Class<? extends Fragment> pageClass, @Nullable Bundle args, @Nullable Bundle options);
+	AppNavController<Page> startActivityForResult(@NonNull Class<? extends FragmentActivity> activity, int requestCode);
 
-	AppNavController<Page> startPageForResult(@NonNull Class<? extends Fragment> pageClass, int requestCode);
+	AppNavController<Page> startActivityForResult(@NonNull Class<? extends FragmentActivity> activity, int requestCode, @Nullable Bundle args);
 
-	AppNavController<Page> startPageForResult(@NonNull Class<? extends Fragment> pageClass, @Nullable Bundle args, int requestCode);
+	AppNavController<Page> startActivityForResult(@NonNull Class<? extends FragmentActivity> activity, int requestCode, @Nullable Bundle args, @Nullable Bundle options);
 
-	AppNavController<Page> startPageForResult(@NonNull Class<? extends Fragment> pageClass, @Nullable Bundle args, @Nullable Bundle options, int requestCode);
+	AppNavController<Page> showFragment(@NonNull Class<? extends DialogFragment> dialogFragment);
 
-	AppNavController<Page> startActivity(@NonNull Intent intent);
+	AppNavController<Page> showFragment(@NonNull Class<? extends DialogFragment> dialogFragment, @Nullable Bundle args);
 
-	AppNavController<Page> startActivity(@NonNull Intent intent, @Nullable Bundle options);
+	AppNavController<Page> pushFragment(@IdRes int containerId, @NonNull Class<? extends Fragment> fragment);
 
-	AppNavController<Page> startActivity(@NonNull Class<? extends FragmentActivity> pageClass);
+	AppNavController<Page> pushFragment(@IdRes int containerId, @NonNull Class<? extends Fragment> fragment, @Nullable Bundle args);
 
-	AppNavController<Page> startActivity(@NonNull Class<? extends FragmentActivity> pageClass, @Nullable Bundle args);
+	AppNavController<Page> pushFragment(@IdRes int containerId, @NonNull Class<? extends Fragment> fragment, @Nullable Navigator.NavOptions options);
 
-	AppNavController<Page> startActivity(@NonNull Class<? extends FragmentActivity> pageClass, @Nullable Bundle args, @Nullable Bundle options);
+	AppNavController<Page> pushFragment(@IdRes int containerId, @NonNull Class<? extends Fragment> fragment, @Nullable Bundle args, @Nullable Navigator.NavOptions options);
 
-	AppNavController<Page> startActivityForResult(@NonNull Intent intent, int requestCode);
+	AppNavController<Page> startFragment(@NonNull Class<? extends Fragment> fragment);
 
-	AppNavController<Page> startActivityForResult(@NonNull Intent intent, @Nullable Bundle options, int requestCode);
+	AppNavController<Page> startFragment(@NonNull Class<? extends Fragment> fragment, @Nullable Bundle args);
 
-	AppNavController<Page> startActivityForResult(@NonNull Class<? extends FragmentActivity> pageClass, int requestCode);
+	AppNavController<Page> startFragment(@NonNull Class<? extends Fragment> fragment, @Nullable Bundle args, @Nullable Bundle options);
 
-	AppNavController<Page> startActivityForResult(@NonNull Class<? extends FragmentActivity> pageClass, @Nullable Bundle args, int requestCode);
+	AppNavController<Page> startFragmentForResult(@NonNull Class<? extends Fragment> fragment, int requestCode);
 
-	AppNavController<Page> startActivityForResult(@NonNull Class<? extends FragmentActivity> pageClass, @Nullable Bundle args, @Nullable Bundle options, int requestCode);
+	AppNavController<Page> startFragmentForResult(@NonNull Class<? extends Fragment> fragment, int requestCode, @Nullable Bundle args);
 
-	AppNavController<Page> navigate(@IdRes int resId);
+	AppNavController<Page> startFragmentForResult(@NonNull Class<? extends Fragment> fragment, int requestCode, @Nullable Bundle args, @Nullable Bundle options);
 
-	AppNavController<Page> navigate(@IdRes int resId, @Nullable Bundle args);
+	AppNavController<Page> addNavigator(@NonNull String name, @NonNull Navigator<? extends Navigator.NavDestination> navigator);
 
-	AppNavController<Page> navigate(@IdRes int resId, @Nullable Bundle args, @Nullable NavOptions navOptions);
+	<T extends Navigator<?>> T getNavigator(@NonNull String name);
 
-	AppNavController<Page> navigate(@IdRes int resId, @Nullable Bundle args, @Nullable NavOptions navOptions, @Nullable Navigator.Extras navigatorExtras);
-
-	AppNavController<Page> addGraph(@NavigationRes int navResId);
-
-	AppNavController<Page> addGraph(@NavigationRes int navResId, @Nullable Bundle args);
-
-	AppNavController<Page> setGraph(@NavigationRes int navResId);
-
-	AppNavController<Page> setGraph(@NavigationRes int navResId, @Nullable Bundle args);
-
-	boolean navigateUp();
+	Navigator.NavOptions getDefaultOptions();
 
 	boolean popBackStack();
-
-	boolean popBackStack(@IdRes int destinationId, boolean inclusive);
 }

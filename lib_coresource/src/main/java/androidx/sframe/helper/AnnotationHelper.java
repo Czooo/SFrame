@@ -3,7 +3,7 @@ package androidx.sframe.helper;
 import java.lang.reflect.Method;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import androidx.sframe.annotation.AppPageInterface;
 import androidx.sframe.annotation.RunWithAsync;
 
 /**
@@ -12,25 +12,22 @@ import androidx.sframe.annotation.RunWithAsync;
  */
 public class AnnotationHelper {
 
-	public static boolean isShouldRunInAsyncAnn(@Nullable Object object) {
-		if (object == null) {
-			return false;
+	public static boolean isAppPageInterface(@NonNull Class<?> pageClass) {
+		if (pageClass.isAnnotationPresent(AppPageInterface.class)) {
+			AppPageInterface annotation = pageClass.getAnnotation(AppPageInterface.class);
+			return annotation != null && annotation.value();
 		}
-		return isShouldRunInAsyncAnn(object.getClass());
+		return true;
 	}
 
-	private static boolean isShouldRunInAsyncAnn(@NonNull Class<?> preClass) {
-		try {
-			final Method[] methods = preClass.getMethods();
-			for (Method preMethod : methods) {
-				if (preMethod.isAnnotationPresent(RunWithAsync.class)) {
-					final RunWithAsync preAnnotation = preMethod.getAnnotation(RunWithAsync.class);
-					return preAnnotation.value();
-				}
+	public static boolean isRunWithAsync(@NonNull Class<?> objectClass) {
+		final Method[] methods = objectClass.getMethods();
+		for (Method method : methods) {
+			if (method.isAnnotationPresent(RunWithAsync.class)) {
+				RunWithAsync annotation = method.getAnnotation(RunWithAsync.class);
+				return annotation != null && annotation.value();
 			}
-			return false;
-		} catch (Exception e) {
-			return false;
 		}
+		return false;
 	}
 }

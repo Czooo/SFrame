@@ -17,10 +17,10 @@ import androidx.sframe.ui.controller.AppPageController;
  * Author create by ok on 2019-06-18
  * Email : ok@163.com.
  */
-final class AppPageControllerHelper {
+public final class AppPageControllerHelper {
 
 	@NonNull
-	static <Page> AppPageController<?> getHostPageController(@NonNull AppPageController<Page> pageController) {
+	public static <Page> AppPageController<?> getHostPageController(@NonNull AppPageController<Page> pageController) {
 		final Page pageOwner = pageController.getPageOwner();
 		if (pageOwner instanceof AbsPopupWindow) {
 			return ((AbsPopupWindow) pageOwner).getHostPageController();
@@ -31,7 +31,7 @@ final class AppPageControllerHelper {
 	}
 
 	@Nullable
-	static <Page> Bundle getArguments(@NonNull AppPageController<Page> pageController) {
+	public static <Page> Bundle getArguments(@NonNull AppPageController<Page> pageController) {
 		final Page pageOwner = pageController.getPageOwner();
 		Bundle arguments = null;
 		if (pageOwner instanceof AbsPopupWindow) {
@@ -48,7 +48,7 @@ final class AppPageControllerHelper {
 	}
 
 	@NonNull
-	static <Page> Bundle requireArguments(@NonNull AppPageController<Page> pageController) {
+	public static <Page> Bundle requireArguments(@NonNull AppPageController<Page> pageController) {
 		final Bundle arguments = getArguments(pageController);
 		if (arguments == null) {
 			throw new IllegalStateException("Page " + pageController.getPageOwner() + " does not have a args set");
@@ -57,7 +57,7 @@ final class AppPageControllerHelper {
 	}
 
 	@Nullable
-	static <Page> Context getContext(@NonNull AppPageController<Page> pageController) {
+	public static <Page> Context getContext(@NonNull AppPageController<Page> pageController) {
 		final Page pageOwner = pageController.getPageOwner();
 		Context context = null;
 		if (pageOwner instanceof AbsPopupWindow) {
@@ -71,7 +71,7 @@ final class AppPageControllerHelper {
 	}
 
 	@NonNull
-	static <Page> Context requireContext(@NonNull AppPageController<Page> pageController) {
+	public static <Page> Context requireContext(@NonNull AppPageController<Page> pageController) {
 		final Context context = getContext(pageController);
 		if (context == null) {
 			throw new IllegalStateException("Page " + pageController.getPageOwner() + " not attached to an context.");
@@ -80,7 +80,7 @@ final class AppPageControllerHelper {
 	}
 
 	@Nullable
-	static <Page> FragmentActivity getFragmentActivity(@NonNull AppPageController<Page> pageController) {
+	public static <Page> FragmentActivity getFragmentActivity(@NonNull AppPageController<Page> pageController) {
 		final Page pageOwner = pageController.getPageOwner();
 		FragmentActivity fragmentActivity = null;
 		if (pageOwner instanceof AbsPopupWindow) {
@@ -94,7 +94,7 @@ final class AppPageControllerHelper {
 	}
 
 	@NonNull
-	static <Page> FragmentActivity requireFragmentActivity(@NonNull AppPageController<Page> pageController) {
+	public static <Page> FragmentActivity requireFragmentActivity(@NonNull AppPageController<Page> pageController) {
 		final FragmentActivity fragmentActivity = getFragmentActivity(pageController);
 		if (fragmentActivity == null) {
 			throw new IllegalStateException("Page " + pageController.getPageOwner() + " not attached to an activity.");
@@ -103,13 +103,11 @@ final class AppPageControllerHelper {
 	}
 
 	@NonNull
-	static <Page> FragmentManager requireSupportFragmentManager(@NonNull AppPageController<Page> pageController) {
+	public static <Page> FragmentManager requireSupportFragmentManager(@NonNull AppPageController<Page> pageController) {
 		final Page pageOwner = pageController.getPageOwner();
 		FragmentManager fragmentManager = null;
 		if (pageOwner instanceof AbsPopupWindow) {
 			fragmentManager = requireSupportFragmentManager(((AbsPopupWindow) pageOwner).getHostPageController());
-		} else if (pageOwner instanceof AbsDialogFragment) {
-			fragmentManager = requireSupportFragmentManager(((AbsDialogFragment) pageOwner).getHostPageController());
 		} else if (pageOwner instanceof Fragment) {
 			fragmentManager = ((Fragment) pageOwner).getFragmentManager();
 		} else if (pageOwner instanceof FragmentActivity) {
@@ -122,7 +120,7 @@ final class AppPageControllerHelper {
 	}
 
 	@NonNull
-	static <Page> FragmentManager requireChildFragmentManager(@NonNull AppPageController<Page> pageController) {
+	public static <Page> FragmentManager requireChildFragmentManager(@NonNull AppPageController<Page> pageController) {
 		final Page pageOwner = pageController.getPageOwner();
 		FragmentManager fragmentManager = null;
 		if (pageOwner instanceof AbsPopupWindow) {
@@ -138,7 +136,7 @@ final class AppPageControllerHelper {
 		return fragmentManager;
 	}
 
-	static <Page> void startActivity(@NonNull AppPageController<Page> pageController, @NonNull Intent intent, @Nullable Bundle options) {
+	public static <Page> void startActivity(@NonNull AppPageController<Page> pageController, @NonNull Intent intent, @Nullable Bundle options) {
 		final Page pageOwner = pageController.getPageOwner();
 		if (pageOwner instanceof AbsPopupWindow) {
 			startActivity(((AbsPopupWindow) pageOwner).getHostPageController(), intent, options);
@@ -149,7 +147,7 @@ final class AppPageControllerHelper {
 		}
 	}
 
-	static <Page> void startActivityForResult(@NonNull AppPageController<Page> pageController, @NonNull Intent intent, @Nullable Bundle options, int requestCode) {
+	public static <Page> void startActivityForResult(@NonNull AppPageController<Page> pageController, @NonNull Intent intent, @Nullable Bundle options, int requestCode) {
 		final Page pageOwner = pageController.getPageOwner();
 		if (pageOwner instanceof AbsPopupWindow) {
 			startActivityForResult(((AbsPopupWindow) pageOwner).getHostPageController(), intent, options, requestCode);

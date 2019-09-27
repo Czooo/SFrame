@@ -5,16 +5,17 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.sframe.annotation.AppPageInterface;
 import androidx.sframe.model.AgentNavModel;
 import androidx.sframe.ui.abs.AbsActivity;
-import androidx.sframe.ui.controller.AppPageController;
 import androidx.sframe.utils.Logger;
 
 /**
  * Author create by ok on 2019-06-04
  * Email : ok@163.com.
  */
-public class NavAgentActivity extends AbsActivity implements AppPageController.ContentViewInterface {
+@AppPageInterface(value = false)
+public class NavAgentActivity extends AbsActivity {
 
 	private static final String KEY_MODEL = "androidx-support-nav:agentActivity:model";
 	private static final String KEY_POP = "androidx-support-nav:popEnabled";
@@ -42,31 +43,19 @@ public class NavAgentActivity extends AbsActivity implements AppPageController.C
 	@Override
 	public void onPageViewCreated(@Nullable Bundle savedInstanceState) {
 		final Intent intent = this.getIntent();
-		final Bundle args = intent.getExtras();
+		final Bundle arguments = intent.getExtras();
 		try {
-			if (args == null) {
+			if (arguments == null) {
 				throw new IllegalStateException("NavAgentActivity " + this + " not set args");
 			}
-			final AgentNavModel mAgentNavModel = (AgentNavModel) args.getSerializable(KEY_MODEL);
-
-			if (mAgentNavModel == null || mAgentNavModel.errorArgs()) {
+			final AgentNavModel model = (AgentNavModel) arguments.getSerializable(KEY_MODEL);
+			if (model == null || model.getFragmentClass() == null) {
 				throw new IllegalStateException("NavAgentActivity " + this + " not set model");
 			}
-
-			if (mAgentNavModel.getPageClass() == null) {
-				this.getPageController().getAppNavController().setGraph(mAgentNavModel.getNavResId(), mAgentNavModel.toBundle(args));
-				return;
-			}
-			this.getPageController().getAppNavController()
-					.pushPage(mAgentNavModel.getPageClass(), mAgentNavModel.toBundle(args));
-
-			final int navResId = mAgentNavModel.getNavResId();
-			if (navResId != 0) {
-				this.getPageController().getAppNavController()
-						.addGraph(navResId);
-			}
+			this.getPageController().getNavController()
+					.pushFragment(android.R.id.content, model.getFragmentClass(), model.toBundle(arguments));
 		} catch (Exception e) {
-			Logger.e(e.getMessage(), e);
+			Logger.e(e);
 		}
 	}
 }

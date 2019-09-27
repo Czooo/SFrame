@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.sframe.helper.PageDragHelper;
 import androidx.sframe.ui.abs.AbsPopupWindow;
-import androidx.sframe.ui.controller.AppNavigation;
+import androidx.sframe.utils.AppNavigator;
 import androidx.sframe.ui.controller.AppPageController;
 import androidx.sframe.utils.ToastCompat;
 
@@ -40,9 +40,8 @@ public class TestPopupWindow2 extends AbsPopupWindow {
 
 					@Override
 					public void onClick(View view) {
-						AppNavigation.findPageController(view)
-								.getAppNavController()
-								.showPage(TestDialogFragment.class);
+						AppNavigator.findNavController(view)
+								.showFragment(TestDialogFragment.class);
 					}
 				})
 				.findAt(R.id.text2)
@@ -50,9 +49,8 @@ public class TestPopupWindow2 extends AbsPopupWindow {
 
 					@Override
 					public void onClick(View view) {
-						AppNavigation.findPageController(view)
-								.getAppNavController()
-								.startPageForResult(PublicFragment.class, 1);
+						AppNavigator.findNavController(view)
+								.startFragmentForResult(PublicFragment.class, 1);
 					}
 				})
 		;

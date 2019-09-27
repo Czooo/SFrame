@@ -261,9 +261,9 @@ public class PageDragHelper<Page> extends DragRelativeLayout.DragManager {
 		} else if (pageOwner instanceof AbsPopupWindow) {
 			((AbsPopupWindow) pageOwner).dismiss();
 		} else if (pageOwner instanceof AbsActivity) {
-			pageController.getAppNavController().popBackStack();
+			pageController.getNavController().popBackStack();
 		} else if (pageOwner instanceof AbsFragment) {
-			pageController.getAppNavController().popBackStack();
+			pageController.getNavController().popBackStack();
 		}
 	}
 
@@ -306,7 +306,7 @@ public class PageDragHelper<Page> extends DragRelativeLayout.DragManager {
 			}
 			if (mDragRelativeLayout.getOrientation() == this.mDragRelativeLayout.getOrientation()) {
 				final DragRelativeLayout.DragManager mDragManager = this.mDragRelativeLayout.getDragManager();
-				if (mDragManager != null) {
+				if (mDragManager != null && mDragManager.shouldStartNestedScroll()) {
 					return mDragManager.canChildScroll(direction);
 				}
 			}

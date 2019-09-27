@@ -18,12 +18,11 @@ import androidx.lifecycle.OnLifecycleEvent;
 import androidx.sframe.annotation.RunWithAsync;
 import androidx.sframe.helper.AnnotationHelper;
 import androidx.sframe.ui.NavAgentActivity;
-import androidx.sframe.ui.controller.AppNavController;
-import androidx.sframe.ui.controller.AppNavigation;
 import androidx.sframe.ui.controller.AppPageController;
 import androidx.sframe.ui.controller.UILayoutController;
 import androidx.sframe.ui.controller.UIToolbarController;
 import androidx.sframe.ui.controller.UIViewController;
+import androidx.sframe.utils.AppNavigator;
 import androidx.sframe.utils.Logger;
 import androidx.sframe.widget.SRelativeLayout;
 
@@ -34,11 +33,8 @@ import androidx.sframe.widget.SRelativeLayout;
 abstract class AbsPageControllerImpl<Page> implements AppPageController<Page>, LifecycleObserver, UILayoutController.OnDataSourceListener, AppToolbarMethod.OnPopClickListener {
 
 	private final PageProvider mPageProvider;
-
 	private View mPageView;
 	private UIViewController mViewController;
-	private AppNavController<Page> mAppNavController;
-
 	private boolean mIsViewCreated;
 
 	AbsPageControllerImpl(@NonNull PageProvider pageProvider) {
@@ -48,8 +44,6 @@ abstract class AbsPageControllerImpl<Page> implements AppPageController<Page>, L
 	@CallSuper
 	@Override
 	public void onCreate(@Nullable Bundle savedInstanceState) {
-		this.mAppNavController = new AppNavControllerImpl<>(this);
-
 		if (Build.VERSION.SDK_INT >= 19) {
 			this.getLifecycle().addObserver(this);
 		}
@@ -61,16 +55,18 @@ abstract class AbsPageControllerImpl<Page> implements AppPageController<Page>, L
 		View pageView = this.mPageView;
 		if (pageView == null) {
 			final Page pageOwner = this.getPageOwner();
+			final boolean appPageInterface = AnnotationHelper
+					.isAppPageInterface(pageOwner.getClass());
 
 			final ViewGroup realContainer;
-			if (pageOwner instanceof ContentViewInterface) {
-				realContainer = container;
-			} else {
+			if (appPageInterface) {
 				realContainer = new SRelativeLayout(inflater.getContext());
+			} else {
+				realContainer = container;
 			}
 
-			if (pageOwner instanceof PageViewInterface) {
-				pageView = ((PageViewInterface) pageOwner).onPageCreateView(inflater, realContainer, savedInstanceState);
+			if (pageOwner instanceof AppPageController.PageViewProvider) {
+				pageView = ((PageViewProvider) pageOwner).onPageCreateView(inflater, realContainer, savedInstanceState);
 			}
 			if (pageView == null) {
 				final int layoutId = this.getPageProvider().onPageLayoutId(savedInstanceState);
@@ -79,13 +75,13 @@ abstract class AbsPageControllerImpl<Page> implements AppPageController<Page>, L
 				}
 			}
 
-			if (pageOwner instanceof ContentViewInterface) {
-				// no-op
-			} else {
+			if (appPageInterface) {
+				final boolean runWithAsync = AnnotationHelper.isRunWithAsync(this.getClass())
+						|| AnnotationHelper.isRunWithAsync(pageOwner.getClass());
 				((SRelativeLayout) realContainer)
 						.getLayoutController()
 						.setOnDataSourceListener(this)
-						.setShouldRunWithAsync(AnnotationHelper.isShouldRunInAsyncAnn(pageOwner))
+						.setShouldRunWithAsync(runWithAsync)
 						// toolbar options
 						.getToolbarController()
 						.getToolbarMethod()
@@ -113,43 +109,47 @@ abstract class AbsPageControllerImpl<Page> implements AppPageController<Page>, L
 	@CallSuper
 	@Override
 	public void onViewCreated(@Nullable Bundle savedInstanceState) {
-		AppNavigation.setViewPageController(this.getPageView(), this);
-		if (this.mIsViewCreated) {
-			try {
+		AppNavigator.setAppPageController(this.getPageView(), this);
+		AppNavigator.setAppNavController(this.getPageView(), this.getNavController());
+		try {
+			if (this.mIsViewCreated) {
 				this.onPreViewCreated(savedInstanceState);
-			} catch (Exception e) {
-				Logger.e(e);
-			} finally {
-				this.getPageProvider().onPageViewCreated(savedInstanceState);
+				final PageProvider provider = this.getPageProvider();
+				provider.onPageViewCreated(savedInstanceState);
 				this.mIsViewCreated = false;
 			}
-		}
-		try {
-			final UILayoutController layoutController = this.getLayoutController();
-			if (UILayoutController.LayoutType.None.key == layoutController.getCurLayoutKey()) {
-				layoutController.layoutOfLoading(savedInstanceState);
-			} else {
-				layoutController.refreshed(savedInstanceState);
-			}
-		} catch (IllegalStateException e) {
+		} catch (Exception e) {
 			Logger.e(e);
+		} finally {
+			final UILayoutController layoutController = this.getPreLayoutController();
+			if (layoutController != null) {
+				if (UILayoutController.LayoutType.None.key == layoutController.getCurLayoutKey()) {
+					layoutController.layoutOfLoading(savedInstanceState);
+				} else {
+					layoutController.refreshed(savedInstanceState);
+				}
+			}
 		}
 	}
 
 	@CallSuper
 	protected void onPreViewCreated(@Nullable Bundle savedInstanceState) throws Exception {
-		final Bundle arguments = AppPageControllerHelper.getArguments(this);
-		this.getLayoutController()
-				.setToolbarLayoutStableMode(false)
-				.getToolbarController()
-				.getToolbarMethod()
-				.setPopEnabled(NavAgentActivity.isShouldPagePopEnabled(arguments));
+		final UILayoutController layoutController = this.getPreLayoutController();
+		if (layoutController != null) {
+			final Bundle arguments = AppPageControllerHelper.getArguments(this);
+			final boolean shouldPagePopEnabled = NavAgentActivity.isShouldPagePopEnabled(arguments);
+			layoutController
+					.setToolbarLayoutStableMode(false)
+					.getToolbarController()
+					.getToolbarMethod()
+					.setPopEnabled(shouldPagePopEnabled);
+		}
 	}
 
 	@CallSuper
 	@Override
 	public void onSaveInstanceState(@NonNull Bundle savedInstanceState) {
-		// NO-OP
+		// no-op
 	}
 
 	@Nullable
@@ -203,37 +203,40 @@ abstract class AbsPageControllerImpl<Page> implements AppPageController<Page>, L
 	@NonNull
 	@Override
 	public final UIViewController getViewController() {
-		try {
-			return this.getLayoutController().getViewController();
-		} catch (IllegalStateException e) {
+		final UILayoutController layoutController = this.getPreLayoutController();
+		if (layoutController == null) {
 			if (this.mViewController == null) {
 				this.mViewController = new UIViewControllerImpl(this.requirePageView());
 			}
 			return this.mViewController;
 		}
+		return layoutController.getViewController();
+	}
+
+	@Nullable
+	public UILayoutController getPreLayoutController() {
+		final View pageView = this.getPageView();
+		if (pageView instanceof SRelativeLayout) {
+			final SRelativeLayout sRelativeLayout = (SRelativeLayout) pageView;
+			return sRelativeLayout.getLayoutController();
+		}
+		return null;
 	}
 
 	@NonNull
 	@Override
-	public UILayoutController getLayoutController() {
-		final View prePageView = this.requirePageView();
-		if (prePageView instanceof SRelativeLayout) {
-			final SRelativeLayout preLayout = (SRelativeLayout) prePageView;
-			return preLayout.getLayoutController();
+	public final UILayoutController getLayoutController() {
+		final UILayoutController layoutController = this.getPreLayoutController();
+		if (layoutController == null) {
+			throw new IllegalStateException("AppPageController " + this + " does not have a UILayoutController set");
 		}
-		throw new IllegalStateException("AppPageController " + this + " does not have a UILayoutController set");
+		return layoutController;
 	}
 
 	@NonNull
 	@Override
 	public final UIToolbarController getToolbarController() {
 		return this.getLayoutController().getToolbarController();
-	}
-
-	@NonNull
-	@Override
-	public final AppNavController<Page> getAppNavController() {
-		return this.mAppNavController;
 	}
 
 	@CallSuper
@@ -246,7 +249,7 @@ abstract class AbsPageControllerImpl<Page> implements AppPageController<Page>, L
 
 	@Override
 	public void onPopClick(@NonNull View view) {
-		if (!this.getAppNavController().navigateUp()) {
+		if (!this.getNavController().popBackStack()) {
 			ActivityCompat.finishAfterTransition(this.requireFragmentActivity());
 		}
 	}
@@ -279,15 +282,13 @@ abstract class AbsPageControllerImpl<Page> implements AppPageController<Page>, L
 	@OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 	protected void onDestroy() {
 		Logger.i(this.getPageOwner().getClass().getName() + " ====== onDestroy()");
-		try {
-			this.getLayoutController().recycled();
-		} catch (IllegalStateException e) {
-			Logger.e(e);
-		} finally {
-			if (this.mViewController != null) {
-				this.mViewController.recycled();
-				this.mViewController = null;
-			}
+		final UILayoutController layoutController = this.getPreLayoutController();
+		if (layoutController != null) {
+			layoutController.recycled();
+		}
+		if (this.mViewController != null) {
+			this.mViewController.recycled();
+			this.mViewController = null;
 		}
 	}
 

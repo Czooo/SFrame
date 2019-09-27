@@ -6,8 +6,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.CallSuper;
+import androidx.annotation.FloatRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StyleRes;
 import androidx.appcompat.app.AppCompatDialogFragment;
 import androidx.sframe.ui.controller.AppNavController;
 import androidx.sframe.ui.controller.AppPageController;
@@ -23,10 +25,11 @@ import androidx.sframe.ui.controller.impl.AppPageDialogFragmentControllerImpl;
  */
 public abstract class AbsDialogFragment extends AppCompatDialogFragment implements AppPageController.PageProvider {
 
-	private final DialogFragmentPageController<AppCompatDialogFragment> mPageController;
+	private final AppPageController<?> mHostPageController;
+	private DialogFragmentPageController<AppCompatDialogFragment> mPageController;
 
 	public AbsDialogFragment(@NonNull AppPageController<?> hostPageController) {
-		this.mPageController = new AppPageDialogFragmentControllerImpl(this, hostPageController);
+		this.mHostPageController = hostPageController;
 	}
 
 	@CallSuper
@@ -76,18 +79,50 @@ public abstract class AbsDialogFragment extends AppCompatDialogFragment implemen
 	}
 
 	@NonNull
-	public final AppNavController<AppCompatDialogFragment> getAppNavController() {
-		return this.getPageController().getAppNavController();
+	public final AppNavController<AppCompatDialogFragment> getNavController() {
+		return this.getPageController().getNavController();
 	}
 
 	@NonNull
 	public final AppPageController<?> getHostPageController() {
-		return this.getPageController().getHostPageController();
+		return this.mHostPageController;
 	}
 
 	@NonNull
 	public DialogFragmentPageController<AppCompatDialogFragment> getPageController() {
+		if (this.mPageController == null) {
+			this.mPageController = new AppPageDialogFragmentControllerImpl(this);
+		}
 		return this.mPageController;
+	}
+
+	public void show() {
+		this.getPageController().show();
+	}
+
+	public void show(@NonNull View anchor) {
+		this.getPageController().show(anchor);
+	}
+
+	public void showNow() {
+		this.getPageController().showNow();
+	}
+
+	public void showNow(@NonNull View anchor) {
+		this.getPageController().showNow(anchor);
+	}
+
+	public void setGravity(int gravity) {
+		this.getPageController().setGravity(gravity);
+	}
+
+	public void setAnimationStyle(@StyleRes int animationStyleResId) {
+		this.getPageController().setAnimationStyle(animationStyleResId);
+	}
+
+	// 全屏透明度
+	public void setWindowBackgroundAlpha(@FloatRange(from = 0, to = 1.f) float alpha) {
+		this.getPageController().setWindowBackgroundAlpha(alpha);
 	}
 
 	public void setOnDismissListener(@NonNull DialogFragmentPageController.OnDismissListener listener) {

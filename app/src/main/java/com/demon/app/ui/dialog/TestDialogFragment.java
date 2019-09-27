@@ -10,7 +10,7 @@ import com.demon.app.ui.fragment.test.PublicFragment;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.sframe.ui.abs.AbsDialogFragment;
-import androidx.sframe.ui.controller.AppNavigation;
+import androidx.sframe.utils.AppNavigator;
 import androidx.sframe.ui.controller.AppPageController;
 import androidx.sframe.utils.ToastCompat;
 
@@ -37,9 +37,8 @@ public class TestDialogFragment extends AbsDialogFragment {
 
 					@Override
 					public void onClick(View view) {
-						AppNavigation.findPageController(view)
-								.getAppNavController()
-								.showPage(TestDialogFragment2.class);
+						AppNavigator.findNavController(view)
+								.showFragment(TestDialogFragment2.class);
 					}
 				})
 				.findAt(R.id.text2)
@@ -47,9 +46,8 @@ public class TestDialogFragment extends AbsDialogFragment {
 
 					@Override
 					public void onClick(View view) {
-						AppNavigation.findPageController(view)
-								.getAppNavController()
-								.startPageForResult(PublicFragment.class, 1);
+						AppNavigator.findNavController(view)
+								.startFragmentForResult(PublicFragment.class, 1);
 					}
 				})
 				.findAt(R.id.text3)

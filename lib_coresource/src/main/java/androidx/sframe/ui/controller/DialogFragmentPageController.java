@@ -12,17 +12,11 @@ import androidx.annotation.StyleRes;
  */
 public interface DialogFragmentPageController<Page> extends AppPageController<Page> {
 
-	AppPageController<?> getHostPageController();
-
-	DialogFragmentPageController<Page> setWidth(int width);
-
-	DialogFragmentPageController<Page> setHeight(int height);
-
 	DialogFragmentPageController<Page> setGravity(int gravity);
 
 	DialogFragmentPageController<Page> setAnimationStyle(@StyleRes int animationStyleResId);
 
-	DialogFragmentPageController<Page> setBackgroundAlpha(@FloatRange(from = 0, to = 1.f) float alpha);
+	DialogFragmentPageController<Page> setWindowBackgroundAlpha(@FloatRange(from = 0, to = 1.f) float alpha);
 
 	DialogFragmentPageController<Page> setOnDismissListener(@NonNull OnDismissListener listener);
 

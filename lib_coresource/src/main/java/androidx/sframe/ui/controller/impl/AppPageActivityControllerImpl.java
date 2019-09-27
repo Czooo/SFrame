@@ -9,7 +9,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelStore;
-import androidx.sframe.ui.controller.AppCompatNavHostController;
+import androidx.sframe.ui.controller.AppNavController;
 
 /**
  * Author create by ok on 2019-06-18
@@ -17,7 +17,7 @@ import androidx.sframe.ui.controller.AppCompatNavHostController;
  */
 public class AppPageActivityControllerImpl extends AbsPageControllerImpl<FragmentActivity> {
 
-	private AppCompatNavHostController mNavHostController;
+	private AppNavController<FragmentActivity> mAppNavController;
 
 	public AppPageActivityControllerImpl(@NonNull PageProvider pageProvider) {
 		super(pageProvider);
@@ -26,7 +26,8 @@ public class AppPageActivityControllerImpl extends AbsPageControllerImpl<Fragmen
 	@Override
 	public void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		this.mNavHostController = this.createAppCompatNavHostController(savedInstanceState);
+		this.mAppNavController = new AppNavControllerImpl<>(this);
+		this.mAppNavController.onRestoreInstanceState(savedInstanceState);
 
 		if (savedInstanceState == null) {
 			final View prePageView = this.onCreateView(LayoutInflater.from(AppPageControllerHelper.requireContext(this)), null, null);
@@ -40,9 +41,15 @@ public class AppPageActivityControllerImpl extends AbsPageControllerImpl<Fragmen
 	@Override
 	public void onSaveInstanceState(@NonNull Bundle savedInstanceState) {
 		super.onSaveInstanceState(savedInstanceState);
-		if (this.mNavHostController != null) {
-			this.mNavHostController.onSaveInstanceState(savedInstanceState);
+		if (this.mAppNavController != null) {
+			this.mAppNavController.onRestoreInstanceState(savedInstanceState);
 		}
+	}
+
+	@NonNull
+	@Override
+	public AppNavController<FragmentActivity> getNavController() {
+		return this.mAppNavController;
 	}
 
 	@NonNull
@@ -71,13 +78,5 @@ public class AppPageActivityControllerImpl extends AbsPageControllerImpl<Fragmen
 	@Override
 	public ViewModelStore getViewModelStore() {
 		return this.getPageOwner().getViewModelStore();
-	}
-
-	@NonNull
-	protected AppCompatNavHostController createAppCompatNavHostController(@Nullable Bundle savedInstanceState) {
-		final AppCompatNavHostController mAppCompatNavHostController = new AppCompatNavHostController(this);
-		mAppCompatNavHostController.setViewNavHostController(this.getPageOwner());
-		mAppCompatNavHostController.restoreState(savedInstanceState);
-		return mAppCompatNavHostController;
 	}
 }

@@ -185,8 +185,33 @@ public class AppToolbarMethod extends UIToolbarMethod implements UILayoutControl
 		return this;
 	}
 
+	public AppToolbarMethod setStateBar(Drawable background) {
+		this.findViewById(R.id.app_container_state_id).setBackground(background);
+		return this;
+	}
+
 	public AppToolbarMethod setStateBarColor(@ColorInt int color) {
 		this.findViewById(R.id.app_container_state_id).setBackgroundColor(color);
+		return this;
+	}
+
+	public AppToolbarMethod setStateBarResource(@DrawableRes int resId) {
+		this.findViewById(R.id.app_container_state_id).setBackgroundResource(resId);
+		return this;
+	}
+
+	public AppToolbarMethod setTitleBar(Drawable background) {
+		this.findViewById(R.id.app_container_title_id).setBackground(background);
+		return this;
+	}
+
+	public AppToolbarMethod setTitleBarColor(@ColorInt int color) {
+		this.findViewById(R.id.app_container_title_id).setBackgroundColor(color);
+		return this;
+	}
+
+	public AppToolbarMethod setTitleBarResource(@DrawableRes int resId) {
+		this.findViewById(R.id.app_container_title_id).setBackgroundResource(resId);
 		return this;
 	}
 

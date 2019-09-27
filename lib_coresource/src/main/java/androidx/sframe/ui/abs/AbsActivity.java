@@ -68,8 +68,8 @@ public abstract class AbsActivity extends AppCompatActivity implements AppPageCo
 	}
 
 	@NonNull
-	public final AppNavController<FragmentActivity> getAppNavController() {
-		return this.getPageController().getAppNavController();
+	public final AppNavController<FragmentActivity> getNavController() {
+		return this.getPageController().getNavController();
 	}
 
 	@NonNull

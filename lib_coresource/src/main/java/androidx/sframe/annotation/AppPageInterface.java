@@ -8,13 +8,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Author create by ok on 2019-06-15
- * Email : ok@163.com.
+ * @Author create by Zoran on 2019-09-27
+ * @Email : 171905184@qq.com
+ * @Description :
  */
 @Inherited
 @Documented
-@Target(ElementType.METHOD)
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface RunWithAsync {
+public @interface AppPageInterface {
 	boolean value() default true;
 }

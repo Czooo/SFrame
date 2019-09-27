@@ -1,313 +1,239 @@
 package androidx.sframe.ui.controller.impl;
 
-import android.content.ComponentName;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 
-import java.lang.reflect.InvocationTargetException;
-
-import androidx.annotation.NavigationRes;
+import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.sframe.R;
-import androidx.sframe.model.AgentNavModel;
-import androidx.sframe.ui.NavAgentActivity;
-import androidx.sframe.ui.abs.AbsDialogFragment;
-import androidx.sframe.ui.controller.AppCompatNavHostController;
-import androidx.sframe.ui.controller.AppNavController;
-import androidx.sframe.ui.controller.AppNavigation;
-import androidx.sframe.ui.controller.AppPageController;
-import androidx.sframe.ui.dialog.ProgressDialogFragment;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.navigation.NavOptions;
-import androidx.navigation.Navigator;
-import androidx.navigation.fragment.FragmentNavigator;
+import androidx.sframe.R;
+import androidx.sframe.model.AgentNavModel;
+import androidx.sframe.ui.NavAgentActivity;
+import androidx.sframe.ui.controller.AppNavController;
+import androidx.sframe.ui.controller.AppPageController;
+import androidx.sframe.ui.dialog.ProgressDialogFragment;
+import androidx.sframe.navigator.FragmentActivityNavigator;
+import androidx.sframe.navigator.DialogFragmentNavigator;
+import androidx.sframe.navigator.FragmentNavigator;
+import androidx.sframe.navigator.Navigator;
+import androidx.sframe.navigator.NavigatorController;
 
 /**
- * Author create by ok on 2019-06-18
- * Email : ok@163.com.
+ * @Author create by Zoran on 2019-09-25
+ * @Email : 171905184@qq.com
+ * @Description :
  */
-final class AppNavControllerImpl<Page> implements AppNavController<Page> {
+public class AppNavControllerImpl<Page> implements AppNavController<Page> {
 
-	private final AppPageController<Page> mPageController;
-	private final NavOptions mNavOptions;
+	private final NavigatorController<Page> mNavigatorController;
+	private final Navigator.NavOptions mNavOptions;
 
-	private ProgressDialogFragment mProgressDialogFragment;
-
-	AppNavControllerImpl(@NonNull AppPageController<Page> pageController) {
-		this.mPageController = pageController;
+	public AppNavControllerImpl(@NonNull AppPageController<Page> pageController) {
+		this.mNavigatorController = new NavigatorController<>(pageController);
 		// default options
-		this.mNavOptions = new NavOptions.Builder()
+		this.mNavOptions = new Navigator.NavOptions()
 				.setEnterAnim(R.anim.slide_in_from_right)
 				.setExitAnim(R.anim.slide_out_to_left)
 				.setPopEnterAnim(R.anim.slide_in_from_left)
-				.setPopExitAnim(R.anim.slide_out_to_right)
-				.build();
-	}
-
-	@NonNull
-	@Override
-	public final AppPageController<Page> getPageController() {
-		return this.mPageController;
+				.setPopExitAnim(R.anim.slide_out_to_right);
 	}
 
 	@Override
-	public AppNavController<Page> showProgressPage() {
-		if (this.mProgressDialogFragment != null) {
-			if (this.mProgressDialogFragment.getDialog() != null &&
-					this.mProgressDialogFragment.getDialog().isShowing()) {
-				return this;
-			}
-			this.mProgressDialogFragment.dismiss();
-		}
-		this.mProgressDialogFragment = new ProgressDialogFragment(AppPageControllerHelper.getHostPageController(this.getPageController()));
-		this.mProgressDialogFragment.getPageController().show();
+	public AppNavController<Page> onSaveInstanceState(@NonNull Bundle saveInstanceState) {
+		this.getNavigatorController().onSaveInstanceState(saveInstanceState);
 		return this;
 	}
 
 	@Override
-	public AppNavController<Page> dismissProgressPage() {
-		if (this.mProgressDialogFragment != null) {
-			this.mProgressDialogFragment.dismiss();
-		}
+	public AppNavController<Page> onRestoreInstanceState(@Nullable Bundle saveInstanceState) {
+		this.getNavigatorController().onRestoreInstanceState(saveInstanceState);
 		return this;
 	}
 
 	@Override
-	public AppNavController<Page> showPage(@NonNull Class<? extends DialogFragment> pageClass) {
-		return this.showPage(pageClass, null);
+	public AppNavController<Page> showProgressFragment() {
+		return this.showFragment(ProgressDialogFragment.class);
 	}
 
 	@Override
-	public AppNavController<Page> showPage(@NonNull Class<? extends DialogFragment> pageClass, @Nullable Bundle args) {
-		return this.navigateDia(pageClass, args);
-	}
-
-	@Override
-	public AppNavController<Page> pushPage(@NonNull Class<? extends Fragment> pageClass) {
-		return this.pushPage(pageClass, null);
-	}
-
-	@Override
-	public AppNavController<Page> pushPage(@NonNull Class<? extends Fragment> pageClass, @Nullable Bundle args) {
-		return this.pushPage(pageClass, args, this.mNavOptions);
-	}
-
-	@Override
-	public AppNavController<Page> pushPage(@NonNull Class<? extends Fragment> pageClass, @Nullable Bundle args, @Nullable NavOptions navOptions) {
-		return this.pushPage(pageClass, args, navOptions, null);
-	}
-
-	@Override
-	public AppNavController<Page> pushPage(@NonNull Class<? extends Fragment> pageClass, @Nullable Bundle args, @Nullable NavOptions navOptions, @Nullable FragmentNavigator.Extras navigatorExtras) {
-		this.getNavHostController().navigateFra(pageClass, args, navOptions, navigatorExtras);
+	public AppNavController<Page> hideProgressFragment() {
+		this.popBackStack();
 		return this;
 	}
 
 	@Override
-	public AppNavController<Page> startPage(@NonNull Class<? extends Fragment> pageClass) {
-		return this.startPage(pageClass, null);
-	}
-
-	@Override
-	public AppNavController<Page> startPage(@NonNull Class<? extends Fragment> pageClass, @Nullable Bundle args) {
-		return this.startPage(pageClass, args, null);
-	}
-
-	@Override
-	public AppNavController<Page> startPage(@NonNull Class<? extends Fragment> pageClass, @Nullable Bundle args, @Nullable Bundle options) {
-		return this.startActivity(NavAgentActivity.class, NavAgentActivity.create(new AgentNavModel(pageClass, args)), options);
-	}
-
-	@Override
-	public AppNavController<Page> startPageForResult(@NonNull Class<? extends Fragment> pageClass, int requestCode) {
-		return this.startPageForResult(pageClass, null, requestCode);
-	}
-
-	@Override
-	public AppNavController<Page> startPageForResult(@NonNull Class<? extends Fragment> pageClass, @Nullable Bundle args, int requestCode) {
-		return this.startPageForResult(pageClass, args, null, requestCode);
-	}
-
-	@Override
-	public AppNavController<Page> startPageForResult(@NonNull Class<? extends Fragment> pageClass, @Nullable Bundle args, @Nullable Bundle options, int requestCode) {
-		return this.startActivityForResult(NavAgentActivity.class, NavAgentActivity.create(new AgentNavModel(pageClass, args)), options, requestCode);
-	}
-
-	@Override
-	public AppNavController<Page> startActivity(@NonNull Intent intent) {
+	public final AppNavController<Page> startActivity(@SuppressLint("UnknownNullness") Intent intent) {
 		return this.startActivity(intent, null);
 	}
 
 	@Override
-	public AppNavController<Page> startActivity(@NonNull Intent intent, @Nullable Bundle options) {
-		return this.navigateAct(intent, options);
-	}
-
-	@Override
-	public AppNavController<Page> startActivity(@NonNull Class<? extends FragmentActivity> pageClass) {
-		return this.startActivity(pageClass, null);
-	}
-
-	@Override
-	public AppNavController<Page> startActivity(@NonNull Class<? extends FragmentActivity> pageClass, @Nullable Bundle args) {
-		return this.startActivity(pageClass, args, null);
-	}
-
-	@Override
-	public AppNavController<Page> startActivity(@NonNull Class<? extends FragmentActivity> pageClass, @Nullable Bundle args, @Nullable Bundle options) {
-		return this.navigateAct(pageClass, args, options);
-	}
-
-	@Override
-	public AppNavController<Page> startActivityForResult(@NonNull Intent intent, int requestCode) {
-		return this.startActivityForResult(intent, null, requestCode);
-	}
-
-	@Override
-	public AppNavController<Page> startActivityForResult(@NonNull Intent intent, @Nullable Bundle options, int requestCode) {
-		return this.navigateActForResult(intent, options, requestCode);
-	}
-
-	@Override
-	public AppNavController<Page> startActivityForResult(@NonNull Class<? extends FragmentActivity> pageClass, int requestCode) {
-		return this.startActivityForResult(pageClass, null, requestCode);
-	}
-
-	@Override
-	public AppNavController<Page> startActivityForResult(@NonNull Class<? extends FragmentActivity> pageClass, @Nullable Bundle args, int requestCode) {
-		return this.startActivityForResult(pageClass, args, null, requestCode);
-	}
-
-	@Override
-	public AppNavController<Page> startActivityForResult(@NonNull Class<? extends FragmentActivity> pageClass, @Nullable Bundle args, @Nullable Bundle options, int requestCode) {
-		return this.navigateActForResult(pageClass, args, options, requestCode);
-	}
-
-	@Override
-	public AppNavController<Page> navigate(@NavigationRes int resId) {
-		return this.navigate(resId, null);
-	}
-
-	@Override
-	public AppNavController<Page> navigate(@NavigationRes int resId, @Nullable Bundle args) {
-		return this.navigate(resId, args, this.mNavOptions);
-	}
-
-	@Override
-	public AppNavController<Page> navigate(@NavigationRes int resId, @Nullable Bundle args, @Nullable NavOptions navOptions) {
-		return this.navigate(resId, args, navOptions, null);
-	}
-
-	@Override
-	public AppNavController<Page> navigate(@NavigationRes int resId, @Nullable Bundle args, @Nullable NavOptions navOptions, @Nullable Navigator.Extras navigatorExtras) {
-		this.getNavHostController().navigate(resId, args, navOptions, navigatorExtras);
+	public AppNavController<Page> startActivity(@SuppressLint("UnknownNullness") Intent intent, @Nullable Bundle options) {
+		FragmentActivityNavigator<Page> navigator = this.getNavigator(Navigator.NAME_FRAGMENT_ACTIVITY);
+		FragmentActivityNavigator.Destination destination = navigator.obtain();
+		destination.setOptions(options);
+		destination.setIntent(intent);
+		this.getNavigatorController().navigate(destination);
 		return this;
 	}
 
 	@Override
-	public AppNavController<Page> addGraph(@NavigationRes int navResId) {
-		return this.addGraph(navResId, null);
+	public final AppNavController<Page> startActivityForResult(@SuppressLint("UnknownNullness") Intent intent, int requestCode) {
+		return this.startActivityForResult(intent, requestCode, null);
 	}
 
 	@Override
-	public AppNavController<Page> addGraph(@NavigationRes int navResId, @Nullable Bundle args) {
-		this.getNavHostController().addGraph(navResId, args);
+	public AppNavController<Page> startActivityForResult(@SuppressLint("UnknownNullness") Intent intent, int requestCode, @Nullable Bundle options) {
+		FragmentActivityNavigator<Page> navigator = this.getNavigator(Navigator.NAME_FRAGMENT_ACTIVITY);
+		FragmentActivityNavigator.Destination destination = navigator.obtain();
+		destination.setRequestCode(requestCode);
+		destination.setOptions(options);
+		destination.setIntent(intent);
+		this.getNavigatorController().navigate(destination);
 		return this;
 	}
 
 	@Override
-	public AppNavController<Page> setGraph(@NavigationRes int navResId) {
-		return this.setGraph(navResId, null);
+	public final AppNavController<Page> startActivity(@NonNull Class<? extends FragmentActivity> activity) {
+		return this.startActivity(activity, null);
 	}
 
 	@Override
-	public AppNavController<Page> setGraph(@NavigationRes int navResId, @Nullable Bundle args) {
-		this.getNavHostController().setGraph(navResId, args);
+	public final AppNavController<Page> startActivity(@NonNull Class<? extends FragmentActivity> activity, @Nullable Bundle args) {
+		return this.startActivity(activity, args, null);
+	}
+
+	@Override
+	public AppNavController<Page> startActivity(@NonNull Class<? extends FragmentActivity> activity, @Nullable Bundle args, @Nullable Bundle options) {
+		FragmentActivityNavigator<Page> navigator = this.getNavigator(Navigator.NAME_FRAGMENT_ACTIVITY);
+		AppPageController<Page> pageController = navigator.getPageController();
+		Intent intent = new Intent(pageController.requireContext(), activity);
+		FragmentActivityNavigator.Destination destination = navigator.obtain();
+		destination.setOptions(options);
+		destination.setIntent(intent);
+		this.getNavigatorController().navigate(destination, args);
 		return this;
 	}
 
 	@Override
-	public boolean navigateUp() {
-		return this.getNavHostController().navigateUp();
+	public final AppNavController<Page> startActivityForResult(@NonNull Class<? extends FragmentActivity> activity, int requestCode) {
+		return this.startActivityForResult(activity, requestCode, null);
+	}
+
+	@Override
+	public final AppNavController<Page> startActivityForResult(@NonNull Class<? extends FragmentActivity> activity, int requestCode, @Nullable Bundle args) {
+		return this.startActivityForResult(activity, requestCode, args, null);
+	}
+
+	@Override
+	public AppNavController<Page> startActivityForResult(@NonNull Class<? extends FragmentActivity> activity, int requestCode, @Nullable Bundle args, @Nullable Bundle options) {
+		FragmentActivityNavigator<Page> navigator = this.getNavigator(Navigator.NAME_FRAGMENT_ACTIVITY);
+		AppPageController<Page> pageController = navigator.getPageController();
+		Intent intent = new Intent(pageController.requireContext(), activity);
+		FragmentActivityNavigator.Destination destination = navigator.obtain();
+		destination.setRequestCode(requestCode);
+		destination.setOptions(options);
+		destination.setIntent(intent);
+		this.getNavigatorController().navigate(destination, args);
+		return this;
+	}
+
+	@Override
+	public final AppNavController<Page> showFragment(@NonNull Class<? extends DialogFragment> dialogFragment) {
+		return this.showFragment(dialogFragment, null);
+	}
+
+	@Override
+	public AppNavController<Page> showFragment(@NonNull Class<? extends DialogFragment> dialogFragment, @Nullable Bundle args) {
+		DialogFragmentNavigator<Page> navigator = this.getNavigator(Navigator.NAME_DIALOG_FRAGMENT);
+		DialogFragmentNavigator.Destination destination = navigator.obtain();
+		destination.setDialogFragmentClass(dialogFragment);
+		this.getNavigatorController().navigate(destination, args);
+		return this;
+	}
+
+	@Override
+	public final AppNavController<Page> pushFragment(@IdRes int containerId, @NonNull Class<? extends Fragment> fragment) {
+		return this.pushFragment(containerId, fragment, this.mNavOptions);
+	}
+
+	@Override
+	public final AppNavController<Page> pushFragment(@IdRes int containerId, @NonNull Class<? extends Fragment> fragment, @Nullable Bundle args) {
+		return this.pushFragment(containerId, fragment, args, this.mNavOptions);
+	}
+
+	@Override
+	public final AppNavController<Page> pushFragment(int containerId, @NonNull Class<? extends Fragment> fragment, @Nullable Navigator.NavOptions options) {
+		return this.pushFragment(containerId, fragment, null, options);
+	}
+
+	@Override
+	public AppNavController<Page> pushFragment(@IdRes int containerId, @NonNull Class<? extends Fragment> fragment, @Nullable Bundle args, @Nullable Navigator.NavOptions options) {
+		FragmentNavigator<Page> navigator = this.getNavigator(Navigator.NAME_FRAGMENT);
+		FragmentNavigator.Destination destination = navigator.obtain();
+		destination.setFragmentClass(fragment);
+		destination.setContainerId(containerId);
+		this.getNavigatorController().navigate(destination, args, options);
+		return this;
+	}
+
+	@Override
+	public final AppNavController<Page> startFragment(@NonNull Class<? extends Fragment> fragment) {
+		return this.startFragment(fragment, null);
+	}
+
+	@Override
+	public final AppNavController<Page> startFragment(@NonNull Class<? extends Fragment> fragment, @Nullable Bundle args) {
+		return this.startFragment(fragment, args, null);
+	}
+
+	@Override
+	public final AppNavController<Page> startFragment(@NonNull Class<? extends Fragment> fragment, @Nullable Bundle args, @Nullable Bundle options) {
+		return this.startActivity(NavAgentActivity.class, NavAgentActivity.create(new AgentNavModel(fragment, args)), options);
+	}
+
+	@Override
+	public final AppNavController<Page> startFragmentForResult(@NonNull Class<? extends Fragment> fragment, int requestCode) {
+		return this.startFragmentForResult(fragment, requestCode, null);
+	}
+
+	@Override
+	public final AppNavController<Page> startFragmentForResult(@NonNull Class<? extends Fragment> fragment, int requestCode, @Nullable Bundle args) {
+		return this.startFragmentForResult(fragment, requestCode, args, null);
+	}
+
+	@Override
+	public final AppNavController<Page> startFragmentForResult(@NonNull Class<? extends Fragment> fragment, int requestCode, @Nullable Bundle args, @Nullable Bundle options) {
+		return this.startActivityForResult(NavAgentActivity.class, requestCode, NavAgentActivity.create(new AgentNavModel(fragment, args)), options);
+	}
+
+	@Override
+	public AppNavController<Page> addNavigator(@NonNull String name, @NonNull Navigator<? extends Navigator.NavDestination> navigator) {
+		this.getNavigatorController().addNavigator(name, navigator);
+		return this;
+	}
+
+	@Override
+	public <T extends Navigator<?>> T getNavigator(@NonNull String name) {
+		return this.getNavigatorController().getNavigator(name);
+	}
+
+	@NonNull
+	@Override
+	public Navigator.NavOptions getDefaultOptions() {
+		return this.mNavOptions;
 	}
 
 	@Override
 	public boolean popBackStack() {
-		return this.getNavHostController().popBackStack();
-	}
-
-	@Override
-	public boolean popBackStack(int destinationId, boolean inclusive) {
-		return this.getNavHostController().popBackStack(destinationId, inclusive);
-	}
-
-	private AppNavController<Page> navigateAct(@NonNull Class<? extends FragmentActivity> pageClass, @Nullable Bundle args, @Nullable Bundle options) {
-		final Intent preIntent = new Intent();
-		preIntent.setComponent(new ComponentName(AppPageControllerHelper.requireContext(this.getPageController()), pageClass));
-		if (args != null) {
-			preIntent.putExtras(args);
-		}
-		return this.navigateAct(preIntent, options);
-	}
-
-	private AppNavController<Page> navigateAct(@NonNull Intent intent, @Nullable Bundle options) {
-		AppPageControllerHelper.startActivity(this.getPageController(), intent, options);
-		return this;
-	}
-
-	private AppNavController<Page> navigateActForResult(@NonNull Class<? extends FragmentActivity> pageClass, @Nullable Bundle args, @Nullable Bundle options, int requestCode) {
-		final Intent preIntent = new Intent();
-		preIntent.setComponent(new ComponentName(AppPageControllerHelper.requireContext(this.getPageController()), pageClass));
-		if (args != null) {
-			preIntent.putExtras(args);
-		}
-		return this.navigateActForResult(preIntent, options, requestCode);
-	}
-
-	private AppNavController<Page> navigateActForResult(@NonNull Intent intent, @Nullable Bundle options, int requestCode) {
-		AppPageControllerHelper.startActivityForResult(this.getPageController(), intent, options, requestCode);
-		return this;
-	}
-
-	private AppNavController<Page> navigateDia(@NonNull Class<? extends DialogFragment> pageClass, @Nullable Bundle args) {
-//		this.getNavHostController().navigateDia(pageClass, args);
-		try {
-			final DialogFragment preDialogFragment;
-			if (AbsDialogFragment.class.isAssignableFrom(pageClass)) {
-				preDialogFragment = pageClass.getConstructor(AppPageController.class).newInstance(AppPageControllerHelper.getHostPageController(this.getPageController()));
-			} else {
-				preDialogFragment = pageClass.getConstructor().newInstance();
-			}
-			preDialogFragment.setArguments(args);
-
-			if (preDialogFragment instanceof AbsDialogFragment) {
-				((AbsDialogFragment) preDialogFragment).getPageController().show();
-			} else {
-				preDialogFragment.show(AppPageControllerHelper.requireChildFragmentManager(this.getPageController()), pageClass.getName());
-			}
-		} catch (IllegalAccessException e) {
-			throw new Fragment.InstantiationException("Unable to instantiate fragment " + pageClass
-					+ ": make sure class name exists, is public, and has an"
-					+ " empty constructor that is public", e);
-		} catch (InstantiationException e) {
-			throw new Fragment.InstantiationException("Unable to instantiate fragment " + pageClass
-					+ ": make sure class name exists, is public, and has an"
-					+ " empty constructor that is public", e);
-		} catch (NoSuchMethodException e) {
-			throw new Fragment.InstantiationException("Unable to instantiate fragment " + pageClass
-					+ ": could not find Fragment constructor", e);
-		} catch (InvocationTargetException e) {
-			throw new Fragment.InstantiationException("Unable to instantiate fragment " + pageClass
-					+ ": calling Fragment constructor caused an exception", e);
-		}
-		return this;
+		return this.getNavigatorController().popBackStack();
 	}
 
 	@NonNull
-	private AppCompatNavHostController getNavHostController() {
-		return AppNavigation.findNavHostController(AppPageControllerHelper.requireFragmentActivity(this.getPageController()));
+	private NavigatorController<Page> getNavigatorController() {
+		return this.mNavigatorController;
 	}
 }

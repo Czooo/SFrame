@@ -31,15 +31,13 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatDialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.sframe.annotation.RunWithAsync;
 import androidx.sframe.model.AppMenuModel;
 import androidx.sframe.ui.abs.AbsListFragment;
-import androidx.sframe.ui.controller.AppNavigation;
-import androidx.sframe.ui.controller.DialogFragmentPageController;
 import androidx.sframe.ui.controller.impl.AppToolbarMethod;
+import androidx.sframe.utils.AppNavigator;
 import androidx.sframe.utils.DataCompat;
 import androidx.sframe.utils.ToastCompat;
 import androidx.sframe.widget.adapter.GridLayoutManagerCompat;
@@ -172,66 +170,62 @@ public class TestFragment extends AbsListFragment<TestModel> implements Recycler
 		switch (model.getId()) {
 			case 0:
 				// push 界面到栈，不跳转新Activity
-				this.getPageController()
-						.getAppNavController()
-						.pushPage(PublicFragment.class);
+				// push to Activity
+				this.getSupportNavController()
+						.pushFragment(android.R.id.content, PublicFragment.class);
+				// push to this
+//				this.getNavController()
+//						.pushFragment(R.id.content, PublicFragment.class);
 				break;
 			case 1:
 				// push 界面到栈，跳转新Activity
-				this.getPageController()
-						.getAppNavController()
-						.startPage(PublicFragment.class);
+				this.getNavController()
+						.startFragment(PublicFragment.class);
 				break;
 			case 2:
 				// push 界面到栈，跳转新Activity，并返回界面请求结果
-				this.getPageController()
-						.getAppNavController()
-						.startPageForResult(PublicFragment.class, 1);
+				this.getNavController()
+						.startFragmentForResult(PublicFragment.class, 1);
 				break;
 			case 3:
 				// 跳转新的Activity
-				this.getPageController()
-						.getAppNavController()
+				this.getNavController()
 						.startActivity(TestActivity.class);
 				break;
 			case 4:
 				// 跳转新的Activity，并返回界面请求结果
-				this.getPageController()
-						.getAppNavController()
+				this.getNavController()
 						.startActivityForResult(TestActivity.class, 1);
 				break;
 			case 5:
 				// 调用DialogFragment方法A
-				this.getPageController().getAppNavController().showPage(TestDialogFragment.class);
+				this.getNavController()
+						.showFragment(TestDialogFragment.class);
 				break;
 			case 6:
 				// 调用DialogFragment方法B
 				TestDialogFragment fragment = new TestDialogFragment(this.getPageController());
-				DialogFragmentPageController<AppCompatDialogFragment> pageController = fragment.getPageController();
-				pageController.setGravity(Gravity.CENTER);
-				pageController.setBackgroundAlpha(0.22f);
-				pageController.show();
+				fragment.setWindowBackgroundAlpha(0.22f);
+				fragment.setGravity(Gravity.START);
+				fragment.show();
 				break;
 			case 7:
 				// DialogFragment.show(View) 用法
 				TestDialogFragment2 fragment2 = new TestDialogFragment2(this.getPageController());
-				DialogFragmentPageController<AppCompatDialogFragment> pageController2 = fragment2.getPageController();
-				pageController2.setAnimationStyle(R.style.DialogAnimation_SlideInFromBottomOutToBottom);
-				pageController2.show(childView);
+				fragment2.setAnimationStyle(R.style.DialogAnimation_SlideInFromBottomOutToBottom);
+				fragment2.show(childView);
 				break;
 			case 8:
 				// ListDialogFragment 用法(非全屏)
 				TestListDialogFragment listFragment = new TestListDialogFragment(this.getPageController());
-				DialogFragmentPageController<AppCompatDialogFragment> listPageController = listFragment.getPageController();
-				listPageController.setAnimationStyle(R.style.DialogAnimation_SlideInFromBottomOutToBottom);
-				listPageController.show(childView);
+				listFragment.setAnimationStyle(R.style.DialogAnimation_SlideInFromBottomOutToBottom);
+				listFragment.show(childView);
 				break;
 			case 9:
 				// ListDialogFragment 用法(全屏)
 				TestListDialogFragment listFragment2 = new TestListDialogFragment(this.getPageController());
-				DialogFragmentPageController<AppCompatDialogFragment> listPageController2 = listFragment2.getPageController();
 				// 此处取决于是否全屏
-				listPageController2.show();
+				listFragment2.show();
 				break;
 			case 10:
 				Bundle args = new Bundle();
@@ -253,14 +247,14 @@ public class TestFragment extends AbsListFragment<TestModel> implements Recycler
 				listPopupWindow.showAsDropDown(childView);
 				break;
 			case 14:
-				AppNavigation.findPageController(childView)
-						.getAppNavController()
-						.showProgressPage();
+				AppNavigator
+						.findNavController(childView)
+						.showProgressFragment();
 				break;
 			case 15:
-				AppNavigation.findPageController(childView)
-						.getAppNavController()
-						.startPage(StickyFragment.class);
+				AppNavigator
+						.findNavController(childView)
+						.startFragment(StickyFragment.class);
 				break;
 		}
 	}

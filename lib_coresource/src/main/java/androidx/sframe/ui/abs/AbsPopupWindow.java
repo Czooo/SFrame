@@ -82,8 +82,8 @@ public abstract class AbsPopupWindow extends AppCompatPopupWindow implements App
 	}
 
 	@NonNull
-	public final AppNavController<AppCompatPopupWindow> getAppNavController() {
-		return this.getPageController().getAppNavController();
+	public final AppNavController<AppCompatPopupWindow> getNavController() {
+		return this.getPageController().getNavController();
 	}
 
 	@NonNull
@@ -103,7 +103,7 @@ public abstract class AbsPopupWindow extends AppCompatPopupWindow implements App
 	}
 
 	// 全屏透明度
-	public final void setWindowBackgroundAlpha(@FloatRange(from = 0, to = 1.f) float alpha) {
+	public void setWindowBackgroundAlpha(@FloatRange(from = 0, to = 1.f) float alpha) {
 		this.getPageController().setWindowBackgroundAlpha(alpha);
 	}
 }

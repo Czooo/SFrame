@@ -5,6 +5,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.sframe.R;
+import androidx.sframe.annotation.AppPageInterface;
 import androidx.sframe.ui.abs.AbsDialogFragment;
 import androidx.sframe.ui.controller.AppPageController;
 
@@ -12,7 +13,8 @@ import androidx.sframe.ui.controller.AppPageController;
  * Author create by ok on 2019-06-20
  * Email : ok@163.com.
  */
-public class ProgressDialogFragment extends AbsDialogFragment implements AppPageController.ContentViewInterface {
+@AppPageInterface(value = false)
+public class ProgressDialogFragment extends AbsDialogFragment {
 
 	public ProgressDialogFragment(@NonNull AppPageController<?> supperPageController) {
 		super(supperPageController);
