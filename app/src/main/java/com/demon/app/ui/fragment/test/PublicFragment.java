@@ -21,6 +21,10 @@ public class PublicFragment extends AbsFragment {
 
 	@Override
 	public void onPageViewCreated(@Nullable Bundle savedInstanceState) {
+		this.getToolbarController()
+				.getToolbarMethod()
+				.setPopEnabled(true);
+
 		this.requireActivity().setResult(Activity.RESULT_OK);
 	}
 }

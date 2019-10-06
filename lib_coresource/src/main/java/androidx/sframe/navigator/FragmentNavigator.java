@@ -3,8 +3,6 @@ package androidx.sframe.navigator;
 import android.content.Context;
 import android.os.Bundle;
 
-import java.util.ArrayDeque;
-
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,16 +13,17 @@ import androidx.sframe.ui.controller.AppPageController;
 import androidx.sframe.ui.controller.impl.AppPageControllerHelper;
 
 /**
- * @Author create by Zoran on 2019-09-25
+ * @Author create by Zoran on 2019-10-04
  * @Email : 171905184@qq.com
  * @Description :
  */
+@Navigator.Name("fragment")
 public class FragmentNavigator<Page> extends Navigator<FragmentNavigator.Destination> {
 
-	private static final String KEY_BACK_STACK_IDS = "androidx-navigator-fragment:navigator:backStackIds";
+	private static final String FRAGMENT_TAG = "androidx-navigator-fragment:tag:";
 
 	private final AppPageController<Page> mPageController;
-	private final ArrayDeque<Integer> mBackStack = new ArrayDeque<>();
+	private int mFragmentCount = 0;
 
 	public FragmentNavigator(@NonNull AppPageController<Page> pageController) {
 		this.mPageController = pageController;
@@ -33,7 +32,7 @@ public class FragmentNavigator<Page> extends Navigator<FragmentNavigator.Destina
 	@NonNull
 	@Override
 	public Destination obtain() {
-		return new Destination(Navigator.NAME_FRAGMENT);
+		return new Destination(this);
 	}
 
 	@Nullable
@@ -44,16 +43,12 @@ public class FragmentNavigator<Page> extends Navigator<FragmentNavigator.Destina
 			return null;
 		}
 		final Fragment fragment = fragmentManager.getFragmentFactory()
-				.instantiate(this.getContext().getClassLoader(),
-						navDestination.mFragmentClass.getName());
+				.instantiate(this.getContext().getClassLoader(), navDestination.mFragmentClass.getName());
 		fragment.setArguments(args);
 
-		final @IdRes int destId = this.mBackStack.size();
-		final int backStackIndex = this.mBackStack.size() + 1;
-		final String fragmentTag = this.generateFragmentTag(backStackIndex, destId);
+		final String fragmentTag = FRAGMENT_TAG + this.mFragmentCount++;
 		final FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-		if (navOptions != null && !this.mBackStack.isEmpty()) {
+		if (navOptions != null) {
 			int enterAnim = navOptions.getEnterAnim();
 			int exitAnim = navOptions.getExitAnim();
 			int popEnterAnim = navOptions.getPopEnterAnim();
@@ -68,62 +63,14 @@ public class FragmentNavigator<Page> extends Navigator<FragmentNavigator.Destina
 		}
 		fragmentTransaction.replace(navDestination.mContainerId, fragment, fragmentTag);
 		fragmentTransaction.setPrimaryNavigationFragment(fragment);
-
-		if (!this.mBackStack.isEmpty()) {
-			fragmentTransaction.addToBackStack(fragmentTag);
+		final boolean shouldAddToBackStack = navOptions == null
+				|| navOptions.isAddToBackStack();
+		if (shouldAddToBackStack) {
+			fragmentTransaction.addToBackStack(fragment.getTag());
 		}
-
 		fragmentTransaction.setReorderingAllowed(true);
 		fragmentTransaction.commit();
-		this.mBackStack.add(destId);
 		return navDestination;
-	}
-
-	@Override
-	public boolean popBackStack() {
-		if (this.mBackStack.isEmpty()) {
-			return false;
-		}
-		final FragmentManager fragmentManager = this.getFragmentManager();
-		if (fragmentManager.isStateSaved()) {
-			return false;
-		}
-		fragmentManager.popBackStack(
-				this.generateFragmentTag(this.mBackStack.size(), this.mBackStack.peekLast()),
-				FragmentManager.POP_BACK_STACK_INCLUSIVE);
-		this.mBackStack.removeLast();
-		return true;
-	}
-
-	@Nullable
-	@Override
-	public Bundle onSaveInstanceState() {
-		final int[] backStackIds = new int[this.mBackStack.size()];
-		int index = 0;
-		for (Integer destId : this.mBackStack) {
-			backStackIds[index++] = destId;
-		}
-		Bundle saveInstanceState = new Bundle();
-		saveInstanceState.putIntArray(KEY_BACK_STACK_IDS, backStackIds);
-		return saveInstanceState;
-	}
-
-	@Override
-	public void onRestoreInstanceState(@Nullable Bundle saveInstanceState) {
-		if (saveInstanceState == null) {
-			return;
-		}
-		final int[] backStackIds = saveInstanceState.getIntArray(KEY_BACK_STACK_IDS);
-		if (backStackIds != null) {
-			this.mBackStack.clear();
-			for (Integer destId : backStackIds) {
-				this.mBackStack.add(destId);
-			}
-		}
-	}
-
-	public final int getStackCount() {
-		return this.mBackStack.size();
 	}
 
 	@NonNull
@@ -141,29 +88,22 @@ public class FragmentNavigator<Page> extends Navigator<FragmentNavigator.Destina
 		return this.mPageController;
 	}
 
-	@NonNull
-	private String generateFragmentTag(int backStackIndex, int destId) {
-		return "androidx:navigator:" + backStackIndex + ":" + destId;
-	}
-
-	public static class Destination extends Navigator.NavDestination {
+	public static class Destination extends NavDestination {
 
 		@IdRes
 		private int mContainerId;
 		private Class<? extends Fragment> mFragmentClass;
 
-		public Destination(@NonNull String navigatorName) {
-			super(navigatorName);
+		Destination(@NonNull Navigator<? extends NavDestination> navigator) {
+			super(navigator);
 		}
 
-		public Destination setContainerId(@IdRes int containerId) {
+		public final void setContainerId(@IdRes int containerId) {
 			this.mContainerId = containerId;
-			return this;
 		}
 
-		public Destination setFragmentClass(@NonNull Class<? extends Fragment> fragmentClass) {
+		public final void setFragmentClass(@NonNull Class<? extends Fragment> fragmentClass) {
 			this.mFragmentClass = fragmentClass;
-			return this;
 		}
 	}
 }

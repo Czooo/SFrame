@@ -37,6 +37,7 @@ import androidx.sframe.annotation.RunWithAsync;
 import androidx.sframe.model.AppMenuModel;
 import androidx.sframe.ui.abs.AbsListFragment;
 import androidx.sframe.ui.controller.impl.AppToolbarMethod;
+import androidx.sframe.ui.dialog.ProgressDialogFragment;
 import androidx.sframe.utils.AppNavigator;
 import androidx.sframe.utils.DataCompat;
 import androidx.sframe.utils.ToastCompat;
@@ -249,7 +250,7 @@ public class TestFragment extends AbsListFragment<TestModel> implements Recycler
 			case 14:
 				AppNavigator
 						.findNavController(childView)
-						.showProgressFragment();
+						.showFragment(ProgressDialogFragment.class);
 				break;
 			case 15:
 				AppNavigator

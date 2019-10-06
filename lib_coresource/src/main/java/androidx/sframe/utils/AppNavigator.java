@@ -19,11 +19,12 @@ import androidx.sframe.ui.controller.AppPageController;
  */
 public class AppNavigator {
 
+	///////////////////////////////////////////////////////////////////////////////////////////
 	public static <Page> void setAppNavController(@Nullable View view, @NonNull AppNavController<Page> controller) {
 		if (view == null) {
 			return;
 		}
-		view.setTag(R.id.app_controller_nav_tag, controller);
+		view.setTag(R.id.app_controller_page_nav_tag, controller);
 	}
 
 	@NonNull
@@ -60,7 +61,7 @@ public class AppNavigator {
 	@Nullable
 	@SuppressWarnings("unchecked")
 	private static <Page> AppNavController<Page> getNavController(@NonNull View view) {
-		Object tag = view.getTag(R.id.app_controller_nav_tag);
+		Object tag = view.getTag(R.id.app_controller_page_nav_tag);
 		AppNavController<Page> controller = null;
 		if (tag instanceof WeakReference) {
 			controller = ((WeakReference<AppNavController>) tag).get();
@@ -69,6 +70,7 @@ public class AppNavigator {
 		}
 		return controller;
 	}
+	///////////////////////////////////////////////////////////////////////////////////////////
 
 	public static <Page> void setAppPageController(@Nullable View view, @NonNull AppPageController<Page> pageController) {
 		if (view == null) {

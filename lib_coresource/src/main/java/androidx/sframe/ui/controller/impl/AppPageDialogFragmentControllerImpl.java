@@ -1,8 +1,11 @@
 package androidx.sframe.ui.controller.impl;
 
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -21,13 +24,14 @@ import androidx.sframe.ui.controller.UILayoutController;
  * Author create by ok on 2019-06-18
  * Email : ok@163.com.
  */
-public class AppPageDialogFragmentControllerImpl extends AppPageFragmentControllerImpl<AppCompatDialogFragment> implements DialogFragmentPageController<AppCompatDialogFragment> {
+public class AppPageDialogFragmentControllerImpl extends AppPageFragmentControllerImpl<AppCompatDialogFragment> implements DialogFragmentPageController<AppCompatDialogFragment>, Dialog.OnKeyListener, KeyEvent.Callback {
 
 	private int mLayoutWidth = 0;
 	private int mLayoutHeight = 0;
 	private int mLayoutGravity = Gravity.CENTER;
 	private int mLayoutAnimStyle = R.style.DialogAnimation;
 	private float mLayoutBackgroundAlpha = 0.22f;
+	private OnKeyDownListener mOnKeyDownListener;
 	private OnDismissListener mOnDismissListener;
 
 	public AppPageDialogFragmentControllerImpl(@NonNull PageProvider pageProvider) {
@@ -51,6 +55,8 @@ public class AppPageDialogFragmentControllerImpl extends AppPageFragmentControll
 					.getToolbarMethod()
 					.setPopEnabled(true);
 		}
+		this.getPageOwner().requireDialog()
+				.setOnKeyListener(this);
 	}
 
 	@NonNull
@@ -61,7 +67,9 @@ public class AppPageDialogFragmentControllerImpl extends AppPageFragmentControll
 
 	@Override
 	public void onPopClick(@NonNull View view) {
-		this.getPageOwner().dismiss();
+		if (!this.getNavController().popBackStack()) {
+			this.getPageOwner().dismiss();
+		}
 	}
 
 	@Override
@@ -135,6 +143,12 @@ public class AppPageDialogFragmentControllerImpl extends AppPageFragmentControll
 	}
 
 	@Override
+	public final DialogFragmentPageController<AppCompatDialogFragment> setOnKeyDownListener(@NonNull OnKeyDownListener listener) {
+		this.mOnKeyDownListener = listener;
+		return this;
+	}
+
+	@Override
 	public final DialogFragmentPageController<AppCompatDialogFragment> setOnDismissListener(@NonNull OnDismissListener listener) {
 		this.mOnDismissListener = listener;
 		return this;
@@ -175,5 +189,104 @@ public class AppPageDialogFragmentControllerImpl extends AppPageFragmentControll
 		final DisplayMetrics mDisplayMetrics = anchor.getResources().getDisplayMetrics();
 		final int screenHeight = mDisplayMetrics.heightPixels;
 		return screenHeight - y;
+	}
+
+	@Override
+	public boolean onKey(DialogInterface dialogInterface, int keyCode, KeyEvent event) {
+		final Dialog dialog = this.getPageOwner().requireDialog();
+		final Window window = dialog.getWindow();
+		if (window != null) {
+			if (window.superDispatchKeyEvent(event)) {
+				return true;
+			}
+			return event.dispatch(this, window.getDecorView()
+					.getKeyDispatcherState(), this);
+		}
+		return event.dispatch(this, null, this);
+	}
+
+	/**
+	 * Called when a key down event has occurred.  If you return true,
+	 * you can first call {@link KeyEvent#startTracking()
+	 * KeyEvent.startTracking()} to have the framework track the event
+	 * through its {@link #onKeyUp(int, KeyEvent)} and also call your
+	 * {@link #onKeyLongPress(int, KeyEvent)} if it occurs.
+	 *
+	 * @param keyCode The value in event.getKeyCode().
+	 * @param event   Description of the key event.
+	 * @return If you handled the event, return true.  If you want to allow
+	 * the event to be handled by the next receiver, return false.
+	 */
+	@Override
+	public boolean onKeyDown(int keyCode, @NonNull KeyEvent event) {
+		if (this.mOnKeyDownListener != null
+				&& this.mOnKeyDownListener.onKeyDown(this.getPageOwner(), keyCode, event)) {
+			return true;
+		}
+		if (KeyEvent.KEYCODE_BACK == keyCode
+				|| KeyEvent.KEYCODE_ESCAPE == keyCode) {
+			if (!this.getNavController().popBackStack()) {
+				event.startTracking();
+			}
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Called when a long press has occurred.  If you return true,
+	 * the final key up will have {@link KeyEvent#FLAG_CANCELED} and
+	 * {@link KeyEvent#FLAG_CANCELED_LONG_PRESS} set.  Note that in
+	 * order to receive this callback, someone in the event change
+	 * <em>must</em> return true from {@link #onKeyDown} <em>and</em>
+	 * call {@link KeyEvent#startTracking()} on the event.
+	 *
+	 * @param keyCode The value in event.getKeyCode().
+	 * @param event   Description of the key event.
+	 * @return If you handled the event, return true.  If you want to allow
+	 * the event to be handled by the next receiver, return false.
+	 */
+	@Override
+	public boolean onKeyLongPress(int keyCode, @NonNull KeyEvent event) {
+		return false;
+	}
+
+	/**
+	 * Called when a key up event has occurred.
+	 *
+	 * @param keyCode The value in event.getKeyCode().
+	 * @param event   Description of the key event.
+	 * @return If you handled the event, return true.  If you want to allow
+	 * the event to be handled by the next receiver, return false.
+	 */
+	@Override
+	public boolean onKeyUp(int keyCode, @NonNull KeyEvent event) {
+		if ((keyCode == KeyEvent.KEYCODE_BACK
+				|| keyCode == KeyEvent.KEYCODE_ESCAPE)
+				&& event.isTracking()
+				&& !event.isCanceled()) {
+			final AppCompatDialogFragment pageOwner = this.getPageOwner();
+			if (pageOwner.isCancelable() && pageOwner.getDialog() != null) {
+				pageOwner.getDialog().cancel();
+			}
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Called when a user's interaction with an analog control, such as
+	 * flinging a trackball, generates simulated down/up events for the same
+	 * key multiple times in quick succession.
+	 *
+	 * @param keyCode The value in event.getKeyCode().
+	 * @param count   Number of pairs as returned by event.getRepeatCount().
+	 * @param event   Description of the key event.
+	 * @return If you handled the event, return true.  If you want to allow
+	 * the event to be handled by the next receiver, return false.
+	 */
+	@Override
+	public boolean onKeyMultiple(int keyCode, int count, @NonNull KeyEvent event) {
+		return false;
 	}
 }

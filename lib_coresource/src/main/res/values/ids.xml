@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="app_controller_page_tag" type="id"/>
-    <item name="app_controller_nav_tag" type="id"/>
+    <item name="app_controller_page_nav_tag" type="id"/>
     <item name="app_layout_toolbar_id" type="id"/>
     <item name="app_layout_content_id" type="id"/>
     <item name="app_layout_loading_id" type="id"/>

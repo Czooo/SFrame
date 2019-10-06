@@ -14,7 +14,6 @@ import androidx.lifecycle.LifecycleEventObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelStore;
 import androidx.sframe.R;
-import androidx.sframe.ui.controller.AppNavController;
 import androidx.sframe.ui.controller.PopupWindowPageController;
 import androidx.sframe.ui.controller.UILayoutController;
 import androidx.sframe.widget.AppCompatPopupWindow;
@@ -24,8 +23,6 @@ import androidx.sframe.widget.AppCompatPopupWindow;
  * Email : ok@163.com.
  */
 public class AppPagePopupWindowControllerImpl extends AbsPageControllerImpl<AppCompatPopupWindow> implements PopupWindowPageController<AppCompatPopupWindow> {
-
-	private AppNavController<AppCompatPopupWindow> mAppNavController;
 
 	private float mWindowBackgroundAlpha = -1.F;
 
@@ -41,13 +38,6 @@ public class AppPagePopupWindowControllerImpl extends AbsPageControllerImpl<AppC
 	}
 
 	@Override
-	public void onViewCreated(@Nullable Bundle savedInstanceState) {
-		this.mAppNavController = new AppNavControllerImpl<>(this);
-		this.mAppNavController.onRestoreInstanceState(savedInstanceState);
-		super.onViewCreated(savedInstanceState);
-	}
-
-	@Override
 	protected void onPreViewCreated(@Nullable Bundle savedInstanceState) throws Exception {
 		super.onPreViewCreated(savedInstanceState);
 		final UILayoutController layoutController = this.getPreLayoutController();
@@ -60,24 +50,10 @@ public class AppPagePopupWindowControllerImpl extends AbsPageControllerImpl<AppC
 		}
 	}
 
-	@Override
-	public void onSaveInstanceState(@NonNull Bundle savedInstanceState) {
-		super.onSaveInstanceState(savedInstanceState);
-		if (this.mAppNavController != null) {
-			this.mAppNavController.onSaveInstanceState(savedInstanceState);
-		}
-	}
-
 	@NonNull
 	@Override
 	public final AppCompatPopupWindow getPageOwner() {
 		return (AppCompatPopupWindow) this.getPageProvider();
-	}
-
-	@NonNull
-	@Override
-	public AppNavController<AppCompatPopupWindow> getNavController() {
-		return this.mAppNavController;
 	}
 
 	/**

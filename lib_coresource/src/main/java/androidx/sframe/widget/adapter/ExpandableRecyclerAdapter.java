@@ -293,7 +293,7 @@ public abstract class ExpandableRecyclerAdapter<DataSource> extends RecyclerAdap
 		return false;
 	}
 
-	public void setExpandableStickyEnabled(boolean enabled) {
+	public void setExpandableItemEnabled(boolean enabled) {
 		this.mExpandableItemDecoration.setShouldEnabled(enabled);
 	}
 

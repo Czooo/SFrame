@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
@@ -18,6 +17,7 @@ import androidx.lifecycle.OnLifecycleEvent;
 import androidx.sframe.annotation.RunWithAsync;
 import androidx.sframe.helper.AnnotationHelper;
 import androidx.sframe.ui.NavAgentActivity;
+import androidx.sframe.ui.controller.AppNavController;
 import androidx.sframe.ui.controller.AppPageController;
 import androidx.sframe.ui.controller.UILayoutController;
 import androidx.sframe.ui.controller.UIToolbarController;
@@ -33,8 +33,10 @@ import androidx.sframe.widget.SRelativeLayout;
 abstract class AbsPageControllerImpl<Page> implements AppPageController<Page>, LifecycleObserver, UILayoutController.OnDataSourceListener, AppToolbarMethod.OnPopClickListener {
 
 	private final PageProvider mPageProvider;
+
 	private View mPageView;
 	private UIViewController mViewController;
+	private AppNavController<Page> mAppNavController;
 	private boolean mIsViewCreated;
 
 	AbsPageControllerImpl(@NonNull PageProvider pageProvider) {
@@ -239,6 +241,15 @@ abstract class AbsPageControllerImpl<Page> implements AppPageController<Page>, L
 		return this.getLayoutController().getToolbarController();
 	}
 
+	@NonNull
+	@Override
+	public AppNavController<Page> getNavController() {
+		if (this.mAppNavController == null) {
+			this.mAppNavController = new AppNavControllerImpl<>(this);
+		}
+		return this.mAppNavController;
+	}
+
 	@CallSuper
 	@Override
 	@RunWithAsync(value = false)
@@ -249,8 +260,8 @@ abstract class AbsPageControllerImpl<Page> implements AppPageController<Page>, L
 
 	@Override
 	public void onPopClick(@NonNull View view) {
-		if (!this.getNavController().popBackStack()) {
-			ActivityCompat.finishAfterTransition(this.requireFragmentActivity());
+		if (!this.getNavController().navigateUp()) {
+			this.getNavController().finishActivity();
 		}
 	}
 

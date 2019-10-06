@@ -1,6 +1,7 @@
 package androidx.sframe.ui.abs;
 
 import android.os.Bundle;
+import android.view.KeyEvent;
 
 import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
@@ -78,5 +79,32 @@ public abstract class AbsActivity extends AppCompatActivity implements AppPageCo
 			this.mPageController = new AppPageActivityControllerImpl(this);
 		}
 		return this.mPageController;
+	}
+
+	private final OnKeyDownDispatcher mOnKeyDownDispatcher = new OnKeyDownDispatcher(new OnKeyDownCallback() {
+		@Override
+		public boolean onKeyDown(int keyCode, KeyEvent event) {
+			return AbsActivity.this.dispatchOnKeyDown(keyCode, event);
+		}
+	});
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		return this.mOnKeyDownDispatcher.onKeyDown(keyCode, event);
+	}
+
+	@NonNull
+	public OnKeyDownDispatcher getOnKeyDownDispatcher() {
+		return this.mOnKeyDownDispatcher;
+	}
+
+	private boolean dispatchOnKeyDown(int keyCode, KeyEvent event) {
+		if (KeyEvent.KEYCODE_BACK == keyCode
+				|| KeyEvent.KEYCODE_ESCAPE == keyCode) {
+			if (this.getNavController().navigateUp()) {
+				return true;
+			}
+		}
+		return super.onKeyDown(keyCode, event);
 	}
 }

@@ -6,13 +6,16 @@ import android.view.KeyEvent;
 import com.demon.app.ui.fragment.TestFragment;
 
 import androidx.annotation.Nullable;
+import androidx.sframe.annotation.AppPageInterface;
 import androidx.sframe.manager.PageCacheManager;
+import androidx.sframe.navigator.NavOptions;
 import androidx.sframe.ui.abs.AbsActivity;
 
 /**
  * Author create by ok on 2019-06-17
  * Email : ok@163.com.
  */
+@AppPageInterface(value = false)
 public class MainActivity extends AbsActivity {
 
 	@Override
@@ -22,9 +25,10 @@ public class MainActivity extends AbsActivity {
 
 	@Override
 	public void onPageViewCreated(@Nullable Bundle savedInstanceState) {
-		this.getPageController()
-				.getNavController()
-				.pushFragment(android.R.id.content, TestFragment.class);
+		NavOptions navOptions = new NavOptions();
+		navOptions.setAddToBackStack(false);
+		this.getNavController()
+				.pushFragment(android.R.id.content, TestFragment.class, navOptions);
 	}
 
 	@Override

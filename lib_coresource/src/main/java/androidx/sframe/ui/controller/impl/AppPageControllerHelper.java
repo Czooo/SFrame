@@ -109,7 +109,7 @@ public final class AppPageControllerHelper {
 		if (pageOwner instanceof AbsPopupWindow) {
 			fragmentManager = requireSupportFragmentManager(((AbsPopupWindow) pageOwner).getHostPageController());
 		} else if (pageOwner instanceof Fragment) {
-			fragmentManager = ((Fragment) pageOwner).getFragmentManager();
+			fragmentManager = ((Fragment) pageOwner).getParentFragmentManager();
 		} else if (pageOwner instanceof FragmentActivity) {
 			fragmentManager = ((FragmentActivity) pageOwner).getSupportFragmentManager();
 		}
@@ -121,6 +121,15 @@ public final class AppPageControllerHelper {
 
 	@NonNull
 	public static <Page> FragmentManager requireChildFragmentManager(@NonNull AppPageController<Page> pageController) {
+		final FragmentManager fragmentManager = getChildFragmentManager(pageController);
+		if (fragmentManager == null) {
+			throw new IllegalStateException("Page " + pageController.getPageOwner() + " not attached to an ChildFragmentManager.");
+		}
+		return fragmentManager;
+	}
+
+	@Nullable
+	public static <Page> FragmentManager getChildFragmentManager(@NonNull AppPageController<Page> pageController) {
 		final Page pageOwner = pageController.getPageOwner();
 		FragmentManager fragmentManager = null;
 		if (pageOwner instanceof AbsPopupWindow) {
@@ -129,9 +138,6 @@ public final class AppPageControllerHelper {
 			fragmentManager = ((Fragment) pageOwner).getChildFragmentManager();
 		} else if (pageOwner instanceof FragmentActivity) {
 			fragmentManager = ((FragmentActivity) pageOwner).getSupportFragmentManager();
-		}
-		if (fragmentManager == null) {
-			throw new IllegalStateException("Page " + pageOwner + " not attached to an ChildFragmentManager.");
 		}
 		return fragmentManager;
 	}

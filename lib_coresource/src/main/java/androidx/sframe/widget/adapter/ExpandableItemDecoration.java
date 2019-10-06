@@ -43,12 +43,16 @@ public class ExpandableItemDecoration extends RecyclerView.ItemDecoration {
 			return;
 		}
 		final int position;
+		final int orientation;
 		if (layoutManager instanceof LinearLayoutManager) {
 			position = ((LinearLayoutManager) layoutManager).findFirstVisibleItemPosition();
+			orientation = ((LinearLayoutManager) layoutManager).getOrientation();
 		} else if (layoutManager instanceof StaggeredGridLayoutManager) {
 			position = ((StaggeredGridLayoutManager) layoutManager).findFirstVisibleItemPositions(null)[0];
+			orientation = ((StaggeredGridLayoutManager) layoutManager).getOrientation();
 		} else {
-			position = -1;
+			position = RecyclerView.NO_POSITION;
+			orientation = RecyclerView.VERTICAL;
 		}
 
 		final ExpandableRecyclerAdapter<Object> recyclerAdapter = (ExpandableRecyclerAdapter<Object>) adapter;
@@ -81,19 +85,35 @@ public class ExpandableItemDecoration extends RecyclerView.ItemDecoration {
 			itemView.measure(widthMeasureSpec, heightMeasureSpec);
 			itemView.layout(recyclerView.getPaddingLeft(), recyclerView.getPaddingTop(), recyclerView.getPaddingLeft() + itemView.getMeasuredWidth(), recyclerView.getPaddingTop() + itemView.getMeasuredHeight());
 
-			int scrollOffset = 0;
+			int translateX = 0;
+			int translateY = 0;
+			if (RecyclerView.HORIZONTAL == orientation) {
+				translateX = recyclerView.getPaddingLeft();
+			} else if (RecyclerView.VERTICAL == orientation) {
+				translateY = recyclerView.getPaddingTop();
+			} else {
+				throw new IllegalStateException("not orientation");
+			}
+
 			final RecyclerView.ViewHolder nextRecyclerHolder = recyclerView.findViewHolderForLayoutPosition(position);
 			if (nextRecyclerHolder != null) {
 				if (recyclerAdapter.getRealGroupPosition(position + 1) != groupPosition) {
 					final View nextItemView = nextRecyclerHolder.itemView;
-					scrollOffset = nextItemView.getHeight() + nextItemView.getTop() - itemView.getMeasuredHeight();
-					if (scrollOffset <= 0) {
-						canvas.translate(0, scrollOffset);
+					final int scrollOffsetX = nextItemView.getWidth() + nextItemView.getLeft() - itemView.getMeasuredWidth();
+					final int scrollOffsetY = nextItemView.getHeight() + nextItemView.getTop() - itemView.getMeasuredHeight();
+
+					if (RecyclerView.HORIZONTAL == orientation) {
+						if (scrollOffsetX <= translateX) {
+							translateX = scrollOffsetX;
+						}
 					} else {
-						scrollOffset = 0;
+						if (scrollOffsetY <= translateY) {
+							translateY = scrollOffsetY;
+						}
 					}
 				}
 			}
+			canvas.translate(translateX, translateY);
 			// 默认在视图顶部，无需平移，直接绘制
 			itemView.draw(canvas);
 			// 恢复画布到之前保存状态
@@ -101,7 +121,13 @@ public class ExpandableItemDecoration extends RecyclerView.ItemDecoration {
 			// 手势可用区域
 			final Rect rect = this.mRect;
 			itemView.getGlobalVisibleRect(rect);
-			rect.bottom += scrollOffset;
+			if (RecyclerView.HORIZONTAL == orientation) {
+				rect.left += recyclerView.getPaddingLeft();
+				rect.right += translateX;
+			} else {
+				rect.top += recyclerView.getPaddingTop();
+				rect.bottom += translateY;
+			}
 			// 当前显示的 Group
 			this.mExpandableViewHolder = recyclerHolder;
 		} else {

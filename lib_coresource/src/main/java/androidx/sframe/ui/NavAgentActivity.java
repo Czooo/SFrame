@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.sframe.annotation.AppPageInterface;
 import androidx.sframe.model.AgentNavModel;
+import androidx.sframe.navigator.NavOptions;
 import androidx.sframe.ui.abs.AbsActivity;
 import androidx.sframe.utils.Logger;
 
@@ -52,8 +53,9 @@ public class NavAgentActivity extends AbsActivity {
 			if (model == null || model.getFragmentClass() == null) {
 				throw new IllegalStateException("NavAgentActivity " + this + " not set model");
 			}
-			this.getPageController().getNavController()
-					.pushFragment(android.R.id.content, model.getFragmentClass(), model.toBundle(arguments));
+			this.getNavController()
+					.pushFragment(android.R.id.content, model.getFragmentClass(), model.toBundle(arguments), new NavOptions()
+							.setAddToBackStack(false));
 		} catch (Exception e) {
 			Logger.e(e);
 		}
